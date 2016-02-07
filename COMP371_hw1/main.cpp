@@ -1,8 +1,9 @@
-
+#include "Scene.h"
 #include <iostream>
 using namespace std;
 int main() {
-	cout << "yes" << endl;
+	Scene* s = new Scene();
+	s->runEngine();
 	return 0;
 }
 
