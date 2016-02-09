@@ -40,7 +40,7 @@ Scene::~Scene()
 
 int Scene::runEngine() { 
 
-	initialize();
+	initializeOpenGL();
 
 	///Load the shaders
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
@@ -222,7 +222,7 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	return ProgramID;
 }
 
-bool Scene::initialize() {
+bool Scene::initializeOpenGL() {
 	/// Initialize GL context and O/S window using the GLFW helper library
 	if (!glfwInit()) {
 		fprintf(stderr, "ERROR: could not start GLFW3\n");
