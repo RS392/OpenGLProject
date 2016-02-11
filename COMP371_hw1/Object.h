@@ -11,8 +11,8 @@ using namespace std;
 
 class Object
 {
-private:
 
+private:
 	vector<Vector3D> position;
 	
 
