@@ -79,7 +79,7 @@ int Scene::runEngine() {
 	while (!glfwWindowShouldClose(window)) {
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
 		//glColor4f(0.1f,0.2f,0.2f,0.5f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
@@ -106,24 +106,22 @@ int Scene::runEngine() {
 
 }
 
+void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
+	switch (key) {
 
+	case GLFW_KEY_W:
+		break;
+	case GLFW_KEY_A:
+		break;
+	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 0.05f));
+		break;
+	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-0.05f, 0.0f, 0.0f));
+		break;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	default: break;
+	}
+}
 
 GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path) {
 	// Create the shaders
@@ -241,6 +239,8 @@ bool Scene::initializeOpenGL() {
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 	glfwMakeContextCurrent(window);
+
+	glfwSetKeyCallback(window, keyPressed);
 
 	/// Initialize GLEW extension handler
 	glewExperimental = GL_TRUE;	///Needed to get the latest version of OpenGL
