@@ -20,6 +20,9 @@ glm::mat4 proj_matrix;
 glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
+GLfloat test[] = { 0.5f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f };
 
 GLuint VBO, VAO, EBO;
 
@@ -30,6 +33,9 @@ int width = 800;
 vector<glm::vec4> treeVertices(1);
 vector<glm::vec3> treeNormals(1);
 vector<GLushort> treeElements(1);
+
+bool clicked;
+double oldY = 0;
 
 Scene::Scene()
 {
@@ -50,8 +56,9 @@ int Scene::runEngine() {
 	GLuint elementBuffer;
 	glGenBuffers(1, &vertexbuffer);
 	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -63,6 +70,20 @@ int Scene::runEngine() {
 		);
 
 	while (!glfwWindowShouldClose(window)) {
+
+		//Zoom-in, zoom-out
+		double currentX = 0;
+		double currentY = oldY;
+		glfwGetCursorPos(window, &currentX, &currentY);
+		
+		if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
+
+			glm::vec3 eye(0.0f, 0.0f, currentY / 50.0f);
+			view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
+			oldY = currentY;
+		}
+
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
@@ -76,7 +97,7 @@ int Scene::runEngine() {
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS, 0, 38);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glBindVertexArray(0);
 
@@ -153,20 +174,27 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 
 	switch (key) {
 
-	case GLFW_KEY_W:
+	case GLFW_KEY_W: 
 		break;
 	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(0.05f, 0.0f, 0.0f));
 		break;
-<<<<<<< HEAD
 	case GLFW_KEY_S: 
-=======
-	case GLFW_KEY_S:
->>>>>>> 6509087a2e5c2f97342f15c8767ac3a65b11a7e4
 		break;
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-0.05f, 0.0f, 0.0f));
 		break;
 
 	default: break;
+	}
+}
+
+void buttonClicked(GLFWwindow* window, int button, int action, int mods) {
+
+	//Zoom-in, zoom-out
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		clicked = true;
+	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		clicked = false;
 	}
 }
 
@@ -286,6 +314,8 @@ bool Scene::initializeOpenGL() {
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 	glfwMakeContextCurrent(window);
+
+	glfwSetMouseButtonCallback(window, buttonClicked);
 
 	glfwSetKeyCallback(window, keyPressed);
 
