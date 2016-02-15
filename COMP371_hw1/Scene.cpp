@@ -27,6 +27,9 @@ GLfloat point_size = 3.0f;
 
 int height = 600;
 int width = 800;
+vector<glm::vec4> treeVertices(1);
+vector<glm::vec3> treeNormals(1);
+vector<GLushort> treeElements(1);
 
 Scene::Scene()
 {
@@ -39,33 +42,16 @@ Scene::~Scene()
 }
 
 int Scene::runEngine() { 
-
+	
+	//loadObj("obj__pinet2.obj",treeVertices,treeNormals,treeElements);
 	initializeOpenGL();
-
-	///Load the shaders
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-
-	// This will identify our vertex buffer
 	GLuint vertexbuffer;
 	GLuint elementBuffer;
-
-
-
-
-	// Generate 1 buffer, put the resulting identifier in vertexbuffer
 	glGenBuffers(1, &vertexbuffer);
 	glGenBuffers(1, &elementBuffer);
-	// The following commands will talk about our 'vertexbuffer' buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-
-	// Give our vertices to OpenGL.
-
-
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(matPxT), matPxT, GL_STATIC_DRAW); // doing this if doing translation
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -104,6 +90,63 @@ int Scene::runEngine() {
 	cleanUp();
 	return 0;
 
+}
+
+
+void Scene::loadObj(const char* filename, vector<glm::vec4> &vertices, vector<glm::vec3> &normals, vector<GLushort> &elements)
+{
+	ifstream in(filename, ios::in);
+	if (!in)
+	{
+		cerr << "Cannot open " << filename << endl; exit(1);
+	}
+
+	string line;
+	while (getline(in, line))
+	{
+		if (line.substr(0, 2) == "v ")
+		{
+			istringstream s(line.substr(2));
+			glm::vec4 v; s >> v.x; s >> v.y; s >> v.z; v.w = 1.0f;
+			vertices.push_back(v);
+		}
+		else if (line.substr(0, 2) == "f ") // need to change this because it doesnt work properly with the format given
+		{
+			istringstream s(line.substr(2));
+			GLushort a, b, c;
+			s >> a; s >> b; s >> c;
+			a--; b--; c--;
+			elements.push_back(a); elements.push_back(b); elements.push_back(c);
+		}
+		/*
+		else if (line[0] == '#')
+		{
+		// coment
+		}
+		else
+		{
+
+		}
+		}
+		*/
+
+		// THIS PART DOES NOT WORK
+		/*
+		normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
+		for (int i = 0; i < elements.size(); i += 3)
+		{
+		cout << "crash" << endl;
+		GLushort ia = elements[i];
+		GLushort ib = elements[i + 1];
+		GLushort ic = elements[i + 2];
+		cout << "ib: " << ic << endl;
+		glm::vec3 normal = glm::normalize(glm::cross(
+		glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
+		glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
+
+		normals[ia] = normals[ib] = normals[ic] = normal;
+		}*/
+	}
 }
 
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
