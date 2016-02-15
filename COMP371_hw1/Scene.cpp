@@ -155,9 +155,9 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 
 	case GLFW_KEY_W:
 		break;
-	case GLFW_KEY_A:
+	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(0.05f, 0.0f, 0.0f));
 		break;
-	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 0.05f));
+	case GLFW_KEY_S:
 		break;
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-0.05f, 0.0f, 0.0f));
 		break;
