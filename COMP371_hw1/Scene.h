@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <vector>
 #include <cctype>
+#include <sstream>
 using namespace std;
 
 class Scene
@@ -29,7 +30,7 @@ class Scene
 private:
 	bool initializeOpenGL();
 	bool initializeProgram();
-
+	void loadObj(const char* filename, vector<glm::vec4> &vertices, vector<glm::vec3> &normals, vector<GLushort> &elements);
 	bool cleanUp();
 	GLuint loadShaders(string vertex_shader_path, string fragment_shader_path);
 
