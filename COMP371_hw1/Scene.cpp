@@ -70,7 +70,23 @@ int Scene::runEngine() {
 		);
 
 	while (!glfwWindowShouldClose(window)) {
+		GLint viewport[4]; //var to hold the viewport info
+		GLdouble modelview[16]; //var to hold the modelview info
+		GLdouble projection[16]; //var to hold the projection matrix info
+		GLfloat winX, winY, winZ; //variables to hold screen x,y,z coordinates
+		GLdouble worldX, worldY, worldZ; //variables to hold world x,y,z coordinates
+		GLdouble camera_pos[3];
 
+		//int viewport[4];
+		// get matrixs and viewport:
+		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+		glGetDoublev(GL_PROJECTION_MATRIX, projection);
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		gluUnProject((viewport[2] - viewport[0]) / 2, (viewport[3] - viewport[1]) / 2,
+			0.0, modelview, projection, viewport,
+			&camera_pos[0], &camera_pos[1], &camera_pos[2]);
+
+		cout << "x: " << camera_pos[0] << endl;
 		//Zoom-in, zoom-out
 		double currentX = 0;
 		double currentY = oldY;
