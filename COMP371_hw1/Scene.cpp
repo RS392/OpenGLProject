@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 using namespace std;
-
+using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
 
@@ -30,9 +30,9 @@ GLfloat point_size = 3.0f;
 
 int height = 600;
 int width = 800;
-vector<glm::vec4> treeVertices(1);
-vector<glm::vec3> treeNormals(1);
-vector<GLushort> treeElements(1);
+vector<vec3> treeVertices(1);
+vector<vec3> treeNormals(1);
+vector<vec2> treeUvs(1);
 
 bool clicked;
 double oldY = 0;
@@ -48,8 +48,10 @@ Scene::~Scene()
 }
 
 int Scene::runEngine() { 
+	FileReader* fileReader = new FileReader();
+
+	fileReader->loadObj("obj__pinet2.obj",treeVertices,treeUvs, treeNormals);
 	
-	//loadObj("obj__pinet2.obj",treeVertices,treeNormals,treeElements);
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	GLuint vertexbuffer;
@@ -58,7 +60,8 @@ int Scene::runEngine() {
 	glGenBuffers(1, &elementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(glm::vec3), &treeVertices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -86,7 +89,7 @@ int Scene::runEngine() {
 			0.0, modelview, projection, viewport,
 			&camera_pos[0], &camera_pos[1], &camera_pos[2]);
 
-		cout << "x: " << camera_pos[0] << endl;
+		//cout << "x: " << camera_pos[0] << endl;
 		//Zoom-in, zoom-out
 		double currentX = 0;
 		double currentY = oldY;
@@ -94,9 +97,9 @@ int Scene::runEngine() {
 		
 		if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
 
-			glm::vec3 eye(0.0f, 0.0f, currentY / 50.0f);
+			glm::vec3 eye(0.0f, 0.0f, currentY / 0.01f);
 			view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
+			proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);
 			oldY = currentY;
 		}
 
@@ -113,7 +116,7 @@ int Scene::runEngine() {
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_POINTS, 0, treeVertices.size());
 
 		glBindVertexArray(0);
 
@@ -130,61 +133,8 @@ int Scene::runEngine() {
 }
 
 
-void Scene::loadObj(const char* filename, vector<glm::vec4> &vertices, vector<glm::vec3> &normals, vector<GLushort> &elements)
-{
-	ifstream in(filename, ios::in);
-	if (!in)
-	{
-		cerr << "Cannot open " << filename << endl; exit(1);
-	}
 
-	string line;
-	while (getline(in, line))
-	{
-		if (line.substr(0, 2) == "v ")
-		{
-			istringstream s(line.substr(2));
-			glm::vec4 v; s >> v.x; s >> v.y; s >> v.z; v.w = 1.0f;
-			vertices.push_back(v);
-		}
-		else if (line.substr(0, 2) == "f ") // need to change this because it doesnt work properly with the format given
-		{
-			istringstream s(line.substr(2));
-			GLushort a, b, c;
-			s >> a; s >> b; s >> c;
-			a--; b--; c--;
-			elements.push_back(a); elements.push_back(b); elements.push_back(c);
-		}
-		/*
-		else if (line[0] == '#')
-		{
-		// coment
-		}
-		else
-		{
 
-		}
-		}
-		*/
-
-		// THIS PART DOES NOT WORK
-		/*
-		normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
-		for (int i = 0; i < elements.size(); i += 3)
-		{
-		cout << "crash" << endl;
-		GLushort ia = elements[i];
-		GLushort ib = elements[i + 1];
-		GLushort ic = elements[i + 2];
-		cout << "ib: " << ic << endl;
-		glm::vec3 normal = glm::normalize(glm::cross(
-		glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
-		glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
-
-		normals[ia] = normals[ib] = normals[ic] = normal;
-		}*/
-	}
-}
 
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
