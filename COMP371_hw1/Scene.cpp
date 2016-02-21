@@ -14,7 +14,6 @@ GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
 
-
 ///Transformations
 glm::mat4 proj_matrix;
 glm::mat4 view_matrix;
@@ -33,6 +32,7 @@ int width = 800;
 vector<vec3> treeVertices(1);
 vector<vec3> treeNormals(1);
 vector<vec2> treeUvs(1);
+TGAFILE treeTGA;
 
 bool clicked;
 double oldY = 0;
@@ -46,22 +46,15 @@ Scene::Scene()
 Scene::~Scene()
 {
 }
-
-int Scene::runEngine() { 
+void Scene::makeSingleTree() {
 	FileReader* fileReader = new FileReader();
-
-	fileReader->loadObj("obj__pinet2.obj",treeVertices,treeUvs, treeNormals);
-	
-	initializeOpenGL();
-	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-	GLuint vertexbuffer;
-	GLuint elementBuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(glm::vec3), &treeVertices[0], GL_STATIC_DRAW);
+	fileReader->loadObj("obj__pinet2.obj", treeVertices, treeUvs, treeNormals);
+	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
+	cout << treeTGA.imageHeight << endl;
+}
+void Scene::drawSingleTree() {
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(vec3), &treeVertices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -71,7 +64,30 @@ int Scene::runEngine() {
 		0,                  // stride
 		(void*)0            // array buffer offset
 		);
+	glDrawArrays(GL_LINES, 0, treeVertices.size());
+}
+void Scene::drawEverything() {
+	drawSingleTree();
+}
+int Scene::runEngine() { 
+	
 
+	makeSingleTree();
+	
+	initializeOpenGL();
+	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	GLuint elementBuffer;
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &elementBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
+	
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	
+
+	
 	while (!glfwWindowShouldClose(window)) {
 		GLint viewport[4]; //var to hold the viewport info
 		GLdouble modelview[16]; //var to hold the modelview info
@@ -116,8 +132,26 @@ int Scene::runEngine() {
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS, 0, treeVertices.size());
 
+		// "Bind" the newly created texture : all future texture functions will modify this texture
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		// Give the image to OpenGL
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, treeTGA.imageWidth, treeTGA.imageHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, treeTGA.imageData);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glBindBuffer(GL_ARRAY_BUFFER, textureID);
+		glBufferData(GL_ARRAY_BUFFER, treeUvs.size() * sizeof(vec2), &treeUvs[0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			2,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+			);
+		glDrawArrays(GL_TEXTURE, 0, treeUvs.size());
+		drawEverything();
 		glBindVertexArray(0);
 
 		// update other events like input handling

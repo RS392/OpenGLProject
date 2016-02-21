@@ -35,7 +35,9 @@ private:
 	GLuint loadShaders(string vertex_shader_path, string fragment_shader_path);
 
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
-
+	void makeSingleTree();
+	void drawSingleTree();
+	void drawEverything();
 
 public:
 	Scene();
