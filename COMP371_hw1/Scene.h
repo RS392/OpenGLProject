@@ -38,7 +38,7 @@ private:
 	void makeSingleTree();
 	void drawSingleTree();
 	void drawEverything();
-
+	void applyTexture();
 public:
 	Scene();
 	~Scene();

@@ -23,7 +23,7 @@ GLfloat test[] = { 0.5f, 0.0f, 0.0f,
 				0.0f, 1.0f, 0.0f,
 				0.0f, 0.0f, 0.0f };
 
-GLuint VBO, VAO, EBO;
+GLuint VBO, VAO, EBO, TBO;
 
 GLfloat point_size = 3.0f;
 
@@ -41,7 +41,37 @@ Scene::Scene()
 {
 
 }
+void tempZoom() {
+	GLint viewport[4]; //var to hold the viewport info
+	GLdouble modelview[16]; //var to hold the modelview info
+	GLdouble projection[16]; //var to hold the projection matrix info
+	GLfloat winX, winY, winZ; //variables to hold screen x,y,z coordinates
+	GLdouble worldX, worldY, worldZ; //variables to hold world x,y,z coordinates
+	GLdouble camera_pos[3];
 
+	//int viewport[4];
+	// get matrixs and viewport:
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	gluUnProject((viewport[2] - viewport[0]) / 2, (viewport[3] - viewport[1]) / 2,
+		0.0, modelview, projection, viewport,
+		&camera_pos[0], &camera_pos[1], &camera_pos[2]);
+
+	//cout << "x: " << camera_pos[0] << endl;
+	//Zoom-in, zoom-out
+	double currentX = 0;
+	double currentY = oldY;
+	glfwGetCursorPos(window, &currentX, &currentY);
+
+	if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
+
+		glm::vec3 eye(0.0f, 0.0f, currentY / 0.01f);
+		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);
+		oldY = currentY;
+	}
+}
 
 Scene::~Scene()
 {
@@ -69,6 +99,25 @@ void Scene::drawSingleTree() {
 void Scene::drawEverything() {
 	drawSingleTree();
 }
+void Scene::applyTexture() {
+	glGenTextures(1, &TBO);
+	glBindTexture(GL_TEXTURE_2D, TBO);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	glTexImage2D(GL_TEXTURE_2D,
+		0,
+		GL_RGB,
+		(GLsizei)treeTGA.imageWidth,
+		(GLsizei)treeTGA.imageHeight,
+		0,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		treeTGA.imageData);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+}
 int Scene::runEngine() { 
 	
 
@@ -81,44 +130,12 @@ int Scene::runEngine() {
 	glGenBuffers(1, &elementBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(test), test, GL_STATIC_DRAW);
-	
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	
+
 
 	
 	while (!glfwWindowShouldClose(window)) {
-		GLint viewport[4]; //var to hold the viewport info
-		GLdouble modelview[16]; //var to hold the modelview info
-		GLdouble projection[16]; //var to hold the projection matrix info
-		GLfloat winX, winY, winZ; //variables to hold screen x,y,z coordinates
-		GLdouble worldX, worldY, worldZ; //variables to hold world x,y,z coordinates
-		GLdouble camera_pos[3];
-
-		//int viewport[4];
-		// get matrixs and viewport:
-		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-		glGetDoublev(GL_PROJECTION_MATRIX, projection);
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		gluUnProject((viewport[2] - viewport[0]) / 2, (viewport[3] - viewport[1]) / 2,
-			0.0, modelview, projection, viewport,
-			&camera_pos[0], &camera_pos[1], &camera_pos[2]);
-
-		//cout << "x: " << camera_pos[0] << endl;
-		//Zoom-in, zoom-out
-		double currentX = 0;
-		double currentY = oldY;
-		glfwGetCursorPos(window, &currentX, &currentY);
 		
-		if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
-
-			glm::vec3 eye(0.0f, 0.0f, currentY / 0.01f);
-			view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-			proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);
-			oldY = currentY;
-		}
-
+		tempZoom();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
@@ -132,7 +149,7 @@ int Scene::runEngine() {
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-
+		/*
 		// "Bind" the newly created texture : all future texture functions will modify this texture
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		// Give the image to OpenGL
@@ -151,6 +168,7 @@ int Scene::runEngine() {
 			(void*)0            // array buffer offset
 			);
 		glDrawArrays(GL_TEXTURE, 0, treeUvs.size());
+		*/
 		drawEverything();
 		glBindVertexArray(0);
 
