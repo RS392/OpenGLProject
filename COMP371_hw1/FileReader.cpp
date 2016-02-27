@@ -7,6 +7,10 @@
 FileReader::FileReader()
 {
 }
+
+
+
+
 void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 {
 	FILE *filePtr;

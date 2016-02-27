@@ -118,6 +118,7 @@ void Scene::applyTexture() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
+
 int Scene::runEngine() { 
 	
 
@@ -125,13 +126,14 @@ int Scene::runEngine() {
 	
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-	GLuint elementBuffer;
+
+
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 
+	
 	
 	while (!glfwWindowShouldClose(window)) {
 		
@@ -143,36 +145,22 @@ int Scene::runEngine() {
 		glPointSize(point_size);
 		glUseProgram(shader_program);
 
+
 		//Pass the values of the three matrices to the shaders
 		glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 		glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-		/*
-		// "Bind" the newly created texture : all future texture functions will modify this texture
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		// Give the image to OpenGL
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, treeTGA.imageWidth, treeTGA.imageHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, treeTGA.imageData);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glBindBuffer(GL_ARRAY_BUFFER, textureID);
-		glBufferData(GL_ARRAY_BUFFER, treeUvs.size() * sizeof(vec2), &treeUvs[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			2,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-			);
-		glDrawArrays(GL_TEXTURE, 0, treeUvs.size());
-		*/
 		drawEverything();
-		glBindVertexArray(0);
 
-		// update other events like input handling
+
+		glBindVertexArray(0);;
+
+
+
+
+
 		glfwPollEvents();
 		// put the stuff we've been drawing onto the display
 
