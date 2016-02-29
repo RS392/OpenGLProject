@@ -6,7 +6,7 @@
 #pragma once
 
 #include "targetver.h"
-
+#include "Scene.h"
 #include <stdio.h>
 #include <tchar.h>
 

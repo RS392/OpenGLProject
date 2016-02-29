@@ -23,6 +23,7 @@
 #include <vector>
 #include <cctype>
 #include <sstream>
+#include "stdafx.h"
 using namespace std;
 
 class Scene
