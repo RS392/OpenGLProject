@@ -23,7 +23,11 @@
 #include <vector>
 #include <cctype>
 #include <sstream>
+<<<<<<< HEAD
 #include "stdafx.h"
+=======
+#include "FileReader.h"
+>>>>>>> 056e9f22141f6419570fc81fb837f4e2779b5566
 using namespace std;
 
 class Scene
@@ -31,13 +35,14 @@ class Scene
 private:
 	bool initializeOpenGL();
 	bool initializeProgram();
-	void loadObj(const char* filename, vector<glm::vec4> &vertices, vector<glm::vec3> &normals, vector<GLushort> &elements);
 	bool cleanUp();
 	GLuint loadShaders(string vertex_shader_path, string fragment_shader_path);
 
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
-
-
+	void makeSingleTree();
+	void drawSingleTree();
+	void drawEverything();
+	void applyTexture();
 public:
 	Scene();
 	~Scene();

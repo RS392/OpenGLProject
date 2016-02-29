@@ -2,7 +2,7 @@
 #include "Scene.h"
 
 using namespace std;
-
+using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
 
@@ -14,44 +14,77 @@ GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
 
-
 ///Transformations
 glm::mat4 proj_matrix;
 glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
+GLfloat test[] = { 0.5f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f,
+				0.0f, 0.0f, 0.0f };
 
-GLuint VBO, VAO, EBO;
+GLuint VBO, VAO, EBO, TBO;
 
 GLfloat point_size = 3.0f;
 
 int height = 600;
 int width = 800;
-vector<glm::vec4> treeVertices(1);
-vector<glm::vec3> treeNormals(1);
-vector<GLushort> treeElements(1);
+vector<vec3> treeVertices(1);
+vector<vec3> treeNormals(1);
+vector<vec2> treeUvs(1);
+TGAFILE treeTGA;
+
+bool clicked;
+double oldY = 0;
 
 Scene::Scene()
 {
 
 }
+void tempZoom() {
+	GLint viewport[4]; //var to hold the viewport info
+	GLdouble modelview[16]; //var to hold the modelview info
+	GLdouble projection[16]; //var to hold the projection matrix info
+	GLfloat winX, winY, winZ; //variables to hold screen x,y,z coordinates
+	GLdouble worldX, worldY, worldZ; //variables to hold world x,y,z coordinates
+	GLdouble camera_pos[3];
 
+	//int viewport[4];
+	// get matrixs and viewport:
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	gluUnProject((viewport[2] - viewport[0]) / 2, (viewport[3] - viewport[1]) / 2,
+		0.0, modelview, projection, viewport,
+		&camera_pos[0], &camera_pos[1], &camera_pos[2]);
+
+	//cout << "x: " << camera_pos[0] << endl;
+	//Zoom-in, zoom-out
+	double currentX = 0;
+	double currentY = oldY;
+	glfwGetCursorPos(window, &currentX, &currentY);
+
+	if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
+
+		glm::vec3 eye(0.0f, 0.0f, currentY / 0.01f);
+		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);
+		oldY = currentY;
+	}
+}
 
 Scene::~Scene()
 {
 }
-
-int Scene::runEngine() { 
-	
-	//loadObj("obj__pinet2.obj",treeVertices,treeNormals,treeElements);
-	initializeOpenGL();
-	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-	GLuint vertexbuffer;
-	GLuint elementBuffer;
-	glGenBuffers(1, &vertexbuffer);
-	glGenBuffers(1, &elementBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+void Scene::makeSingleTree() {
+	FileReader* fileReader = new FileReader();
+	fileReader->loadObj("obj__pinet2.obj", treeVertices, treeUvs, treeNormals);
+	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
+	cout << treeTGA.imageHeight << endl;
+}
+void Scene::drawSingleTree() {
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(vec3), &treeVertices[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -61,8 +94,50 @@ int Scene::runEngine() {
 		0,                  // stride
 		(void*)0            // array buffer offset
 		);
+	glDrawArrays(GL_LINES, 0, treeVertices.size());
+}
+void Scene::drawEverything() {
+	drawSingleTree();
+}
+void Scene::applyTexture() {
+	glGenTextures(1, &TBO);
+	glBindTexture(GL_TEXTURE_2D, TBO);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	glTexImage2D(GL_TEXTURE_2D,
+		0,
+		GL_RGB,
+		(GLsizei)treeTGA.imageWidth,
+		(GLsizei)treeTGA.imageHeight,
+		0,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		treeTGA.imageData);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
+}
+
+int Scene::runEngine() { 
+	
+
+	makeSingleTree();
+	
+	initializeOpenGL();
+	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+
+
+	glGenBuffers(1, &VBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+
+	
+	
 	while (!glfwWindowShouldClose(window)) {
+		
+		tempZoom();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
@@ -70,17 +145,22 @@ int Scene::runEngine() {
 		glPointSize(point_size);
 		glUseProgram(shader_program);
 
+
 		//Pass the values of the three matrices to the shaders
 		glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 		glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS, 0, 38);
+		drawEverything();
 
-		glBindVertexArray(0);
 
-		// update other events like input handling
+		glBindVertexArray(0);;
+
+
+
+
+
 		glfwPollEvents();
 		// put the stuff we've been drawing onto the display
 
@@ -93,76 +173,34 @@ int Scene::runEngine() {
 }
 
 
-void Scene::loadObj(const char* filename, vector<glm::vec4> &vertices, vector<glm::vec3> &normals, vector<GLushort> &elements)
-{
-	ifstream in(filename, ios::in);
-	if (!in)
-	{
-		cerr << "Cannot open " << filename << endl; exit(1);
-	}
 
-	string line;
-	while (getline(in, line))
-	{
-		if (line.substr(0, 2) == "v ")
-		{
-			istringstream s(line.substr(2));
-			glm::vec4 v; s >> v.x; s >> v.y; s >> v.z; v.w = 1.0f;
-			vertices.push_back(v);
-		}
-		else if (line.substr(0, 2) == "f ") // need to change this because it doesnt work properly with the format given
-		{
-			istringstream s(line.substr(2));
-			GLushort a, b, c;
-			s >> a; s >> b; s >> c;
-			a--; b--; c--;
-			elements.push_back(a); elements.push_back(b); elements.push_back(c);
-		}
-		/*
-		else if (line[0] == '#')
-		{
-		// coment
-		}
-		else
-		{
 
-		}
-		}
-		*/
-
-		// THIS PART DOES NOT WORK
-		/*
-		normals.resize(vertices.size(), glm::vec3(0.0, 0.0, 0.0));
-		for (int i = 0; i < elements.size(); i += 3)
-		{
-		cout << "crash" << endl;
-		GLushort ia = elements[i];
-		GLushort ib = elements[i + 1];
-		GLushort ic = elements[i + 2];
-		cout << "ib: " << ic << endl;
-		glm::vec3 normal = glm::normalize(glm::cross(
-		glm::vec3(vertices[ib]) - glm::vec3(vertices[ia]),
-		glm::vec3(vertices[ic]) - glm::vec3(vertices[ia])));
-
-		normals[ia] = normals[ib] = normals[ic] = normal;
-		}*/
-	}
-}
 
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
 	switch (key) {
 
-	case GLFW_KEY_W:
+	case GLFW_KEY_W: 
 		break;
-	case GLFW_KEY_A:
+	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(0.05f, 0.0f, 0.0f));
 		break;
-	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 0.05f));
+	case GLFW_KEY_S: 
 		break;
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-0.05f, 0.0f, 0.0f));
 		break;
 
 	default: break;
+	}
+}
+
+void buttonClicked(GLFWwindow* window, int button, int action, int mods) {
+
+	//Zoom-in, zoom-out
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		clicked = true;
+	}
+	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		clicked = false;
 	}
 }
 
@@ -282,6 +320,8 @@ bool Scene::initializeOpenGL() {
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
 	glfwMakeContextCurrent(window);
+
+	glfwSetMouseButtonCallback(window, buttonClicked);
 
 	glfwSetKeyCallback(window, keyPressed);
 
