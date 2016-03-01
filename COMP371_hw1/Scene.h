@@ -23,8 +23,15 @@
 #include <vector>
 #include <cctype>
 #include <sstream>
+<<<<<<< HEAD
+#include "stdafx.h"
+=======
 #include "FileReader.h"
+<<<<<<< HEAD
 #include "RandomAttributeGenerator.h"
+=======
+>>>>>>> 056e9f22141f6419570fc81fb837f4e2779b5566
+>>>>>>> b980d2b5d373896efba9002807568dc4eb66d181
 using namespace std;
 
 class Scene
