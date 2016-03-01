@@ -32,6 +32,12 @@ int width = 800;
 vector<vec3> treeVertices(1);
 vector<vec3> treeNormals(1);
 vector<vec2> treeUvs(1);
+
+//vector<vec3> treeVertices2(1);
+vector<vector<vec3>> treesVertices;
+
+
+
 TGAFILE treeTGA;
 
 bool clicked;
@@ -39,7 +45,7 @@ double oldY = 0;
 
 Scene::Scene()
 {
-
+	generator = new RandomAttributeGenerator();
 }
 void tempZoom() {
 	GLint viewport[4]; //var to hold the viewport info
@@ -76,28 +82,36 @@ void tempZoom() {
 Scene::~Scene()
 {
 }
+void Scene::makeMultipleTrees() {
+	object obj;
+	obj = generator->generateObjectAtDiffLocations(treeVertices, 't');
+	objects.push_back(obj);
+}
 void Scene::makeSingleTree() {
 	FileReader* fileReader = new FileReader();
 	fileReader->loadObj("obj__pinet2.obj", treeVertices, treeUvs, treeNormals);
 	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
-	cout << treeTGA.imageHeight << endl;
+	
+	
 }
-void Scene::drawSingleTree() {
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, treeVertices.size() * sizeof(vec3), &treeVertices[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-	glDrawArrays(GL_LINES, 0, treeVertices.size());
+void Scene::drawObjects() {
+	for (int i = 0; i < objects.size(); ++i) {
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, objects[i].size() * sizeof(vec3), &objects[i][0], GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+			);
+		glDrawArrays(GL_LINES, 0, objects[i].size());
+	}
 }
 void Scene::drawEverything() {
-	drawSingleTree();
+	drawObjects();
 }
 void Scene::applyTexture() {
 	glGenTextures(1, &TBO);
@@ -106,6 +120,7 @@ void Scene::applyTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
 		GL_RGB,
@@ -123,7 +138,10 @@ int Scene::runEngine() {
 	
 
 	makeSingleTree();
-	
+	int nbOfTrees = 10;
+	for (int i = 0; i < nbOfTrees; ++i) {
+		makeMultipleTrees();
+	}
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 

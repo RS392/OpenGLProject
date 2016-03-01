@@ -24,11 +24,15 @@
 #include <cctype>
 #include <sstream>
 #include "FileReader.h"
+#include "RandomAttributeGenerator.h"
 using namespace std;
 
 class Scene
 {
 private:
+	RandomAttributeGenerator* generator;
+	objects objects;
+
 	bool initializeOpenGL();
 	bool initializeProgram();
 	bool cleanUp();
@@ -36,7 +40,8 @@ private:
 
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
 	void makeSingleTree();
-	void drawSingleTree();
+	void makeMultipleTrees();
+	void drawObjects();
 	void drawEverything();
 	void applyTexture();
 public:
