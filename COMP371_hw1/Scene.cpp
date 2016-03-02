@@ -14,9 +14,12 @@ GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
 
+int height = 600, heightB = 600;
+int width = 800, widthB = 800;
+
 ///Transformations
-glm::mat4 proj_matrix;
-glm::mat4 view_matrix;
+glm::mat4 proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);;
+glm::mat4 view_matrix = glm::lookAt(glm::vec3(0.0f, 50.0f, -200.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 glm::mat4 model_matrix;
 
 GLfloat test[] = { 0.5f, 0.0f, 0.0f,
@@ -27,8 +30,6 @@ GLuint VBO, VAO, EBO, TBO;
 
 GLfloat point_size = 3.0f;
 
-int height = 600;
-int width = 800;
 //vector<vec3> treeVertices(1);
 vector<vec3> treeNormals(1);
 vector<vec2> treeUvs(1);
@@ -37,7 +38,10 @@ vector<vec2> treeUvs(1);
 TGAFILE treeTGA;
 
 bool clicked;
+double oldX = 0;
 double oldY = 0;
+GLfloat displacementz = 0.0f;
+GLfloat displacementx = 0.0f;
 
 Scene::Scene()
 {
@@ -46,37 +50,6 @@ Scene::Scene()
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		object obj(1); // empty place holder to allocate memory
 		originalObjects.push_back(obj);
-	}
-}
-void tempZoom() {
-	GLint viewport[4]; //var to hold the viewport info
-	GLdouble modelview[16]; //var to hold the modelview info
-	GLdouble projection[16]; //var to hold the projection matrix info
-	GLfloat winX, winY, winZ; //variables to hold screen x,y,z coordinates
-	GLdouble worldX, worldY, worldZ; //variables to hold world x,y,z coordinates
-	GLdouble camera_pos[3];
-
-	//int viewport[4];
-	// get matrixs and viewport:
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	gluUnProject((viewport[2] - viewport[0]) / 2, (viewport[3] - viewport[1]) / 2,
-		0.0, modelview, projection, viewport,
-		&camera_pos[0], &camera_pos[1], &camera_pos[2]);
-
-	//cout << "x: " << camera_pos[0] << endl;
-	//Zoom-in, zoom-out
-	double currentX = 0;
-	double currentY = oldY;
-	glfwGetCursorPos(window, &currentX, &currentY);
-
-	if (clicked && (currentY != oldY) && currentY > 0 && currentY < height) {
-
-		glm::vec3 eye(0.0f, 0.0f, currentY / 0.01f);
-		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);
-		oldY = currentY;
 	}
 }
 
@@ -164,6 +137,24 @@ void Scene::applyTexture() {
 
 }
 
+void rotateCamera() {
+
+	double xpos = oldX;
+	double ypos = oldY;
+	glfwGetCursorPos(window, &xpos, &ypos);
+
+	if (xpos > oldX && xpos < widthB) {
+		
+		view_matrix = glm::lookAt(glm::vec3(0.0f + displacementx, 50.0f, -200.0f + displacementz), glm::vec3(cos((xpos - oldX) / 100.0f), 0.0f, sin((xpos - oldX) / 100.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
+		oldX = xpos = widthB / 2;
+	}
+	else if (xpos < oldX && xpos > 0) {
+
+		view_matrix = glm::rotate(view_matrix, -0.0001f, glm::vec3(0, 1, 0));
+		oldX = ypos = 0;
+	}
+}
+
 int Scene::runEngine() { 
 	
 
@@ -183,7 +174,7 @@ int Scene::runEngine() {
 	
 	while (!glfwWindowShouldClose(window)) {
 		
-		tempZoom();
+		rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
@@ -218,21 +209,21 @@ int Scene::runEngine() {
 
 }
 
-
-
-
-
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
 	switch (key) {
 
-	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
+	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -10.0f));
+						displacementz += 10.0f;
 		break;
-	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
+	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(-10.0f, 0.0f, 0.0f));
+						displacementx += 5.0f;
 		break;
-	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -5.0f));
+	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 10.0f));
+						displacementz -= 10.0f;
 		break;
-	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-5.0f, 0.0f, 0.0f));
+	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(10.0f, 0.0f, 0.0f));
+						displacementx -= 5.0f;
 		break;
 
 	default: break;
@@ -252,6 +243,8 @@ void buttonClicked(GLFWwindow* window, int button, int action, int mods) {
 
 void windowResized(GLFWwindow* window, int width2, int height2) {
 
+	widthB = width2;
+	heightB = height2;
 	glViewport(0, 0, width2, height2);
 }
 
