@@ -174,7 +174,7 @@ int Scene::runEngine() {
 	
 	while (!glfwWindowShouldClose(window)) {
 		
-		rotateCamera();
+		//rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
