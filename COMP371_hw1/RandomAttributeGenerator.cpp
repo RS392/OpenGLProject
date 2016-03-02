@@ -19,7 +19,7 @@ object RandomAttributeGenerator::generateObjectAtDiffLocations(object original, 
 
 	
 	int zTranslation = rand() % 800 - 200;
-	for (int i = 0; i < original.size(); i++) {	
+	for (size_t i = 0; i < original.size(); i++) {	
 		obj[i][0] += (float)xTranslation;
 		obj[i][2] += (float)zTranslation;
 	}
