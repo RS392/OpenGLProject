@@ -87,7 +87,7 @@ void Scene::makeMultipleObjects() {
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 	// and other things will of course depend on the object type
 	
-	for (int i = 0; i < originalObjects.size(); ++i) {
+	for (size_t i = 0; i < originalObjects.size(); ++i) {
 		int min, max;
 		int numberOfCopies;
 		if (i == 0) {
@@ -125,7 +125,7 @@ void Scene::makeOriginalObjects() {
 }
 void Scene::drawObjects() {
 	
-	for (int i = 0; i < objects.size(); ++i) {
+	for (size_t i = 0; i < objects.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, objects[i].size() * sizeof(vec3), &objects[i][0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
@@ -226,13 +226,13 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 
 	switch (key) {
 
-	case GLFW_KEY_W: 
+	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
 		break;
-	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(0.05f, 0.0f, 0.0f));
+	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
 		break;
-	case GLFW_KEY_S: 
+	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -5.0f));
 		break;
-	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-0.05f, 0.0f, 0.0f));
+	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(-5.0f, 0.0f, 0.0f));
 		break;
 
 	default: break;
@@ -248,6 +248,11 @@ void buttonClicked(GLFWwindow* window, int button, int action, int mods) {
 	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 		clicked = false;
 	}
+}
+
+void windowResized(GLFWwindow* window, int width2, int height2) {
+
+	glViewport(0, 0, width2, height2);
 }
 
 GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path) {
@@ -370,6 +375,8 @@ bool Scene::initializeOpenGL() {
 	glfwSetMouseButtonCallback(window, buttonClicked);
 
 	glfwSetKeyCallback(window, keyPressed);
+
+	glfwSetWindowSizeCallback(window, windowResized);
 
 	/// Initialize GLEW extension handler
 	glewExperimental = GL_TRUE;	///Needed to get the latest version of OpenGL
