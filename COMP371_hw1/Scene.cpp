@@ -29,13 +29,9 @@ GLfloat point_size = 3.0f;
 
 int height = 600;
 int width = 800;
-vector<vec3> treeVertices(1);
+//vector<vec3> treeVertices(1);
 vector<vec3> treeNormals(1);
 vector<vec2> treeUvs(1);
-
-//vector<vec3> treeVertices2(1);
-vector<vector<vec3>> treesVertices;
-
 
 
 TGAFILE treeTGA;
@@ -46,6 +42,11 @@ double oldY = 0;
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
+	numberOfOriginalObjects = 3;
+	for (int i = 0; i < numberOfOriginalObjects; ++i) {
+		object obj(1); // empty place holder to allocate memory
+		originalObjects.push_back(obj);
+	}
 }
 void tempZoom() {
 	GLint viewport[4]; //var to hold the viewport info
@@ -82,19 +83,48 @@ void tempZoom() {
 Scene::~Scene()
 {
 }
-void Scene::makeMultipleTrees() {
-	object obj;
-	obj = generator->generateObjectAtDiffLocations(treeVertices, 't');
-	objects.push_back(obj);
-}
-void Scene::makeSingleTree() {
-	FileReader* fileReader = new FileReader();
-	fileReader->loadObj("obj__pinet2.obj", treeVertices, treeUvs, treeNormals);
-	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
+void Scene::makeMultipleObjects() {
+	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
+	// and other things will of course depend on the object type
 	
+	for (int i = 0; i < originalObjects.size(); ++i) {
+		int min, max;
+		int numberOfCopies;
+		if (i == 0) {
+			typeOfObject = 'p';
+			min = 5;
+			max = 10;
+		}
+		else if (i == 1) {
+			typeOfObject = 't';
+			min = 3;
+			max = 8;
+		}
+		else if (i == 2) {
+			typeOfObject = 'f';
+			min = 20;
+			max = 50;
+		}
+		numberOfCopies = rand() % max + min;
+		for (int j = 0; j < numberOfCopies; ++j) {
+			object obj;
+			obj = generator->generateObjectAtDiffLocations(originalObjects[i], typeOfObject);
+			objects.push_back(obj);
+		}
+	}
+}
+void Scene::makeOriginalObjects() {
+	FileReader* fileReader = new FileReader();
+	
+	fileReader->loadObj("obj__pinet2.obj", originalObjects[0], treeUvs, treeNormals);
+	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
+	fileReader->loadObj("obj__tree1.obj", originalObjects[1], treeUvs, treeNormals);
+	fileReader->loadObj("obj__fern1.obj", originalObjects[2], treeUvs, treeNormals);
+	//fileReader->loadObj("obj__flow2.obj", originalObjects[3], treeUvs, treeNormals);
 	
 }
 void Scene::drawObjects() {
+	
 	for (int i = 0; i < objects.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, objects[i].size() * sizeof(vec3), &objects[i][0], GL_STATIC_DRAW);
@@ -137,11 +167,9 @@ void Scene::applyTexture() {
 int Scene::runEngine() { 
 	
 
-	makeSingleTree();
-	int nbOfTrees = 10;
-	for (int i = 0; i < nbOfTrees; ++i) {
-		makeMultipleTrees();
-	}
+	makeOriginalObjects();
+	makeMultipleObjects();
+	
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 
