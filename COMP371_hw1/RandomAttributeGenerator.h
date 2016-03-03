@@ -12,9 +12,12 @@ typedef vector<vec3> object;
 typedef vector<object> objects;
 class RandomAttributeGenerator
 {
+private:
+	void changeObjectSize(object &obj);
+	void changeObjectLocation(object &obj);
 public:
 	RandomAttributeGenerator();
 	~RandomAttributeGenerator();
-	object generateObjectAtDiffLocations(object original, char type);
+	void randomizeObject(object original, char type, objects &copies);
 };
 

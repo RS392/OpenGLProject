@@ -14,7 +14,7 @@ GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
 
-int height = 600, heightB = 600;
+int height = 500, heightB = 600;
 int width = 800, widthB = 800;
 
 ///Transformations
@@ -22,17 +22,12 @@ glm::mat4 proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height
 glm::mat4 view_matrix = glm::lookAt(glm::vec3(0.0f, 50.0f, -200.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 glm::mat4 model_matrix;
 
-GLfloat test[] = { 0.5f, 0.0f, 0.0f,
-				0.0f, 1.0f, 0.0f,
-				0.0f, 0.0f, 0.0f };
 
 GLuint VBO, VAO, EBO, TBO;
 
 GLfloat point_size = 3.0f;
 
 //vector<vec3> treeVertices(1);
-vector<vec3> treeNormals(1);
-vector<vec2> treeUvs(1);
 
 
 TGAFILE treeTGA;
@@ -61,29 +56,16 @@ void Scene::makeMultipleObjects() {
 	// and other things will of course depend on the object type
 	
 	for (size_t i = 0; i < originalObjects.size(); ++i) {
-		int min, max;
-		int numberOfCopies;
 		if (i == 0) {
 			typeOfObject = 'p';
-			min = 5;
-			max = 10;
 		}
 		else if (i == 1) {
 			typeOfObject = 't';
-			min = 3;
-			max = 8;
 		}
 		else if (i == 2) {
 			typeOfObject = 'f';
-			min = 20;
-			max = 50;
 		}
-		numberOfCopies = rand() % max + min;
-		for (int j = 0; j < numberOfCopies; ++j) {
-			object obj;
-			obj = generator->generateObjectAtDiffLocations(originalObjects[i], typeOfObject);
-			objects.push_back(obj);
-		}
+		generator->randomizeObject(originalObjects[i], typeOfObject, objects);
 	}
 }
 void Scene::makeOriginalObjects() {

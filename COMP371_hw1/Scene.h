@@ -35,6 +35,12 @@ private:
 	objects originalObjects;
 	objects objects;
 	int numberOfOriginalObjects;
+	
+	vector<vec3> treeNormals;
+	vector<vec2> treeUvs;
+	
+	
+	
 	bool initializeOpenGL();
 	bool initializeProgram();
 	bool cleanUp();
