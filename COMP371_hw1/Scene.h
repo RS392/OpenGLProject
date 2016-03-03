@@ -26,7 +26,6 @@
 #include "stdafx.h"
 #include "FileReader.h"
 #include "RandomAttributeGenerator.h"
-#include "Terrain.h"
 using namespace std;
 
 class Scene
@@ -35,7 +34,6 @@ private:
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objects;
-	Terrain *terrain;
 	int numberOfOriginalObjects;
 	bool initializeOpenGL();
 	bool initializeProgram();
@@ -47,7 +45,6 @@ private:
 	void makeMultipleObjects();
 	void drawObjects();
 	void drawEverything();
-	void drawTerrain();
 	void applyTexture();
 public:
 	Scene();

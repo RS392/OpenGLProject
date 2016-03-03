@@ -38,7 +38,6 @@ vector<vec2> treeUvs(1);
 TGAFILE treeTGA;
 
 bool clicked;
-bool terrainView = true;
 double oldX = 0;
 double oldY = 0;
 GLfloat displacementz = 0.0f;
@@ -52,7 +51,6 @@ Scene::Scene()
 		object obj(1); // empty place holder to allocate memory
 		originalObjects.push_back(obj);
 	}
-	terrain = new Terrain();//for testing
 }
 
 Scene::~Scene()
@@ -97,41 +95,6 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("obj__fern1.obj", originalObjects[2], treeUvs, treeNormals);
 	//fileReader->loadObj("obj__flow2.obj", originalObjects[3], treeUvs, treeNormals);
 	
-}
-
-void Scene::drawTerrain()
-{
-	//change the view/projection matrices to look down more
-	if (terrainView)
-	{
-		glm::vec3 eye(0.0f, 1.0f, -2.0f);
-		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
-		terrainView = false;
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
-	//glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
-	glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-
-																									
 }
 void Scene::drawObjects() {
 	
@@ -227,9 +190,9 @@ int Scene::runEngine() {
 
 		glBindVertexArray(VAO);
 		drawEverything();
-		//drawTerrain();
 
-		glBindVertexArray(0);
+
+		glBindVertexArray(0);;
 
 
 

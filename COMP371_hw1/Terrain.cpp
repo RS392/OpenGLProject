@@ -2,24 +2,22 @@
 #include "Scene.h"
 #include "Terrain.h"
 
+
 Terrain::Terrain()
 {
 	setIntervals(10);
 	setTranslateVector(0.0, 0.0, 1);
-	setFirstSetOfVertices();
 	setVertices();
 }
-Terrain::Terrain(vector<glm::vec3> last, Vector3D lastTranslateVector)
-{
-	setIntervals(10);
-	setTranslateVector(lastTranslateVector.getX(), lastTranslateVector.getY(), lastTranslateVector.getZ());
-	setVertices();
-}
+
 Terrain::~Terrain()
 {
 }
 
-
+vector<GLfloat> Terrain::getTest() 
+{
+	return test;
+}
 void Terrain::setTranslateVector(double x, double y, double z)
 {
 	translateVector = Vector3D(x, y, z);
@@ -28,88 +26,110 @@ Vector3D Terrain::getTranslateVector()
 {
 	return translateVector;
 }
-void Terrain::setFirstSetOfVertices()
-{
-	//populate with number of points based on interval.
-	for (int i = -10 * intervals; i < intervals * 10; i++)//pushes back vertices with x values ranging from -1 to 0, 0 to 1
-	{
-		initialPoints.push_back(glm::vec3(i / (float)intervals, 0.0, -1.0));
-	}
-}
+
 void Terrain::setVertices()
 {
+	
 
+	//populate with number of points based on interval.
+	for (int i = -10 * intervals; i < intervals*10; i++)//pushes back vertices with x values ranging from -1 to 0, 0 to 1
+	{
+		initialPoints.push_back(Vector3D(i / (float)intervals, 0.0, -1.0));
+	}
 	int rowLength = initialPoints.size(); //for calculating indices
 										  // Translate based on vector
 	for (int j = 0; j < initialPoints.size(); j++)
 	{
-		vertices.push_back(initialPoints[j].x);
-		vertices.push_back(initialPoints[j].y);
-		vertices.push_back(initialPoints[j].z);
+		vertices.push_back(initialPoints[j]);
 	}
 	glm::mat4 translateMatrix = glm::mat4(1.0f);
-	for (int m = 0; m < intervals; m++)
+	for (int m = 0; m < intervals; m++) 
 	{
-		srand(time(NULL));
 		translateMatrix = glm::translate(translateMatrix,
 			glm::vec3(
 				translateVector.getX(), translateVector.getY(), translateVector.getZ()));
 		for (int i = 0; i < initialPoints.size(); i++) {
 
-			glm::vec4 vertex(initialPoints[i].x, initialPoints[i].y, initialPoints[i].z, 1.0f);
+			glm::vec4 vertex(initialPoints[i].getX(), initialPoints[i].getY(), initialPoints[i].getZ(), 1.0f);
 			glm::vec4 newV = translateMatrix * vertex;
-			//vertices2.push_back(glm::vec3(newV.x, newV.y, newV.z));
-			vertices.push_back(newV.x);
-			vertices.push_back(newV.y);
-			vertices.push_back(newV.z);
-			if (i == initialPoints.size() - 1)//if last translation, modify translation vector 
+			vertices.push_back(Vector3D(newV.x, newV.y, newV.z));
+			if (i == initialPoints.size()-1)//if last translation, modify translation vector 
 			{
 				float x = translateVector.getX();
 				float y = translateVector.getY();
 				float z = translateVector.getZ();
-
-				cout << (float)rand() / RAND_MAX << endl;
-				if ((float)rand() / RAND_MAX > .99)//todo add probabilities
+				srand(time(NULL));
+				if (rand() / 100 > .5)//todo add probabilities
 				{
-					//translateVector.setX(x += .51);
-					if (translateVector.getY() < -0.5)
-					{
-						translateVector.setY(-0.25);
-					}
-					else
-					{
-						translateVector.setY(y -= .15);
-					}
+					translateVector.setX(x += .51);
+					translateVector.setY(y -= 1);
 					translateVector.setZ(z += 1);
-					//srand(time(NULL));
+					srand(time(NULL));
 				}
-				else if ((float)rand() / RAND_MAX > .5)
+				else if (rand() / 100 < .15)
 				{
-					translateVector.setY(y += 0.15);
+					translateVector.setY(y += 0.10);
 					translateVector.setZ(z += 0.25);
-					//srand(time(NULL));
+					srand(time(NULL));
 				}
-				else if ((float)rand() / RAND_MAX >.2)
+				else if (rand() / 100 >.2 && rand() / 100 < .45)
 				{
-					//translateVector.setX(x -= 1);
+					translateVector.setX(x -= 1);
 					translateVector.setY(y += 0.5);
 					translateVector.setZ(z += 0.25);
-					//srand(time(NULL));
+					srand(time(NULL));
 				}
 			}
-
+			
 		}
-
+		
 	}
-
+	
+	//all will increase in z
+	//biggish variation in y
+	//small variations in x
 	setWireFrameIndices(rowLength);
 }
-
-vector<GLfloat> Terrain::getVertices()
+vector<Vector3D> Terrain::getVertices()
 {
 	return vertices;
 }
 
+void Terrain::setDirt(double r, double g, double b, double a)
+{
+	dirt = Vector4D(r, g, b, a);
+}
+Vector4D Terrain::getDirt()
+{
+	return dirt;
+}
+
+void Terrain::setGrass(double r, double g, double b, double a)
+{
+	grass = Vector4D(r, g, b, a);
+}
+Vector4D Terrain::getGrass()
+{
+	return grass;
+}
+
+void Terrain::setWater(double r, double g, double b, double a)
+{
+	water = Vector4D(r, g, b, a);
+}
+Vector4D Terrain::getWater()
+{
+	return water;
+}
+
+void Terrain::setCurrentY(double y)
+{
+	currentY = y;
+}
+double Terrain::getCurrentY()
+{
+	return currentY;
+}
 
 vector<GLuint> Terrain::getWireFrameIndices()
 {
@@ -141,26 +161,32 @@ Does not connect with itself at the end of each "row" (where row represents a ve
 */
 void Terrain::setWireFrameIndices(int initialSize)
 {
-
-	offset = initialSize;
-
+	for (int i = 0; i <vertices.size(); i++)
+	{
+		test.push_back(vertices[i].getX());
+		test.push_back(vertices[i].getY());
+		test.push_back(vertices[i].getZ());
+		//cout << vertices[i].getX() << "," << vertices[i].getY() << "," << vertices[i].getZ() << endl;
+	}
+	int offset = initialSize;
+	
 	int i = 0;
-	for (int k = 0; k < vertices.size() - 3; k += 3) {//test
+	for (int k = 0; k <test.size() - 3; k += 3) {//test
 		i = k / 3;
-		if (k < vertices.size() - offset * 3)// not the last set of translated points
+		if (k < test.size() - offset*3 )// not the last set of translated points
 		{
 
 			if ((i%offset) != (offset - 1)) //not the last point of a set of translated points
 			{
 				wireFrameIndices.push_back(i);
 				wireFrameIndices.push_back(i + 1); // (i, i+1)
-												   //std::cout << i << endl;
-												   //std::cout << "i, i+1: (" << i << "," << i + 1 << ")" << endl;
+				//std::cout << i << endl;
+				//std::cout << "i, i+1: (" << i << "," << i + 1 << ")" << endl;
 
 				wireFrameIndices.push_back(i + 1);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + offset); // (i, i+offset)
 
-														//std::cout << "i + 1: (" << i + 1 << "," << i + offset << ")" << endl;
+				//std::cout << "i + 1: (" << i + 1 << "," << i + offset << ")" << endl;
 
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i);
@@ -169,83 +195,30 @@ void Terrain::setWireFrameIndices(int initialSize)
 
 				wireFrameIndices.push_back(i + 1);
 				wireFrameIndices.push_back(i + offset + 1);// (i, i+offset+1)
-														   //std::cout << "i+1, i+offset+1: (" << i + 1 << "," << i + offset + 1 << ")" << endl;
+				//std::cout << "i+1, i+offset+1: (" << i + 1 << "," << i + offset + 1 << ")" << endl;
 
 				wireFrameIndices.push_back(i + offset + 1);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + 1); // (i, i+offset)
-												   //std::cout << "i+offset+1,i: (" << i + offset + 1 << "," << i << ")" << endl;
+				//std::cout << "i+offset+1,i: (" << i + offset + 1 << "," << i << ")" << endl;
 
 			}
 
 		}
-
-
+		
+		
 	}
 	for (int m = 0; m < wireFrameIndices.size() - 4; m += 4)
 	{
 		indicesForTriangles.push_back(wireFrameIndices[m]);
-		indicesForTriangles.push_back(wireFrameIndices[m + 1]);
-		indicesForTriangles.push_back(wireFrameIndices[m + 3]);
+		indicesForTriangles.push_back(wireFrameIndices[m+1]);
+		indicesForTriangles.push_back(wireFrameIndices[m+3]);
 	}
 
 }
 vector<GLuint> Terrain::getIndicesForTriangles()
 {
 	return indicesForTriangles;
-}
-/*
-Todo:  Given int from 1-3, return vector in that sector.  This way we don't have trees floating or sunken in water, and we can randomize
-which part of the terrain is populated
-*/
-glm::vec3 Terrain::getPointInSector(int sector)//doesn't work right yet
-{
-	srand(time(NULL));
-	double random = rand() / RAND_MAX;
-
-	for (int i = 0; i <= vertices.size() - offset * 3; i += offset * 3)
-	{
-
-		if (i < i*offset * 3 + (offset))//S1
-		{
-			if (random  < .15)
-			{
-				return glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
-			}
-			//cout << "S1" << endl;
-		}
-		if ((i > i*offset * 3 + offset) && (i < i*offset * 3 + 2 * offset))//S2
-		{
-			if (random / 100 < .45)
-			{
-				return glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
-			}
-			//cout << "S2" << endl;
-		}
-		if ((i > i*offset * 3 + 2 * offset) && (i < i*offset * 3 + 3 * offset))//S2
-		{
-
-			return glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
-
-			//cout << "S3" << endl;
-		}
-	}
-
-
-}
-
-/*
-Returns the last set of vertices so that they can be used to seamlessly transition between terrain objects
-*/
-vector<glm::vec3> Terrain::getLastVertices()
-{
-	vector<glm::vec3> lastVertices;
-	for (int i = vertices.size() - offset * 3; i <= vertices.size() - 3; i += 3)//x, y z (float)
-	{
-		lastVertices.push_back(glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]));//vec3
-
-	}
-	return lastVertices;
 }

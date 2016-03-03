@@ -9,30 +9,41 @@ class Terrain
 {
 private:
 	Vector3D translateVector;
-	vector<GLfloat> vertices;
+	vector<Vector3D> vertices;
+	Vector4D dirt;
+	Vector4D grass;
+	Vector4D water;
 	int intervals;
-	int offset;
-
+	double currentY;
+	vector<GLfloat> test;
 	vector<GLuint> wireFrameIndices;
 	vector<GLuint> indicesForTriangles;
 	vector<float> probabilities;
-	vector<glm::vec3> initialPoints;//moved from translate for testing
+	vector<Vector3D> initialPoints;//moved from translate for testing
 
 
 public:
 	Terrain();
-	Terrain(vector<glm::vec3>, Vector3D);
 	~Terrain();
 
-
+	vector<GLfloat> getTest();
 	void setTranslateVector(double x, double y, double z);
 	Vector3D getTranslateVector();
 
 	void setVertices();
-	vector<GLfloat> getVertices();
+	vector<Vector3D> getVertices();
 
-	//void setVertices2();
-	//vector<Vector3D> getVertices2();
+	void setDirt(double, double, double, double);
+	Vector4D getDirt();
+
+	void setGrass(double, double, double, double);
+	Vector4D getGrass();
+
+	void setWater(double, double, double, double);
+	Vector4D getWater();
+
+	void setCurrentY(double);
+	double getCurrentY();
 
 	void setWireFrameIndices(int);
 	vector<GLuint> getWireFrameIndices();
@@ -44,8 +55,6 @@ public:
 	int getIntervals();
 
 	vector<GLuint> getIndicesForTriangles();
-	glm::vec3 getPointInSector(int); //todo
-	void setFirstSetOfVertices();
-	vector<glm::vec3> Terrain::getLastVertices();
+
 };
 
