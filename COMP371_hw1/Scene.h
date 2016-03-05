@@ -27,7 +27,7 @@
 #include "FileReader.h"
 #include "RandomAttributeGenerator.h"
 #include "Terrain.h"
-
+#include "ctime"
 using namespace std;
 
 class Scene
@@ -35,12 +35,11 @@ class Scene
 private:
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
-	objects objectsToDraw;
 	objects objectsInMemory;
-	
+	clock_t time;
 	int numberOfOriginalObjects;
 	Terrain *terrain;
-
+	vec3 oldPlayerPos;
 	vector<vec3> treeNormals;
 	vector<vec2> treeUvs;
 	

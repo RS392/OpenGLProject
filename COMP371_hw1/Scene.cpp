@@ -5,7 +5,8 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-
+#define RADIUS 200
+#define ENVIRONMENTREFRESHRATE 0.1
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
@@ -41,13 +42,11 @@ GLfloat displacementx = 0.0f;
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
-	numberOfOriginalObjects = 3;
+	numberOfOriginalObjects = 4;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		object obj(1); // empty place holder to allocate memory
 		originalObjects.push_back(obj);
 	}
-	object obj(1);
-	objectsToDraw.push_back(obj);
 	terrain = new Terrain();//for testing
 }
 
@@ -69,6 +68,9 @@ void Scene::makeMultipleObjects() {
 		else if (i == 2) {
 			typeOfObject = 'f';
 		}
+		else if (i == 3) {
+			typeOfObject = 'g';
+		}
 		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
 	}
 }
@@ -79,7 +81,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
 	fileReader->loadObj("obj__tree1.obj", originalObjects[1], treeUvs, treeNormals);
 	fileReader->loadObj("obj__fern1.obj", originalObjects[2], treeUvs, treeNormals);
-	//fileReader->loadObj("obj__flow2.obj", originalObjects[3], treeUvs, treeNormals);
+	fileReader->loadObj("obj__grass.obj", originalObjects[3], treeUvs, treeNormals);
 	
 }
 void Scene::drawTerrain()
@@ -119,9 +121,9 @@ void Scene::drawTerrain()
 
 void Scene::drawObjects() {
 	
-	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
+	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i].size() * sizeof(vec3), &objectsToDraw[i][0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, objectsInMemory[i].size() * sizeof(vec3), &objectsInMemory[i][0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -131,7 +133,7 @@ void Scene::drawObjects() {
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
-		glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i].size());
+		glDrawArrays(GL_LINES, 0, objectsInMemory[i].size());
 	}
 }
 void Scene::drawEverything() {
@@ -179,32 +181,41 @@ void rotateCamera() {
 }
 
 void Scene::constructEnvironment() {
-	int radius = 200;
+	time = clock();
 	vec3 playerPos = getCameraPos();
-	bool inRange = false;
-	// add objects from objects in range to objectsToDraw
+	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
+					   // and other things will of course depend on the object type
+	generator->setRadius(RADIUS);
+	generator->setPlayerPos(playerPos);
+	for (size_t i = 0; i < originalObjects.size(); ++i) {
+		if (i == 0) {
+			typeOfObject = 'p';
+		}
+		else if (i == 1) {
+			typeOfObject = 't';
+		}
+		else if (i == 2) {
+			typeOfObject = 'f';
+		}
+		else if (i == 3) {
+			typeOfObject = 'g';
+		}
+		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
+	}
+	//destroy objects out of range
+	int objectsDestroyed = 0;
 	for (int i = 0; i < objectsInMemory.size(); ++i) {
-		int differenceX = abs(objectsInMemory[i][0][0]) - abs(playerPos[0]); // 
-		int differenceZ = abs(objectsInMemory[i][0][2]) - abs(playerPos[2]);
-		object ob = objectsInMemory[i];
-		bool isAlreadyDrawn = find(objectsToDraw.begin(), objectsToDraw.end(), ob) != objectsToDraw.end();
-		if (differenceX < radius && differenceZ < radius && !isAlreadyDrawn) {
-			objectsToDraw.push_back(objectsInMemory[i]);
+		int differenceX = abs(abs(objectsInMemory[i][0][0]) - abs(playerPos[0])); // 
+		int differenceZ = abs(abs(objectsInMemory[i][0][2]) - abs(playerPos[2]));
+		
+		if (differenceX > RADIUS * 1.5 || differenceZ > RADIUS * 1.5 ) {
+			++objectsDestroyed;
+			objectsInMemory.erase(objectsInMemory.begin() + i);
 		}
 
 	}
+	//cout << "objects destroyed: " << objectsDestroyed << endl;
 	
-	//destroy objects out of range
-	/*
-	for (int i = 0; i < objectsToDraw.size(); ++i) {
-		int differenceX = abs(objectsToDraw[i][0][0]) - abs(playerPos[0]); // 
-		int differenceZ = abs(objectsToDraw[i][0][2]) - abs(playerPos[2]);
-		bool isAlreadyDrawn = std::find(objectsToDraw.begin(), objectsToDraw.end(), objects[i]) != objects.end();
-		if (differenceX > radius && differenceZ > radius && isAlreadyDrawn) {
-			objectsToDraw.erase(objectsToDraw.begin() + i);
-		}
-	}
-	*/
 }
 
 int Scene::runEngine() { 
@@ -222,15 +233,14 @@ int Scene::runEngine() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 
-	
-	int timer = 0;
 	while (!glfwWindowShouldClose(window)) {
-		++timer;
-		if (timer > 10000) {
-			cout << "constructing" << endl;
+		
+		
+		if ((clock() - time)/1000.0f > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
 			constructEnvironment();
-			timer = 0;
+			oldPlayerPos = getCameraPos();
 		}
+		//time = clock() - 2000;
 		//rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -266,7 +276,6 @@ int Scene::runEngine() {
 
 }
 vec3 Scene::getCameraPos() {
-	
 	mat4 ViewInv = inverse(view_matrix);
 	GLdouble x = ViewInv[3][0];
 	GLdouble y = ViewInv[3][1];
@@ -290,7 +299,7 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(10.0f, 0.0f, 0.0f));
 						displacementx -= 5.0f;
 		break;
-	//case GLFW_KEY_B: cout << getCameraPos()[0] << endl;
+	case GLFW_KEY_B: 
 
 		break;
 

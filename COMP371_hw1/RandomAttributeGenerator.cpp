@@ -10,21 +10,30 @@ RandomAttributeGenerator::RandomAttributeGenerator()
 RandomAttributeGenerator::~RandomAttributeGenerator()
 {
 }
-
+void RandomAttributeGenerator::setRadius(int rad) {
+	radius = rad;
+}
+void RandomAttributeGenerator::setPlayerPos(vec3 pos) {
+	playerPos = pos;
+}
 void RandomAttributeGenerator::randomizeObject(object original, char type, objects &copies) {
 	int min, max, nbOfCopies;
 
 	if (type == 't') {
-		min = 10;
-		max = 40;
+		min = 1;
+		max = 2;
 	}
 	else if (type == 'p') {
-		min = 60;
-		max = 100;
+		min = 1;
+		max = 2;
 	}
 	else if (type == 'f') {
-		min = 1000;
-		max = 5000;
+		min = 1;
+		max = 2;
+	}
+	else if (type == 'g') {
+		min = 1;
+		max = 2;
 	}
 
 	nbOfCopies = rand() % max + min;
@@ -34,12 +43,16 @@ void RandomAttributeGenerator::randomizeObject(object original, char type, objec
 
 		changeObjectLocation(obj);
 		changeObjectSize(obj);
+
+		
 		copies.push_back(obj);
 	}
 }
+
 void RandomAttributeGenerator::changeObjectLocation(object &obj) {
-	int xTranslation = rand() % 5000 - 2500;
-	int zTranslation = rand() % 8000 - 2000;
+
+	int xTranslation = (rand() % (radius*2) - radius) + playerPos.x;
+	int zTranslation = (rand() % (radius)) + playerPos.z + radius;
 	for (size_t i = 0; i < obj.size(); i++) {
 		obj[i][0] += (float)xTranslation;
 		obj[i][2] += (float)zTranslation;
