@@ -9,7 +9,7 @@ using namespace glm;
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
-
+bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
@@ -46,11 +46,15 @@ Scene::Scene()
 		object obj(1); // empty place holder to allocate memory
 		originalObjects.push_back(obj);
 	}
+	object obj(1);
+	objectsToDraw.push_back(obj);
+	terrain = new Terrain();//for testing
 }
 
 Scene::~Scene()
 {
 }
+
 void Scene::makeMultipleObjects() {
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 	// and other things will of course depend on the object type
@@ -65,7 +69,7 @@ void Scene::makeMultipleObjects() {
 		else if (i == 2) {
 			typeOfObject = 'f';
 		}
-		generator->randomizeObject(originalObjects[i], typeOfObject, objects);
+		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
 	}
 }
 void Scene::makeOriginalObjects() {
@@ -78,11 +82,46 @@ void Scene::makeOriginalObjects() {
 	//fileReader->loadObj("obj__flow2.obj", originalObjects[3], treeUvs, treeNormals);
 	
 }
+void Scene::drawTerrain()
+{
+	//change the view/projection matrices to look down more
+	if (terrainView)
+	{
+		glm::vec3 eye(0.0f, 1.0f, -2.0f);
+		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
+		terrainView = false;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
+	//glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
+
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
+	glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
+
+
+}
+
 void Scene::drawObjects() {
 	
-	for (size_t i = 0; i < objects.size(); ++i) {
+	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, objects[i].size() * sizeof(vec3), &objects[i][0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i].size() * sizeof(vec3), &objectsToDraw[i][0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -92,11 +131,13 @@ void Scene::drawObjects() {
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
-		glDrawArrays(GL_LINES, 0, objects[i].size());
+		glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i].size());
 	}
 }
 void Scene::drawEverything() {
 	drawObjects();
+	//drawTerrain();
+
 }
 void Scene::applyTexture() {
 	glGenTextures(1, &TBO);
@@ -137,6 +178,35 @@ void rotateCamera() {
 	}
 }
 
+void Scene::constructEnvironment() {
+	int radius = 200;
+	vec3 playerPos = getCameraPos();
+	bool inRange = false;
+	// add objects from objects in range to objectsToDraw
+	for (int i = 0; i < objectsInMemory.size(); ++i) {
+		int differenceX = abs(objectsInMemory[i][0][0]) - abs(playerPos[0]); // 
+		int differenceZ = abs(objectsInMemory[i][0][2]) - abs(playerPos[2]);
+		object ob = objectsInMemory[i];
+		bool isAlreadyDrawn = find(objectsToDraw.begin(), objectsToDraw.end(), ob) != objectsToDraw.end();
+		if (differenceX < radius && differenceZ < radius && !isAlreadyDrawn) {
+			objectsToDraw.push_back(objectsInMemory[i]);
+		}
+
+	}
+	
+	//destroy objects out of range
+	/*
+	for (int i = 0; i < objectsToDraw.size(); ++i) {
+		int differenceX = abs(objectsToDraw[i][0][0]) - abs(playerPos[0]); // 
+		int differenceZ = abs(objectsToDraw[i][0][2]) - abs(playerPos[2]);
+		bool isAlreadyDrawn = std::find(objectsToDraw.begin(), objectsToDraw.end(), objects[i]) != objects.end();
+		if (differenceX > radius && differenceZ > radius && isAlreadyDrawn) {
+			objectsToDraw.erase(objectsToDraw.begin() + i);
+		}
+	}
+	*/
+}
+
 int Scene::runEngine() { 
 	
 
@@ -153,9 +223,14 @@ int Scene::runEngine() {
 
 
 	
-	
+	int timer = 0;
 	while (!glfwWindowShouldClose(window)) {
-		
+		++timer;
+		if (timer > 10000) {
+			cout << "constructing" << endl;
+			constructEnvironment();
+			timer = 0;
+		}
 		//rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -190,7 +265,15 @@ int Scene::runEngine() {
 	return 0;
 
 }
-
+vec3 Scene::getCameraPos() {
+	
+	mat4 ViewInv = inverse(view_matrix);
+	GLdouble x = ViewInv[3][0];
+	GLdouble y = ViewInv[3][1];
+	GLdouble z = ViewInv[3][2];
+	vec3 position(x,y,z);
+	return position;
+}
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
 	switch (key) {
@@ -206,6 +289,9 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 		break;
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(10.0f, 0.0f, 0.0f));
 						displacementx -= 5.0f;
+		break;
+	//case GLFW_KEY_B: cout << getCameraPos()[0] << endl;
+
 		break;
 
 	default: break;
