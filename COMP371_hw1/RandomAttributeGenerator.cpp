@@ -24,8 +24,8 @@ void RandomAttributeGenerator::randomizeObject(object original, char type, objec
 		max = 2;
 	}
 	else if (type == 'p') {
-		min = 1;
-		max = 2;
+		min = 10;
+		max = 20;
 	}
 	else if (type == 'f') {
 		min = 1;
@@ -43,7 +43,7 @@ void RandomAttributeGenerator::randomizeObject(object original, char type, objec
 
 		changeObjectLocation(obj);
 		changeObjectSize(obj);
-
+		
 		
 		copies.push_back(obj);
 	}
@@ -60,5 +60,12 @@ void RandomAttributeGenerator::changeObjectLocation(object &obj) {
 
 }
 void RandomAttributeGenerator::changeObjectSize(object &obj) {
-
+	int xScale = (rand() % 10 + 1) / 10 + 1;
+	int yScale = (rand() % 10 + 1) / 10 + 1;
+	int zScale = (rand() % 10 + 1) / 10 + 1;
+	for (size_t i = 0; i < obj.size(); i++) {
+		obj[i][0] *= (float)xScale;
+		obj[i][1] *= (float)yScale;
+		obj[i][2] *= (float)zScale;
+	}
 }

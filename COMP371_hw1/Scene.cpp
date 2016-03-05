@@ -5,8 +5,8 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-#define RADIUS 200
-#define ENVIRONMENTREFRESHRATE 0.1
+#define RADIUS 1000
+#define ENVIRONMENTREFRESHRATE 1
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
