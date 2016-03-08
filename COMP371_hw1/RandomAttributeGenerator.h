@@ -5,23 +5,36 @@
 #include <random>
 #include <iostream>
 #include <time.h> 
+#include "Object.h"
+#include <Windows.h>
+#include "CustomThread.h"
+#include <mutex>
+#include <future>
 using namespace std;
 using namespace glm;
-
-typedef vector<vec3> object;
-typedef vector<object> objects;
+#define RADIUS 1500
+#define ENVIRONMENTREFRESHRATE 5
+//typedef vector<vec3> object;
+typedef vector<Object> objects;
 class RandomAttributeGenerator
 {
 private:
-	void changeObjectSize(object &obj);
-	void changeObjectLocation(object &obj);
+	mutex m;
+	
+	void alterObj(Object &obj, objects &copies);
+	unsigned int generateRandomInt(unsigned long a, unsigned long b, unsigned long c);
+	void changeObjectSize(Object &obj);
+	void changeObjectLocation(Object &obj);
 	int radius;
 	vec3 playerPos;
+	vec3 oldPlayerPos;
 public:
+	
+	void setOldPlayerPos(vec3 pos);
 	void setRadius(int rad);
 	void setPlayerPos(vec3 pos);
 	RandomAttributeGenerator();
 	~RandomAttributeGenerator();
-	void randomizeObject(object original, char type, objects &copies);
+	void randomizeObject(Object original, char type, objects &copies);
 };
 

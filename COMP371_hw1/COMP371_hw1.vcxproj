@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CustomThread.h" />
     <ClInclude Include="Feature.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="JunkCode.h" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CustomThread.cpp" />
     <ClCompile Include="Feature.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="JunkCode.cpp" />
