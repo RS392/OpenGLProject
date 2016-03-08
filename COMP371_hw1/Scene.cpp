@@ -5,8 +5,7 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-#define RADIUS 1000
-#define ENVIRONMENTREFRESHRATE 1
+
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
@@ -39,15 +38,18 @@ double oldY = 0;
 GLfloat displacementz = 0.0f;
 GLfloat displacementx = 0.0f;
 
+bool threadDone;
+
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
 	numberOfOriginalObjects = 4;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
-		object obj(1); // empty place holder to allocate memory
+		Object obj; // empty place holder to allocate memory
 		originalObjects.push_back(obj);
 	}
 	terrain = new Terrain();//for testing
+	time = clock();
 }
 
 Scene::~Scene()
@@ -58,7 +60,7 @@ void Scene::makeMultipleObjects() {
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 	// and other things will of course depend on the object type
 	
-	for (size_t i = 0; i < originalObjects.size(); ++i) {
+	for (int i = 0; i < originalObjects.size(); ++i) {
 		if (i == 0) {
 			typeOfObject = 'p';
 		}
@@ -77,24 +79,23 @@ void Scene::makeMultipleObjects() {
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
-	fileReader->loadObj("obj__pinet2.obj", originalObjects[0], treeUvs, treeNormals);
+	fileReader->loadObj("obj__pinet2.obj", originalObjects[0].verts, treeUvs, treeNormals);
 	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
-	fileReader->loadObj("obj__tree1.obj", originalObjects[1], treeUvs, treeNormals);
-	fileReader->loadObj("obj__fern1.obj", originalObjects[2], treeUvs, treeNormals);
-	fileReader->loadObj("obj__grass.obj", originalObjects[3], treeUvs, treeNormals);
+	fileReader->loadObj("obj__tree1.obj", originalObjects[1].verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__fern1.obj", originalObjects[2].verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__grass.obj", originalObjects[3].verts, treeUvs, treeNormals);
 	
 }
 void Scene::drawTerrain()
 {
 	//change the view/projection matrices to look down more
-	if (terrainView)
+	/*if (terrainView)
 	{
 		glm::vec3 eye(0.0f, 1.0f, -2.0f);
 		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
 		terrainView = false;
-	}
-
+	}*/
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
 
@@ -119,11 +120,13 @@ void Scene::drawTerrain()
 
 }
 
+
 void Scene::drawObjects() {
 	
-	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
+	for (int i = 0; i < objectsToDraw.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, objectsInMemory[i].size() * sizeof(vec3), &objectsInMemory[i][0], GL_STATIC_DRAW);
+		//cout << "about to draw..." << endl;
+		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i].verts.size() * sizeof(vec3), &objectsToDraw[i].verts[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -133,7 +136,7 @@ void Scene::drawObjects() {
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
-		glDrawArrays(GL_LINES, 0, objectsInMemory[i].size());
+		glDrawArrays(GL_LINES, 0, objectsToDraw[i].verts.size());
 	}
 }
 void Scene::drawEverything() {
@@ -181,13 +184,13 @@ void rotateCamera() {
 }
 
 void Scene::constructEnvironment() {
+	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 					   // and other things will of course depend on the object type
 	generator->setRadius(RADIUS);
-	generator->setPlayerPos(playerPos);
-	for (size_t i = 0; i < originalObjects.size(); ++i) {
+	for (int i = 0; i < originalObjects.size(); ++i) {
 		if (i == 0) {
 			typeOfObject = 'p';
 		}
@@ -203,26 +206,32 @@ void Scene::constructEnvironment() {
 		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
 	}
 	//destroy objects out of range
-	int objectsDestroyed = 0;
 	for (int i = 0; i < objectsInMemory.size(); ++i) {
-		int differenceX = abs(abs(objectsInMemory[i][0][0]) - abs(playerPos[0])); // 
-		int differenceZ = abs(abs(objectsInMemory[i][0][2]) - abs(playerPos[2]));
-		
-		if (differenceX > RADIUS * 1.5 || differenceZ > RADIUS * 1.5 ) {
-			++objectsDestroyed;
+		int differenceX = abs(abs(objectsInMemory[i].verts[0][0]) - abs(playerPos[0])); // 
+		int differenceZ = abs(abs(objectsInMemory[i].verts[0][2]) - abs(playerPos[2]));
+		bool behindPlayer = false;
+		if (objectsInMemory[i].verts[0][2] < playerPos[2])
+			behindPlayer = true;
+
+		if (differenceX > RADIUS * 1.2 || differenceZ > RADIUS * 1.2 || behindPlayer == true) {
+			
 			objectsInMemory.erase(objectsInMemory.begin() + i);
 		}
 
 	}
-	//cout << "objects destroyed: " << objectsDestroyed << endl;
-	
-}
 
+	oldPlayerPos = getCameraPos();
+	generator->setOldPlayerPos(oldPlayerPos);
+	threadDone = true;
+}
+void Scene::test() {
+
+}
 int Scene::runEngine() { 
 	
 
 	makeOriginalObjects();
-	makeMultipleObjects();
+	//makeMultipleObjects();
 	
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
@@ -231,20 +240,28 @@ int Scene::runEngine() {
 	glGenBuffers(1, &VBO);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-
 	while (!glfwWindowShouldClose(window)) {
-		
-		
-		if ((clock() - time)/1000.0f > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
-			constructEnvironment();
-			oldPlayerPos = getCameraPos();
+		generator->setPlayerPos(getCameraPos());
+		double timer = (clock() - time) / 1000.0f;
+		if (timer > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
+			//constructEnvironment();
+			cout << timer << endl;
+			cout << "constructing..." << endl;
+			thread t(&Scene::constructEnvironment, this);
+			t.detach();
+			
+		}
+
+		if (threadDone == true) {
+			cout << "about to draw" << endl;
+			objectsToDraw = objectsInMemory;
+
 		}
 		//time = clock() - 2000;
 		//rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.1f, 0.2f, 0.2f, 0.5f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.8f);
 		//glColor4f(0.1f,0.2f,0.2f,0.5f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
@@ -287,17 +304,17 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 
 	switch (key) {
 
-	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -10.0f));
-						displacementz += 10.0f;
+	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -5.0f));
+						displacementz += 5.0f;
 		break;
-	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(-10.0f, 0.0f, 0.0f));
-						displacementx += 5.0f;
+	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(-5.0f, 0.0f, 0.0f));
+						displacementx += 2.50f;
 		break;
-	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 10.0f));
-						displacementz -= 10.0f;
+	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
+						displacementz -= 5.0f;
 		break;
-	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(10.0f, 0.0f, 0.0f));
-						displacementx -= 5.0f;
+	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
+						displacementx -= 2.5f;
 		break;
 	case GLFW_KEY_B: 
 

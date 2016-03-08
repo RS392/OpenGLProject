@@ -28,6 +28,7 @@
 #include "RandomAttributeGenerator.h"
 #include "Terrain.h"
 #include "ctime"
+
 using namespace std;
 
 class Scene
@@ -36,6 +37,7 @@ private:
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objectsInMemory;
+	objects objectsToDraw;
 	clock_t time;
 	int numberOfOriginalObjects;
 	Terrain *terrain;
@@ -50,7 +52,7 @@ private:
 	bool initializeProgram();
 	bool cleanUp();
 	GLuint loadShaders(string vertex_shader_path, string fragment_shader_path);
-
+	void test();
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
 	void makeOriginalObjects();
 	void makeMultipleObjects();
