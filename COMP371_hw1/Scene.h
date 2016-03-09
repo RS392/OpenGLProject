@@ -28,7 +28,7 @@
 #include "RandomAttributeGenerator.h"
 #include "Terrain.h"
 #include "ctime"
-
+#include "Camera.h"
 using namespace std;
 
 class Scene

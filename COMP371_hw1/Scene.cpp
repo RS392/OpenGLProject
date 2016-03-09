@@ -39,7 +39,57 @@ GLfloat displacementz = 0.0f;
 GLfloat displacementx = 0.0f;
 
 bool threadDone;
+tdogl::Camera gCamera;
+GLfloat gDegreesRotated = 0.0f;
+double gScrollY = 0.0;
 
+
+// update the scene based on the time elapsed since last update
+void Update(float secondsElapsed) {
+	//rotate the cube
+	const GLfloat degreesPerSecond = 180.0f;
+	gDegreesRotated += secondsElapsed * degreesPerSecond;
+	while (gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
+
+	//move position of camera based on WASD keys, and XZ keys for up and down
+	const float moveSpeed = 220.0; //units per second
+	if (glfwGetKey(window, 'S')) {
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+	}
+	else if (glfwGetKey(window, 'W')) {
+		//cout << "moving north" << endl;
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+	}
+	if (glfwGetKey(window, 'A')) {
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
+	}
+	else if (glfwGetKey(window, 'D')) {
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
+	}
+	if (glfwGetKey(window, 'Z')) {
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0, 1, 0));
+	}
+	else if (glfwGetKey(window, 'X')) {
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
+	}
+
+	//rotate camera based on mouse movement
+	const float mouseSensitivity = 0.1f;
+	double mouseX, mouseY;
+	glfwGetCursorPos(window, &mouseX, &mouseY);
+	gCamera.offsetOrientation(-mouseSensitivity * (float)mouseY, -mouseSensitivity * (float)mouseX);
+	glfwSetCursorPos(window, 0, 0); //reset the mouse, so it doesn't go out of the window
+
+									 //increase or decrease field of view based on mouse wheel
+	/*
+	const float zoomSensitivity = -0.2f;
+	float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
+	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
+	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
+	gCamera.setFieldOfView(fieldOfView);
+	*/
+	gScrollY = 0;
+}
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
@@ -50,6 +100,10 @@ Scene::Scene()
 	}
 	terrain = new Terrain();//for testing
 	time = clock();
+
+	gCamera.setPosition(glm::vec3(0, 0.24, 200));
+	//gCamera.setViewportAspectRatio(width / height);
+
 }
 
 Scene::~Scene()
@@ -232,20 +286,23 @@ int Scene::runEngine() {
 
 	makeOriginalObjects();
 	//makeMultipleObjects();
-	
+	//constructEnvironment();
+	//objectsToDraw = objectsInMemory;
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-
+	constructEnvironment();
+	objectsToDraw = objectsInMemory;
 
 	glGenBuffers(1, &VBO);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		generator->setPlayerPos(getCameraPos());
 		double timer = (clock() - time) / 1000.0f;
 		if (timer > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
 			//constructEnvironment();
-			cout << timer << endl;
+		//	cout << timer << endl;
 			cout << "constructing..." << endl;
 			thread t(&Scene::constructEnvironment, this);
 			t.detach();
@@ -257,6 +314,23 @@ int Scene::runEngine() {
 			objectsToDraw = objectsInMemory;
 
 		}
+		double thisTime = glfwGetTime();
+		Update((float)(thisTime - lastTime));
+		lastTime = thisTime;
+		view_matrix = gCamera.matrix();
+	//	proj_matrix = gCamera.projection();
+	//	view_matrix[0][0] = -1;
+		//view_matrix[1][1] = 0.97;
+		//view_matrix[2][1] = 0.24;
+		//view_matrix[3][1] = -0.24;
+		//view_matrix[1][2] = 0.24;
+		//view_matrix[2][2] = -0.97;
+		//view_matrix[3][1] = -200;
+
+		//view_matrix[3][3] =1;
+		view_matrix[2][3] = 0;
+		//setUniform3v(uniformName, glm::value_ptr(v));
+		//gProgram->setUniform("camera", gCamera.matrix());
 		//time = clock() - 2000;
 		//rotateCamera();
 		// wipe the drawing surface clear
@@ -293,17 +367,25 @@ int Scene::runEngine() {
 
 }
 vec3 Scene::getCameraPos() {
+	/*
 	mat4 ViewInv = inverse(view_matrix);
 	GLdouble x = ViewInv[3][0];
 	GLdouble y = ViewInv[3][1];
 	GLdouble z = ViewInv[3][2];
 	vec3 position(x,y,z);
+	*/
+	double x = gCamera.position()[0];
+	double y = gCamera.position()[1];
+	double z = gCamera.position()[2];
+	vec3 position(x, y, z);
+	//gCamera.setPosition(vec3(gCamera.position()[0], gCamera.position()[1], -gCamera.position()[2]));
+	//cout << gCamera.position()[2] << endl;
 	return position;
 }
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
 
 	switch (key) {
-
+		/*
 	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -5.0f));
 						displacementz += 5.0f;
 		break;
@@ -315,8 +397,15 @@ void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods
 		break;
 	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
 						displacementx -= 2.5f;
-		break;
+		break;*/
 	case GLFW_KEY_B: 
+		for (int i = 0; i < 4; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				cout << view_matrix[i][j] << " ";
+
+			}
+			cout << endl;
+		}
 
 		break;
 
@@ -457,6 +546,8 @@ bool Scene::initializeOpenGL() {
 
 	int w, h;
 	glfwGetWindowSize(window, &w, &h);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
 
 	glfwSetMouseButtonCallback(window, buttonClicked);
