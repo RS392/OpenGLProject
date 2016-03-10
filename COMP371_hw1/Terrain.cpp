@@ -6,7 +6,7 @@
 Terrain::Terrain()
 {
 	setIntervals(10);
-	setTranslateVector(0.0, 0.0, 1);
+	setTranslateVector(0.0, 0.0, 100);
 	setVertices();
 }
 
@@ -34,7 +34,7 @@ void Terrain::setVertices()
 	//populate with number of points based on interval.
 	for (int i = -10 * intervals; i < intervals*10; i++)//pushes back vertices with x values ranging from -1 to 0, 0 to 1
 	{
-		initialPoints.push_back(Vector3D(i / (float)intervals, 0.0, -1.0));
+		initialPoints.push_back((Vector3D(50*((i / (float)intervals)), 0.0, 200.0)));
 	}
 	int rowLength = initialPoints.size(); //for calculating indices
 										  // Translate based on vector
@@ -61,22 +61,22 @@ void Terrain::setVertices()
 				srand(time(NULL));
 				if (rand() / 100 > .5)//todo add probabilities
 				{
-					translateVector.setX(x += .51);
-					translateVector.setY(y -= 1);
-					translateVector.setZ(z += 1);
+					translateVector.setX(x += 51);
+					translateVector.setY(y -= 10);
+					translateVector.setZ(z += 10);
 					srand(time(NULL));
 				}
 				else if (rand() / 100 < .15)
 				{
-					translateVector.setY(y += 0.10);
-					translateVector.setZ(z += 0.25);
+					translateVector.setY(y += 10);
+					translateVector.setZ(z += 25);
 					srand(time(NULL));
 				}
 				else if (rand() / 100 >.2 && rand() / 100 < .45)
 				{
 					translateVector.setX(x -= 1);
-					translateVector.setY(y += 0.5);
-					translateVector.setZ(z += 0.25);
+					translateVector.setY(y += 5);
+					translateVector.setZ(z += 25);
 					srand(time(NULL));
 				}
 			}

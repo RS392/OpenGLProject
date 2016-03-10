@@ -23,7 +23,7 @@ glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
 
-GLuint VBO, VAO, EBO, TBO;
+GLuint VBO, VAO, EBO, TBO, VBO2;
 
 GLfloat point_size = 3.0f;
 
@@ -102,7 +102,7 @@ Scene::Scene()
 
 	gCamera.setNearAndFarPlanes(0.00001f,50000.0f);
 
-	gCamera.setPosition(glm::vec3(0, 50, 200));
+	gCamera.setPosition(glm::vec3(0, 5, 200));
 	//gCamera.setViewportAspectRatio(width / height);
 
 
@@ -152,7 +152,7 @@ void Scene::drawTerrain()
 		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
 		//terrainView = false;
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(
@@ -279,6 +279,7 @@ int Scene::runEngine() {
 	objectsToDraw = objectsInMemory;
 
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
