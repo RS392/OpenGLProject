@@ -34,8 +34,7 @@ unsigned int RandomAttributeGenerator::generateRandomInt(unsigned long a, unsign
 
 }
 void RandomAttributeGenerator::randomizeObject(Object original, char type, objects &copies) {
-	
-	
+
 	srand(generateRandomInt(clock(), time(NULL), GetCurrentProcessId()));
 	int min, max, nbOfCopies;
 	vec3 distanceTraveled = playerPos - oldPlayerPos;
@@ -57,7 +56,7 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 		min = 100;
 		max = 150;
 	}
-
+	cout << playerPos.z << endl;
 	nbOfCopies = rand() % max + min;
 	for (int i = 0; i < nbOfCopies; ++i) {
 		Object obj = original;
@@ -87,7 +86,7 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 	m.unlock();
 }
 void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
-
+	//cout << playerPos.z << endl;
 	int xTranslation = (rand() % (radius*2) - radius) + playerPos.x;
 	int zTranslation = (rand() % (radius)) + radius + playerPos.z;
 

@@ -40,16 +40,11 @@ GLfloat displacementx = 0.0f;
 
 bool threadDone;
 tdogl::Camera gCamera;
-GLfloat gDegreesRotated = 0.0f;
 double gScrollY = 0.0;
 
 
 // update the scene based on the time elapsed since last update
 void Update(float secondsElapsed) {
-	//rotate the cube
-	const GLfloat degreesPerSecond = 180.0f;
-	gDegreesRotated += secondsElapsed * degreesPerSecond;
-	while (gDegreesRotated > 360.0f) gDegreesRotated -= 360.0f;
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
 	const float moveSpeed = 220.0; //units per second
@@ -81,14 +76,18 @@ void Update(float secondsElapsed) {
 	glfwSetCursorPos(window, 0, 0); //reset the mouse, so it doesn't go out of the window
 
 									 //increase or decrease field of view based on mouse wheel
-	/*
+	
 	const float zoomSensitivity = -0.2f;
 	float fieldOfView = gCamera.fieldOfView() + zoomSensitivity * (float)gScrollY;
 	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
 	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
 	gCamera.setFieldOfView(fieldOfView);
-	*/
+	
 	gScrollY = 0;
+}
+// records how far the y axis has been scrolled
+void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
+	gScrollY += deltaY;
 }
 Scene::Scene()
 {
@@ -100,9 +99,10 @@ Scene::Scene()
 	}
 	terrain = new Terrain();//for testing
 	time = clock();
-
-	gCamera.setPosition(glm::vec3(0, 0.24, 200));
-	//gCamera.setViewportAspectRatio(width / height);
+	gCamera.setPosition(glm::vec3(0, 0, 200));
+	gCamera.setNearAndFarPlanes(0.00001f,50000.0f);
+	
+	//gCamera.setViewportAspectRatio(width/ height);
 
 }
 
@@ -203,8 +203,8 @@ void Scene::applyTexture() {
 	glBindTexture(GL_TEXTURE_2D, TBO);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
@@ -299,21 +299,21 @@ int Scene::runEngine() {
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		generator->setPlayerPos(getCameraPos());
-		double timer = (clock() - time) / 1000.0f;
-		if (timer > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
-			//constructEnvironment();
-		//	cout << timer << endl;
-			cout << "constructing..." << endl;
-			thread t(&Scene::constructEnvironment, this);
-			t.detach();
-			
-		}
-
 		if (threadDone == true) {
-			cout << "about to draw" << endl;
+		//	cout << "attempting to construct" << endl;
+			double timer = (clock() - time) / 1000.0f;
+			if (timer > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
+				cout << "constructing..." << endl;
+				thread t(&Scene::constructEnvironment, this);
+				t.detach();
+			}
+		}
+		if (threadDone == true) {
+			//cout << "about to draw" << endl;
 			objectsToDraw = objectsInMemory;
 
 		}
+		
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
@@ -326,8 +326,8 @@ int Scene::runEngine() {
 		//view_matrix[1][2] = 0.24;
 		//view_matrix[2][2] = -0.97;
 		//view_matrix[3][1] = -200;
-
-		//view_matrix[3][3] =1;
+		
+	//	view_matrix[1][3] =0;
 		view_matrix[2][3] = 0;
 		//setUniform3v(uniformName, glm::value_ptr(v));
 		//gProgram->setUniform("camera", gCamera.matrix());
@@ -378,8 +378,7 @@ vec3 Scene::getCameraPos() {
 	double y = gCamera.position()[1];
 	double z = gCamera.position()[2];
 	vec3 position(x, y, z);
-	//gCamera.setPosition(vec3(gCamera.position()[0], gCamera.position()[1], -gCamera.position()[2]));
-	//cout << gCamera.position()[2] << endl;
+	//cout << position.z << endl;
 	return position;
 }
 void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
@@ -553,7 +552,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetMouseButtonCallback(window, buttonClicked);
 
 	glfwSetKeyCallback(window, keyPressed);
-
+	glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
 
 	/// Initialize GLEW extension handler
