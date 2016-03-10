@@ -99,16 +99,12 @@ Scene::Scene()
 	}
 	terrain = new Terrain();//for testing
 	time = clock();
-<<<<<<< HEAD
-	gCamera.setPosition(glm::vec3(0, 0, 200));
+
 	gCamera.setNearAndFarPlanes(0.00001f,50000.0f);
-	
-	//gCamera.setViewportAspectRatio(width/ height);
-=======
 
 	gCamera.setPosition(glm::vec3(0, 50, 200));
 	//gCamera.setViewportAspectRatio(width / height);
->>>>>>> f01c3f0869f90c7304057ea2e221e8cb5532ceb8
+
 
 }
 
@@ -120,7 +116,7 @@ void Scene::makeMultipleObjects() {
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 	// and other things will of course depend on the object type
 	
-	for (int i = 0; i < originalObjects.size(); ++i) {
+	for (size_t i = 0; i < originalObjects.size(); ++i) {
 		if (i == 0) {
 			typeOfObject = 'p';
 		}
@@ -183,7 +179,7 @@ void Scene::drawTerrain()
 
 void Scene::drawObjects() {
 	
-	for (int i = 0; i < objectsToDraw.size(); ++i) {
+	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		//cout << "about to draw..." << endl;
 		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i].verts.size() * sizeof(vec3), &objectsToDraw[i].verts[0], GL_STATIC_DRAW);
@@ -232,7 +228,7 @@ void Scene::constructEnvironment() {
 	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
 					   // and other things will of course depend on the object type
 	generator->setRadius(RADIUS);
-	for (int i = 0; i < originalObjects.size(); ++i) {
+	for (size_t i = 0; i < originalObjects.size(); ++i) {
 		if (i == 0) {
 			typeOfObject = 'p';
 		}
@@ -248,9 +244,9 @@ void Scene::constructEnvironment() {
 		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
 	}
 	//destroy objects out of range
-	for (int i = 0; i < objectsInMemory.size(); ++i) {
-		int differenceX = abs(abs(objectsInMemory[i].verts[0][0]) - abs(playerPos[0])); // 
-		int differenceZ = abs(abs(objectsInMemory[i].verts[0][2]) - abs(playerPos[2]));
+	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
+		int differenceX = (int) abs(abs(objectsInMemory[i].verts[0][0]) - abs(playerPos[0])); // 
+		int differenceZ = (int) abs(abs(objectsInMemory[i].verts[0][2]) - abs(playerPos[2]));
 		bool behindPlayer = false;
 		if (objectsInMemory[i].verts[0][2] < playerPos[2])
 			behindPlayer = true;
@@ -316,7 +312,7 @@ int Scene::runEngine() {
 		//view_matrix[3][1] = -200;
 		
 	//	view_matrix[1][3] =0;
-		view_matrix[2][3] = 0;
+		view_matrix[2][3] = 5;
 		//setUniform3v(uniformName, glm::value_ptr(v));
 		//gProgram->setUniform("camera", gCamera.matrix());
 		//time = clock() - 2000;
@@ -495,13 +491,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
 
-<<<<<<< HEAD
-	glfwSetMouseButtonCallback(window, buttonClicked);
-
-	glfwSetKeyCallback(window, keyPressed);
 	glfwSetScrollCallback(window, OnScroll);
-=======
->>>>>>> f01c3f0869f90c7304057ea2e221e8cb5532ceb8
 	glfwSetWindowSizeCallback(window, windowResized);
 
 	/// Initialize GLEW extension handler
