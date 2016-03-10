@@ -18,8 +18,8 @@ int height = 500, heightB = 600;
 int width = 800, widthB = 800;
 
 ///Transformations
-glm::mat4 proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 1000.0f);;
-glm::mat4 view_matrix = glm::lookAt(glm::vec3(0.0f, 50.0f, -200.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+glm::mat4 proj_matrix;
+glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
 
@@ -99,10 +99,16 @@ Scene::Scene()
 	}
 	terrain = new Terrain();//for testing
 	time = clock();
+<<<<<<< HEAD
 	gCamera.setPosition(glm::vec3(0, 0, 200));
 	gCamera.setNearAndFarPlanes(0.00001f,50000.0f);
 	
 	//gCamera.setViewportAspectRatio(width/ height);
+=======
+
+	gCamera.setPosition(glm::vec3(0, 50, 200));
+	//gCamera.setViewportAspectRatio(width / height);
+>>>>>>> f01c3f0869f90c7304057ea2e221e8cb5532ceb8
 
 }
 
@@ -219,24 +225,6 @@ void Scene::applyTexture() {
 
 }
 
-void rotateCamera() {
-
-	double xpos = oldX;
-	double ypos = oldY;
-	glfwGetCursorPos(window, &xpos, &ypos);
-
-	if (xpos > oldX && xpos < widthB) {
-		
-		view_matrix = glm::lookAt(glm::vec3(0.0f + displacementx, 50.0f, -200.0f + displacementz), glm::vec3(cos((xpos - oldX) / 100.0f), 0.0f, sin((xpos - oldX) / 100.0f)), glm::vec3(0.0f, 1.0f, 0.0f));
-		oldX = xpos = widthB / 2;
-	}
-	else if (xpos < oldX && xpos > 0) {
-
-		view_matrix = glm::rotate(view_matrix, -0.0001f, glm::vec3(0, 1, 0));
-		oldX = ypos = 0;
-	}
-}
-
 void Scene::constructEnvironment() {
 	threadDone = false;
 	time = clock();
@@ -318,7 +306,7 @@ int Scene::runEngine() {
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
 		view_matrix = gCamera.matrix();
-	//	proj_matrix = gCamera.projection();
+		proj_matrix = gCamera.projection();
 	//	view_matrix[0][0] = -1;
 		//view_matrix[1][1] = 0.97;
 		//view_matrix[2][1] = 0.24;
@@ -332,7 +320,6 @@ int Scene::runEngine() {
 		//setUniform3v(uniformName, glm::value_ptr(v));
 		//gProgram->setUniform("camera", gCamera.matrix());
 		//time = clock() - 2000;
-		//rotateCamera();
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.8f);
@@ -380,47 +367,6 @@ vec3 Scene::getCameraPos() {
 	vec3 position(x, y, z);
 	//cout << position.z << endl;
 	return position;
-}
-void keyPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
-
-	switch (key) {
-		/*
-	case GLFW_KEY_W: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, -5.0f));
-						displacementz += 5.0f;
-		break;
-	case GLFW_KEY_A: view_matrix = glm::translate(view_matrix, glm::vec3(-5.0f, 0.0f, 0.0f));
-						displacementx += 2.50f;
-		break;
-	case GLFW_KEY_S: view_matrix = glm::translate(view_matrix, glm::vec3(0.0f, 0.0f, 5.0f));
-						displacementz -= 5.0f;
-		break;
-	case GLFW_KEY_D: view_matrix = glm::translate(view_matrix, glm::vec3(5.0f, 0.0f, 0.0f));
-						displacementx -= 2.5f;
-		break;*/
-	case GLFW_KEY_B: 
-		for (int i = 0; i < 4; ++i) {
-			for (int j = 0; j < 4; ++j) {
-				cout << view_matrix[i][j] << " ";
-
-			}
-			cout << endl;
-		}
-
-		break;
-
-	default: break;
-	}
-}
-
-void buttonClicked(GLFWwindow* window, int button, int action, int mods) {
-
-	//Zoom-in, zoom-out
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		clicked = true;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-		clicked = false;
-	}
 }
 
 void windowResized(GLFWwindow* window, int width2, int height2) {
@@ -549,10 +495,13 @@ bool Scene::initializeOpenGL() {
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
 
+<<<<<<< HEAD
 	glfwSetMouseButtonCallback(window, buttonClicked);
 
 	glfwSetKeyCallback(window, keyPressed);
 	glfwSetScrollCallback(window, OnScroll);
+=======
+>>>>>>> f01c3f0869f90c7304057ea2e221e8cb5532ceb8
 	glfwSetWindowSizeCallback(window, windowResized);
 
 	/// Initialize GLEW extension handler

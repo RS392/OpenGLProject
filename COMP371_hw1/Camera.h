@@ -71,6 +71,13 @@ namespace tdogl {
 		Does not include translation (the camera's position).
 		*/
 		glm::mat4 orientation() const;
+		
+		/**
+		A rotation matrix that determines the camera is looking, only on the x/z axis.
+
+		Used for displacement.
+		*/
+		glm::mat4 movementOrientation() const;
 
 		/**
 		Offsets the cameras orientation.

@@ -63,6 +63,12 @@ glm::mat4 Camera::orientation() const {
 	return orientation;
 }
 
+glm::mat4 Camera::movementOrientation() const {
+	glm::mat4 orientation;
+	orientation = glm::rotate(orientation, glm::radians(_horizontalAngle), glm::vec3(0, 1, 0));
+	return orientation;
+}
+
 void Camera::offsetOrientation(float upAngle, float rightAngle) {
 	_horizontalAngle += rightAngle;
 	_verticalAngle += upAngle;
@@ -87,12 +93,12 @@ void Camera::setViewportAspectRatio(float viewportAspectRatio) {
 }
 
 glm::vec3 Camera::forward() const {
-	glm::vec4 forward = glm::inverse(orientation()) * glm::vec4(0, 0, -1, 1);
+	glm::vec4 forward = glm::inverse(movementOrientation()) * glm::vec4(0, 0, -1, 1);
 	return glm::vec3(forward);
 }
 
 glm::vec3 Camera::right() const {
-	glm::vec4 right = glm::inverse(orientation()) * glm::vec4(1, 0, 0, 1);
+	glm::vec4 right = glm::inverse(movementOrientation()) * glm::vec4(1, 0, 0, 1);
 	return glm::vec3(right);
 }
 
