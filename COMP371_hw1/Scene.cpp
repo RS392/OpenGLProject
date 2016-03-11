@@ -23,7 +23,7 @@ glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
 
-GLuint VBO, VAO, EBO, TBO;
+GLuint VBO, VAO, EBO, TBO, VBO2;
 
 GLfloat point_size = 3.0f;
 
@@ -163,14 +163,14 @@ void Scene::makeOriginalObjects() {
 void Scene::drawTerrain()
 {
 	//change the view/projection matrices to look down more
-	/*if (terrainView)
+	if (terrainView)
 	{
 		glm::vec3 eye(0.0f, 1.0f, -2.0f);
-		view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
-		terrainView = false;
-	}*/
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		//terrainView = false;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(
@@ -183,9 +183,10 @@ void Scene::drawTerrain()
 		);
 
 	glEnableVertexAttribArray(0);
-
+	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
+	//cout << terrain->getWireFrameIndices().size() << endl;
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
 	//glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
@@ -215,7 +216,7 @@ void Scene::drawObjects() {
 }
 void Scene::drawEverything() {
 	drawObjects();
-	//drawTerrain();
+	drawTerrain();
 
 }
 void Scene::applyTexture() {
@@ -297,6 +298,8 @@ int Scene::runEngine() {
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &VBO2);
+	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
