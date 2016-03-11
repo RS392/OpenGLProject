@@ -37,6 +37,7 @@ private:
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objectsInMemory;
+	objects objectsInTransit;
 	objects objectsToDraw;
 	clock_t time;
 	int numberOfOriginalObjects;
@@ -45,7 +46,7 @@ private:
 	vector<vec3> treeNormals;
 	vector<vec2> treeUvs;
 	
-	
+	void removeFromVBO();
 	void constructEnvironment();
 	vec3 getCameraPos();
 	bool initializeOpenGL();

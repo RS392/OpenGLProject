@@ -42,20 +42,20 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 	//cout << distanceTraveled[2] << endl;
 	double multiplier = 5;
 	if (type == 't') {
-		min = 1;
-		max = 2;
+		min = 1000;
+		max = 2000;
 	}
 	else if (type == 'p') {
-		min = 50;
-		max = 100;
+		min = 800;
+		max = 1000;
 	}
 	else if (type == 'f') {
-		min = 50;
-		max = 100;
+		min = 2000;
+		max = 4000;
 	}
 	else if (type == 'g') {
-		min = 100;
-		max = 200;
+		min = 2000;
+		max = 4000;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % max + min;

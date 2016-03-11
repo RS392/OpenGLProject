@@ -5,7 +5,7 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-
+#define SEEDISTANCE 1000
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
@@ -113,13 +113,13 @@ Scene::Scene()
 	terrain = new Terrain();//for testing
 	time = clock();
 
-	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
+	gCamera.setNearAndFarPlanes(0.1f,SEEDISTANCE);
 
 	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
 	//gCamera.setViewportAspectRatio(width / height);
 	
 
-	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	
 
 }
 
@@ -282,6 +282,23 @@ void Scene::constructEnvironment() {
 void Scene::test() {
 
 }
+void Scene::removeFromVBO() {
+	threadDone = false;
+	time = clock();
+	vec3 playerPos = getCameraPos();
+
+	for (size_t i = 0; i < objectsInTransit.size(); ++i) {
+		int differenceX = (int)abs(abs(objectsInTransit[i].verts[0][0]) - abs(playerPos[0])); // 
+		int differenceZ = (int)abs(abs(objectsInTransit[i].verts[0][2]) - abs(playerPos[2]));
+
+		if (differenceZ > SEEDISTANCE || differenceX > SEEDISTANCE ) {
+
+			objectsInTransit.erase(objectsInTransit.begin() + i);
+		}
+
+	}
+	threadDone = true;
+}
 int Scene::runEngine() { 
 	
 
@@ -291,8 +308,11 @@ int Scene::runEngine() {
 	//objectsToDraw = objectsInMemory;
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	cout << "building, please wait..." << endl;
 	constructEnvironment();
+	objectsInTransit = objectsInMemory;
 	objectsToDraw = objectsInMemory;
+	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
@@ -305,18 +325,20 @@ int Scene::runEngine() {
 	while (!glfwWindowShouldClose(window)) {
 		generator->setPlayerPos(getCameraPos());
 		generator->forward = gCamera.forward();
+		
 		if (threadDone == true) {
 		//	cout << "attempting to construct" << endl;
 			double timer = (clock() - time) / 1000.0f;
 			if (timer > ENVIRONMENTREFRESHRATE && (oldPlayerPos.z != getCameraPos().z || oldPlayerPos.x != getCameraPos().x)) {
-				cout << "constructing..." << endl;
-				thread t(&Scene::constructEnvironment, this);
-				t.detach();
+			//	cout << "constructing..." << endl;
+			//	thread t(&Scene::removeFromVBO, this);
+			//	t.detach();
 			}
 		}
+		//removeFromVBO();
 		if (threadDone == true) {
 			//cout << "about to draw" << endl;
-			objectsToDraw = objectsInMemory;
+		//	objectsToDraw = objectsInTransit;
 
 		}
 		
