@@ -7,6 +7,7 @@
 #include <time.h> 
 #include "Object.h"
 #include <Windows.h>
+#include <mmsystem.h>
 #include "CustomThread.h"
 #include <mutex>
 #include <future>
@@ -28,8 +29,12 @@ private:
 	int radius;
 	vec3 playerPos;
 	vec3 oldPlayerPos;
-public:
+	vec3 distanceTraveled;
 	
+public:
+	bool generatedOnce;
+	int maxDist;
+	vec3 forward;
 	void setOldPlayerPos(vec3 pos);
 	void setRadius(int rad);
 	void setPlayerPos(vec3 pos);

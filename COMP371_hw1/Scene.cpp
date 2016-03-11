@@ -48,17 +48,22 @@ void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
 	const float moveSpeed = 220.0; //units per second
+	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
-		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
+		moving = true;
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
 	}
 	else if (glfwGetKey(window, 'W')) {
 		//cout << "moving north" << endl;
-		gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.forward());
+		moving = true;
+		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.forward());
 	}
 	if (glfwGetKey(window, 'A')) {
+		moving = true;
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * -gCamera.right());
 	}
 	else if (glfwGetKey(window, 'D')) {
+		moving = true;
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
 	}
 	if (glfwGetKey(window, 'Z')) {
@@ -67,12 +72,18 @@ void Update(float secondsElapsed) {
 	else if (glfwGetKey(window, 'X')) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
+	/*
+	if (moving) {
+		PlaySound(TEXT("footsteps2.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	} else 
+		PlaySound(NULL, 0, 0);
+	*/
 
 	//rotate camera based on mouse movement
 	const float mouseSensitivity = 0.1f;
 	double mouseX, mouseY;
 	glfwGetCursorPos(window, &mouseX, &mouseY);
-	gCamera.offsetOrientation(-mouseSensitivity * (float)mouseY, -mouseSensitivity * (float)mouseX);
+	gCamera.offsetOrientation(mouseSensitivity * (float)mouseY, mouseSensitivity * (float)mouseX);
 	glfwSetCursorPos(window, 0, 0); //reset the mouse, so it doesn't go out of the window
 
 									 //increase or decrease field of view based on mouse wheel
@@ -95,16 +106,20 @@ Scene::Scene()
 	numberOfOriginalObjects = 4;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object obj; // empty place holder to allocate memory
+		
 		originalObjects.push_back(obj);
 	}
+
 	terrain = new Terrain();//for testing
 	time = clock();
 
-	gCamera.setNearAndFarPlanes(0.00001f,50000.0f);
+	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 
-	gCamera.setPosition(glm::vec3(0, 50, 200));
+	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
 	//gCamera.setViewportAspectRatio(width / height);
+	
 
+	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 
 }
 
@@ -140,7 +155,10 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("obj__tree1.obj", originalObjects[1].verts, treeUvs, treeNormals);
 	fileReader->loadObj("obj__fern1.obj", originalObjects[2].verts, treeUvs, treeNormals);
 	fileReader->loadObj("obj__grass.obj", originalObjects[3].verts, treeUvs, treeNormals);
-	
+	originalObjects[0].verts.erase(originalObjects[0].verts.begin());
+	originalObjects[1].verts.erase(originalObjects[1].verts.begin());
+	originalObjects[2].verts.erase(originalObjects[2].verts.begin());
+	originalObjects[3].verts.erase(originalObjects[3].verts.begin());
 }
 void Scene::drawTerrain()
 {
@@ -244,22 +262,20 @@ void Scene::constructEnvironment() {
 		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
 	}
 	//destroy objects out of range
+	/*
 	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
 		int differenceX = (int) abs(abs(objectsInMemory[i].verts[0][0]) - abs(playerPos[0])); // 
 		int differenceZ = (int) abs(abs(objectsInMemory[i].verts[0][2]) - abs(playerPos[2]));
-		bool behindPlayer = false;
-		if (objectsInMemory[i].verts[0][2] < playerPos[2])
-			behindPlayer = true;
 
-		if (differenceX > RADIUS * 1.2 || differenceZ > RADIUS * 1.2 || behindPlayer == true) {
+		if (differenceZ > RADIUS * 1.1 ) {
 			
 			objectsInMemory.erase(objectsInMemory.begin() + i);
 		}
 
-	}
-
-	oldPlayerPos = getCameraPos();
-	generator->setOldPlayerPos(oldPlayerPos);
+	}*/
+	
+	//oldPlayerPos = getCameraPos();
+	//generator->setOldPlayerPos(oldPlayerPos);
 	threadDone = true;
 }
 void Scene::test() {
@@ -276,17 +292,20 @@ int Scene::runEngine() {
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
-
+	generator->generatedOnce = true;
+	oldPlayerPos = getCameraPos();
+	vec3 pos = oldPlayerPos;
+	generator->setPlayerPos(pos);
 	glGenBuffers(1, &VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		generator->setPlayerPos(getCameraPos());
+		generator->forward = gCamera.forward();
 		if (threadDone == true) {
 		//	cout << "attempting to construct" << endl;
 			double timer = (clock() - time) / 1000.0f;
-			if (timer > ENVIRONMENTREFRESHRATE && oldPlayerPos != getCameraPos()) {
+			if (timer > ENVIRONMENTREFRESHRATE && (oldPlayerPos.z != getCameraPos().z || oldPlayerPos.x != getCameraPos().x)) {
 				cout << "constructing..." << endl;
 				thread t(&Scene::constructEnvironment, this);
 				t.detach();
@@ -302,7 +321,8 @@ int Scene::runEngine() {
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
 		view_matrix = gCamera.matrix();
-		proj_matrix = gCamera.projection();
+	//	proj_matrix = gCamera.projection();
+	//	cout << gCamera.forward().z << endl;
 	//	view_matrix[0][0] = -1;
 		//view_matrix[1][1] = 0.97;
 		//view_matrix[2][1] = 0.24;
@@ -312,7 +332,7 @@ int Scene::runEngine() {
 		//view_matrix[3][1] = -200;
 		
 	//	view_matrix[1][3] =0;
-		view_matrix[2][3] = 5;
+	//	view_matrix[2][3] = 1.1;
 		//setUniform3v(uniformName, glm::value_ptr(v));
 		//gProgram->setUniform("camera", gCamera.matrix());
 		//time = clock() - 2000;
@@ -325,7 +345,7 @@ int Scene::runEngine() {
 
 
 		//Pass the values of the three matrices to the shaders
-		glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+		//glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 		glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -361,6 +381,7 @@ vec3 Scene::getCameraPos() {
 	double y = gCamera.position()[1];
 	double z = gCamera.position()[2];
 	vec3 position(x, y, z);
+	
 	//cout << position.z << endl;
 	return position;
 }
@@ -464,7 +485,7 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	//If you read the vertex shader file you'll see that the same variable names are used.
 	view_matrix_id = glGetUniformLocation(ProgramID, "view_matrix");
 	model_matrix_id = glGetUniformLocation(ProgramID, "model_matrix");
-	proj_matrix_id = glGetUniformLocation(ProgramID, "proj_matrix");
+	//proj_matrix_id = glGetUniformLocation(ProgramID, "proj_matrix");
 
 	return ProgramID;
 }

@@ -4,6 +4,7 @@
 RandomAttributeGenerator::RandomAttributeGenerator()
 {
 	srand(time(NULL));
+	generatedOnce = false;
 }
 
 
@@ -37,7 +38,7 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 
 	srand(generateRandomInt(clock(), time(NULL), GetCurrentProcessId()));
 	int min, max, nbOfCopies;
-	vec3 distanceTraveled = playerPos - oldPlayerPos;
+	distanceTraveled = playerPos - oldPlayerPos;
 	//cout << distanceTraveled[2] << endl;
 	double multiplier = 5;
 	if (type == 't') {
@@ -54,9 +55,9 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 	}
 	else if (type == 'g') {
 		min = 100;
-		max = 150;
+		max = 200;
 	}
-	cout << playerPos.z << endl;
+	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % max + min;
 	for (int i = 0; i < nbOfCopies; ++i) {
 		Object obj = original;
@@ -86,15 +87,31 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 	m.unlock();
 }
 void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
-	//cout << playerPos.z << endl;
-	int xTranslation = (rand() % (radius*2) - radius) + playerPos.x;
-	int zTranslation = (rand() % (radius)) + radius + playerPos.z;
 
-	for (int i = 0; i < obj.verts.size(); i++) {
-		obj.verts[i][0] += (float)xTranslation;
-		obj.verts[i][2] += (float)zTranslation;
+	if (generatedOnce == false) {
+		int xTranslation = (rand() % (radius * 2) - radius) + playerPos.x;
+		int zTranslation = (rand() % (radius * 2)) + playerPos.z;
+
+		for (int i = 0; i < obj.verts.size(); i++) {
+			obj.verts[i][0] += (float)xTranslation;
+			obj.verts[i][2] += (float)zTranslation;
+		}
 	}
-
+	else {
+		
+		int xTranslation = 0;
+		
+		xTranslation = (rand() % (radius * 2) - radius) + playerPos.x;
+		int zTranslation = 0;
+		if (forward.z < 0)
+			zTranslation = -(rand() % (radius)) + playerPos.z - radius + distanceTraveled.z;
+		else
+			zTranslation = (rand() % (radius)) + playerPos.z  + distanceTraveled.z;
+		for (int i = 0; i < obj.verts.size(); i++) {
+			obj.verts[i][0] += (float)xTranslation;
+			obj.verts[i][2] += (float)zTranslation;
+		}
+	}
 }
 void RandomAttributeGenerator::changeObjectSize(Object &obj) {
 	int xScale = (rand() % 5 + 1) / 10 + 1;
