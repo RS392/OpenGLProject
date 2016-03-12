@@ -6,18 +6,22 @@
 Terrain::Terrain()
 {
 	setIntervals(10);
-	setTranslateVector(0.0, 0.0, 100);
+	setTranslateVector(0.0, 0.0, 1.0);
+	setInitialPoints();
 	setVertices();
 }
-
+/*/ todo: first set of vertices = last
+Terrain::Terrain(vector<glm::vec3> last, Vector3D lastTranslateVector)
+{
+	setIntervals(10);
+	setTranslateVector(lastTranslateVector.getX(), lastTranslateVector.getY(),lastTranslateVector.getZ());
+	setInitialPoints();
+	setVertices();
+}*/
 Terrain::~Terrain()
 {
 }
 
-vector<GLfloat> Terrain::getTest() 
-{
-	return test;
-}
 void Terrain::setTranslateVector(double x, double y, double z)
 {
 	translateVector = Vector3D(x, y, z);
@@ -30,17 +34,13 @@ Vector3D Terrain::getTranslateVector()
 void Terrain::setVertices()
 {
 	
-
-	//populate with number of points based on interval.
-	for (int i = -10 * intervals; i < intervals*10; i++)//pushes back vertices with x values ranging from -1 to 0, 0 to 1
+	int rowLength = initialPoints.size();
+	for (int i = 0; i <vertices.size(); i++)
 	{
-		initialPoints.push_back((Vector3D(50*((i / (float)intervals)), 0.0, 200.0)));
-	}
-	int rowLength = initialPoints.size(); //for calculating indices
-										  // Translate based on vector
-	for (int j = 0; j < initialPoints.size(); j++)
-	{
-		vertices.push_back(initialPoints[j]);
+		vertices.push_back(initialPoints[i].x);
+		vertices.push_back(initialPoints[i].y);
+		vertices.push_back(initialPoints[i].z);
+		//cout << vertices[i].getX() << "," << vertices[i].getY() << "," << vertices[i].getZ() << endl;
 	}
 	glm::mat4 translateMatrix = glm::mat4(1.0f);
 	for (int m = 0; m < intervals; m++) 
@@ -50,33 +50,35 @@ void Terrain::setVertices()
 				translateVector.getX(), translateVector.getY(), translateVector.getZ()));
 		for (int i = 0; i < initialPoints.size(); i++) {
 
-			glm::vec4 vertex(initialPoints[i].getX(), initialPoints[i].getY(), initialPoints[i].getZ(), 1.0f);
+			glm::vec4 vertex(initialPoints[i].x, initialPoints[i].y, initialPoints[i].z, 1.0f);
 			glm::vec4 newV = translateMatrix * vertex;
-			vertices.push_back(Vector3D(newV.x, newV.y, newV.z));
+			vertices.push_back(newV.x);
+			vertices.push_back(newV.y);
+			vertices.push_back(newV.z);
 			if (i == initialPoints.size()-1)//if last translation, modify translation vector 
 			{
 				float x = translateVector.getX();
 				float y = translateVector.getY();
 				float z = translateVector.getZ();
 				srand(time(NULL));
-				if (rand() / 100 > .5)//todo add probabilities
+				if (rand() / RAND_MAX> .5)//todo add probabilities
 				{
-					translateVector.setX(x += 51);
-					translateVector.setY(y -= 10);
-					translateVector.setZ(z += 10);
+					//translateVector.setX(x += 10);
+					//translateVector.setY(y -= 0);
+					translateVector.setZ(z += 1);
 					srand(time(NULL));
 				}
-				else if (rand() / 100 < .15)
+				else if (rand() / RAND_MAX < .15)
 				{
-					translateVector.setY(y += 10);
-					translateVector.setZ(z += 25);
+					//translateVector.setY(y += 0);
+					translateVector.setZ(z += 1);
 					srand(time(NULL));
 				}
-				else if (rand() / 100 >.2 && rand() / 100 < .45)
+				else if (rand() / RAND_MAX>.2 && rand() / RAND_MAX< .45)
 				{
-					translateVector.setX(x -= 1);
-					translateVector.setY(y += 5);
-					translateVector.setZ(z += 25);
+					//translateVector.setX(x -= 10);
+					//translateVector.setY(y += 0);
+					translateVector.setZ(z += 1);
 					srand(time(NULL));
 				}
 			}
@@ -84,52 +86,14 @@ void Terrain::setVertices()
 		}
 		
 	}
-	
-	//all will increase in z
-	//biggish variation in y
-	//small variations in x
+
 	setWireFrameIndices(rowLength);
 }
-vector<Vector3D> Terrain::getVertices()
+vector<GLfloat> Terrain::getVertices()
 {
 	return vertices;
 }
 
-void Terrain::setDirt(double r, double g, double b, double a)
-{
-	dirt = Vector4D(r, g, b, a);
-}
-Vector4D Terrain::getDirt()
-{
-	return dirt;
-}
-
-void Terrain::setGrass(double r, double g, double b, double a)
-{
-	grass = Vector4D(r, g, b, a);
-}
-Vector4D Terrain::getGrass()
-{
-	return grass;
-}
-
-void Terrain::setWater(double r, double g, double b, double a)
-{
-	water = Vector4D(r, g, b, a);
-}
-Vector4D Terrain::getWater()
-{
-	return water;
-}
-
-void Terrain::setCurrentY(double y)
-{
-	currentY = y;
-}
-double Terrain::getCurrentY()
-{
-	return currentY;
-}
 
 vector<GLuint> Terrain::getWireFrameIndices()
 {
@@ -154,6 +118,18 @@ int Terrain::getIntervals()
 {
 	return intervals;
 }
+vector<glm::vec3> Terrain::getInitialPoints()
+{
+	return initialPoints;
+}
+void Terrain::setInitialPoints()
+{
+	for (int i = -10*intervals; i < 10*intervals; i++)
+	{
+		initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
+		//initialPoints.push_back(glm::vec3(0.0, (i / (float)intervals), -1.0));//first set of points are spread along y instead of x
+	}
+}
 /*
 Populates vector indices in the format required for GL_POINTS (i.e. (i[v1], i[v2]) where two vertices are required to form a line)
 Also populates vectors indicesForTriangles required for GL_TRIANGLES of the format (i.e. (i[v1], i[v2], i[v3]) where three vertices are required to form a triangle)
@@ -161,48 +137,35 @@ Does not connect with itself at the end of each "row" (where row represents a ve
 */
 void Terrain::setWireFrameIndices(int initialSize)
 {
-	for (int i = 0; i <vertices.size(); i++)
-	{
-		test.push_back(vertices[i].getX());
-		test.push_back(vertices[i].getY());
-		test.push_back(vertices[i].getZ());
-		//cout << vertices[i].getX() << "," << vertices[i].getY() << "," << vertices[i].getZ() << endl;
-	}
-	int offset = initialSize;
+	
+	offset = initialSize;
 	
 	int i = 0;
-	for (int k = 0; k <test.size() - 3; k += 3) {//test
+	for (int k = 0; k <vertices.size() - 3; k += 3) {//test
 		i = k / 3;
-		if (k < test.size() - offset*3 )// not the last set of translated points
+		if (k < vertices.size() - offset*3 )// not the last set of translated points
 		{
 
 			if ((i%offset) != (offset - 1)) //not the last point of a set of translated points
 			{
 				wireFrameIndices.push_back(i);
 				wireFrameIndices.push_back(i + 1); // (i, i+1)
-				//std::cout << i << endl;
-				//std::cout << "i, i+1: (" << i << "," << i + 1 << ")" << endl;
-
+				
 				wireFrameIndices.push_back(i + 1);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + offset); // (i, i+offset)
-
-				//std::cout << "i + 1: (" << i + 1 << "," << i + offset << ")" << endl;
 
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i);
 
-				//std::cout << "i + offset: (" << i + offset << "," << i << ")" << endl;
-
 				wireFrameIndices.push_back(i + 1);
 				wireFrameIndices.push_back(i + offset + 1);// (i, i+offset+1)
-				//std::cout << "i+1, i+offset+1: (" << i + 1 << "," << i + offset + 1 << ")" << endl;
-
+				
 				wireFrameIndices.push_back(i + offset + 1);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + 1); // (i, i+offset)
-				//std::cout << "i+offset+1,i: (" << i + offset + 1 << "," << i << ")" << endl;
+				
 
 			}
 
@@ -221,4 +184,15 @@ void Terrain::setWireFrameIndices(int initialSize)
 vector<GLuint> Terrain::getIndicesForTriangles()
 {
 	return indicesForTriangles;
+}
+
+vector<glm::vec3> Terrain::getLastPoints()
+{
+	vector<glm::vec3> lastVertices;
+
+	for (int i = vertices.size() - offset * 3; i < vertices.size() - 3; i += 3)
+	{
+		lastVertices.push_back(glm::vec3(vertices[i], vertices[i+1], vertices[i+2]));
+	}
+	return lastVertices;
 }
