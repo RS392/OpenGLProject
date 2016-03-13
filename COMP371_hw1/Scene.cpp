@@ -115,7 +115,9 @@ Scene::Scene()
 
 	gCamera.setNearAndFarPlanes(0.1f,SEEDISTANCE);
 
+	//gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
+	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 	
 
@@ -162,17 +164,10 @@ void Scene::makeOriginalObjects() {
 }
 void Scene::drawTerrain()
 {
-	//change the view/projection matrices to look down more
-	if (terrainView)
-	{
-		glm::vec3 eye(0.0f, 1.0f, -2.0f);
-		//view_matrix = glm::lookAt(eye, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		proj_matrix = glm::perspective(45.0f, (GLfloat)width / (GLfloat)height, 0.01f, 100.0f);
-		//terrainView = false;
-	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
-
+	//cout << terrain->getVertices().size() << endl;
 	glVertexAttribPointer(
 		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
 		3,                  // size
@@ -181,17 +176,17 @@ void Scene::drawTerrain()
 		0,                  // stride
 		(void*)0            // array buffer offset
 		);
-
+		
 	glEnableVertexAttribArray(0);
 	
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//cout << terrain->getWireFrameIndices().size() << endl;
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
-	//glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
-	glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
+	glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
+	//glDrawArrays(GL_POINTS, 0, (terrain->getVertices().size()/3));
+	//glDrawArrays(GL_POINTS, 0, (terrain->getVertices().size()));
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
+	//glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
+	//cout << terrain->getVertices().size() << " size versus " << terrain->getIndicesForTriangles().size() << endl;
 
 }
 
@@ -574,6 +569,7 @@ bool Scene::cleanUp() {
 	//Properly de-allocate all resources once they've outlived their purpose
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &VBO2);
 	glDeleteBuffers(1, &EBO);
 
 	// Close GL context and any other GLFW resources

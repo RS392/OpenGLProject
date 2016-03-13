@@ -46,8 +46,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 		max = 2000;
 	}
 	else if (type == 'p') {
-		min = 600;
-		max = 8000;
+		min = 1000;
+		max = 2000;
 	}
 	else if (type == 'f') {
 		min = 1000;
