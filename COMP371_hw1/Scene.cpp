@@ -286,17 +286,28 @@ void Scene::removeFromVBO() {
 	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
-
+	int destroyed = 0;
 	for (size_t i = 0; i < objectsInTransit.size(); ++i) {
-		int differenceX = (int)abs(abs(objectsInTransit[i].verts[0][0]) - abs(playerPos[0])); // 
-		int differenceZ = (int)abs(abs(objectsInTransit[i].verts[0][2]) - abs(playerPos[2]));
-
-		if (differenceZ > SEEDISTANCE || differenceX > SEEDISTANCE ) {
-
-			objectsInTransit.erase(objectsInTransit.begin() + i);
+		int differenceX = (int)abs(objectsInTransit[i].verts[0][0] - playerPos[0]);
+		int differenceZ = (int)abs(objectsInTransit[i].verts[0][2] - playerPos[2]);
+		//int differenceX = (int)abs(abs(objectsInTransit[i].verts[0][0]) - abs(playerPos[0])); // 
+		//int differenceZ = (int)abs(abs(objectsInTransit[i].verts[0][2]) - abs(playerPos[2]));
+		cout << i << endl;
+		if (differenceZ > SEEDISTANCE*2 || differenceX > SEEDISTANCE*2 ) {
+			++destroyed;
+		//	objectsInTransit.erase(objectsInTransit.begin() + i);
 		}
 
 	}
+	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
+		int differenceX = (int)abs(objectsInMemory[i].verts[0][0] - playerPos[0]);
+		int differenceZ = (int)abs(objectsInMemory[i].verts[0][2] - playerPos[2]);
+		if (differenceZ < SEEDISTANCE * 2 || differenceX < SEEDISTANCE * 2) {
+			objectsInTransit.push_back(objectsInMemory[i]);
+		}
+
+	}
+	cout << "destroyed: " << destroyed <<endl;
 	threadDone = true;
 }
 int Scene::runEngine() { 
@@ -310,7 +321,6 @@ int Scene::runEngine() {
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
-	objectsInTransit = objectsInMemory;
 	objectsToDraw = objectsInMemory;
 	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
@@ -322,8 +332,9 @@ int Scene::runEngine() {
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
+	
 	while (!glfwWindowShouldClose(window)) {
-		generator->setPlayerPos(getCameraPos());
+		/*generator->setPlayerPos(getCameraPos());
 		generator->forward = gCamera.forward();
 		
 		if (threadDone == true) {
@@ -341,6 +352,7 @@ int Scene::runEngine() {
 		//	objectsToDraw = objectsInTransit;
 
 		}
+		*/
 		
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));

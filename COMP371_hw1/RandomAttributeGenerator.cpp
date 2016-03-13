@@ -46,16 +46,16 @@ void RandomAttributeGenerator::randomizeObject(Object original, char type, objec
 		max = 2000;
 	}
 	else if (type == 'p') {
-		min = 800;
-		max = 1000;
+		min = 600;
+		max = 8000;
 	}
 	else if (type == 'f') {
-		min = 2000;
-		max = 4000;
+		min = 1000;
+		max = 2000;
 	}
 	else if (type == 'g') {
-		min = 2000;
-		max = 4000;
+		min = 1000;
+		max = 2000;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % max + min;
