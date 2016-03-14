@@ -16,8 +16,9 @@ private:
 	vector<GLuint> indicesForTriangles;
 	vector<glm::vec3> initialPoints;
 	vector<float> probabilities;
-	
-
+	vector<float> waterVertices;
+	vector<GLuint> waterIndices;
+	vector<glm::vec3> lastVertices;
 
 public:
 	Terrain();
@@ -43,6 +44,12 @@ public:
 	int getIntervals();
 
 	vector<GLuint> getIndicesForTriangles();
+	void setLastPoints();
 	vector <glm::vec3> getLastPoints();
+	
+	vector<float> getWaterVertices();
+	vector<GLuint> getWaterIndices();
+
+	void setWaterIndices();
 };
 

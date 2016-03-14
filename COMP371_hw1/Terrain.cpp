@@ -86,7 +86,7 @@ void Terrain::setVertices()
 		}
 		
 	}
-
+	setLastPoints();
 	setWireFrameIndices(rowLength);
 }
 vector<GLfloat> Terrain::getVertices()
@@ -129,8 +129,13 @@ void Terrain::setInitialPoints()
 		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
 		initialPoints.push_back(glm::vec3((float)i, 0.0, 1500.0));
 	}
+	waterVertices.push_back(initialPoints[0].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(initialPoints[0].z);
 
-
+	waterVertices.push_back(initialPoints[initialPoints.size()-1].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(initialPoints[initialPoints.size() - 1].z);
 }
 /*
 Populates vector indices in the format required for GL_POINTS (i.e. (i[v1], i[v2]) where two vertices are required to form a line)
@@ -188,13 +193,54 @@ vector<GLuint> Terrain::getIndicesForTriangles()
 	return indicesForTriangles;
 }
 
-vector<glm::vec3> Terrain::getLastPoints()
-{
-	vector<glm::vec3> lastVertices;
 
+void Terrain::setLastPoints()
+{
+	
 	for (int i = vertices.size() - offset * 3; i < vertices.size() - 3; i += 3)
 	{
-		lastVertices.push_back(glm::vec3(vertices[i], vertices[i+1], vertices[i+2]));
+		lastVertices.push_back(glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]));
 	}
+	waterVertices.push_back(lastVertices[0].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(lastVertices[0].z);
+
+	waterVertices.push_back(lastVertices[lastVertices.size() - 1].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(lastVertices[lastVertices.size() - 1].z);
+	setWaterIndices();
+}
+
+vector<glm::vec3> Terrain::getLastPoints()
+{
 	return lastVertices;
+}
+vector<float> Terrain::getWaterVertices()
+{
+	return waterVertices;
+}
+vector<GLuint> Terrain::getWaterIndices()
+{
+	return waterIndices;
+}
+
+void Terrain::setWaterIndices()
+{
+	waterIndices.push_back(0);
+	waterIndices.push_back(3);
+	
+	waterIndices.push_back(3);
+	waterIndices.push_back(9);
+
+	waterIndices.push_back(9);
+	waterIndices.push_back(0);
+
+	waterIndices.push_back(0);
+	waterIndices.push_back(9);
+
+	waterIndices.push_back(9);
+	waterIndices.push_back(6);
+
+	waterIndices.push_back(6);
+	waterIndices.push_back(0);
 }
