@@ -5,8 +5,8 @@
 
 Terrain::Terrain()
 {
-	setIntervals(10);
-	setTranslateVector(0.0, 0.0, 1.0);
+	setIntervals(100);
+	setTranslateVector(0.0, 0.0, 100.0);
 	setInitialPoints();
 	setVertices();
 }
@@ -124,11 +124,13 @@ vector<glm::vec3> Terrain::getInitialPoints()
 }
 void Terrain::setInitialPoints()
 {
-	for (int i = -10*intervals; i < 10*intervals; i++)
+	for (int i = -1000*intervals; i < 1000*intervals-1000; i+=500)
 	{
-		initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		//initialPoints.push_back(glm::vec3(0.0, (i / (float)intervals), -1.0));//first set of points are spread along y instead of x
+		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
+		initialPoints.push_back(glm::vec3((float)i, 0.0, 1500.0));
 	}
+
+
 }
 /*
 Populates vector indices in the format required for GL_POINTS (i.e. (i[v1], i[v2]) where two vertices are required to form a line)

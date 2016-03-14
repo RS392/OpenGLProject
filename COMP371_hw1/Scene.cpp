@@ -120,7 +120,7 @@ Scene::Scene()
 	//gCamera.setViewportAspectRatio(width / height);
 	
 
-	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);// terrain
 
 }
 
@@ -210,7 +210,7 @@ void Scene::drawObjects() {
 }
 void Scene::drawEverything() {
 	drawObjects();
-	drawTerrain();
+	//drawTerrain();
 
 }
 void Scene::applyTexture() {
