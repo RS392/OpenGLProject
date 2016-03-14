@@ -276,6 +276,34 @@ void Scene::constructEnvironment() {
 void Scene::test() {
 
 }
+void Scene::removeFromVBO() {
+	threadDone = false;
+	time = clock();
+	vec3 playerPos = getCameraPos();
+	int destroyed = 0;
+	for (size_t i = 0; i < objectsInTransit.size(); ++i) {
+		int differenceX = (int)abs(objectsInTransit[i].verts[0][0] - playerPos[0]);
+		int differenceZ = (int)abs(objectsInTransit[i].verts[0][2] - playerPos[2]);
+		//int differenceX = (int)abs(abs(objectsInTransit[i].verts[0][0]) - abs(playerPos[0])); // 
+		//int differenceZ = (int)abs(abs(objectsInTransit[i].verts[0][2]) - abs(playerPos[2]));
+		cout << i << endl;
+		if (differenceZ > SEEDISTANCE*2 || differenceX > SEEDISTANCE*2 ) {
+			++destroyed;
+		//	objectsInTransit.erase(objectsInTransit.begin() + i);
+		}
+
+	}
+	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
+		int differenceX = (int)abs(objectsInMemory[i].verts[0][0] - playerPos[0]);
+		int differenceZ = (int)abs(objectsInMemory[i].verts[0][2] - playerPos[2]);
+		if (differenceZ < SEEDISTANCE * 2 || differenceX < SEEDISTANCE * 2) {
+			objectsInTransit.push_back(objectsInMemory[i]);
+		}
+
+	}
+	cout << "destroyed: " << destroyed <<endl;
+	threadDone = true;
+}
 int Scene::runEngine() { 
 	
 
@@ -285,8 +313,10 @@ int Scene::runEngine() {
 	//objectsToDraw = objectsInMemory;
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
+	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
