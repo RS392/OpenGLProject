@@ -37,7 +37,6 @@ private:
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objectsInMemory;
-	objects objectsInTransit;
 	objects objectsToDraw;
 	clock_t time;
 	int numberOfOriginalObjects;
@@ -46,6 +45,7 @@ private:
 	vector<vec3> treeNormals;
 	vector<vec2> treeUvs;
 	
+	void handleCollisionWithCamera();
 	void removeFromVBO();
 	void constructEnvironment();
 	vec3 getCameraPos();
@@ -56,7 +56,6 @@ private:
 	void test();
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
 	void makeOriginalObjects();
-	void makeMultipleObjects();
 	void drawObjects();
 	void drawEverything();
 	void drawTerrain();

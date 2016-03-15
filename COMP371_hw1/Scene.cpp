@@ -105,7 +105,7 @@ Scene::Scene()
 	generator = new RandomAttributeGenerator();
 	numberOfOriginalObjects = 4;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
-		Object obj; // empty place holder to allocate memory
+		Object* obj = new Object(); // empty place holder to allocate memory
 		
 		originalObjects.push_back(obj);
 	}
@@ -129,38 +129,22 @@ Scene::~Scene()
 {
 }
 
-void Scene::makeMultipleObjects() {
-	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
-	// and other things will of course depend on the object type
-	
-	for (size_t i = 0; i < originalObjects.size(); ++i) {
-		if (i == 0) {
-			typeOfObject = 'p';
-		}
-		else if (i == 1) {
-			typeOfObject = 't';
-		}
-		else if (i == 2) {
-			typeOfObject = 'f';
-		}
-		else if (i == 3) {
-			typeOfObject = 'g';
-		}
-		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
-	}
-}
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
-	fileReader->loadObj("obj__pinet2.obj", originalObjects[0].verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
 	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
-	fileReader->loadObj("obj__tree1.obj", originalObjects[1].verts, treeUvs, treeNormals);
-	fileReader->loadObj("obj__fern1.obj", originalObjects[2].verts, treeUvs, treeNormals);
-	fileReader->loadObj("obj__grass.obj", originalObjects[3].verts, treeUvs, treeNormals);
-	originalObjects[0].verts.erase(originalObjects[0].verts.begin());
-	originalObjects[1].verts.erase(originalObjects[1].verts.begin());
-	originalObjects[2].verts.erase(originalObjects[2].verts.begin());
-	originalObjects[3].verts.erase(originalObjects[3].verts.begin());
+	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, treeUvs, treeNormals);
+	originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
+	originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
+	originalObjects[2]->verts.erase(originalObjects[2]->verts.begin());
+	originalObjects[3]->verts.erase(originalObjects[3]->verts.begin());
+	originalObjects[0]->type = "pinet2";
+	originalObjects[1]->type = "tree1";
+	originalObjects[2]->type = "fern1";
+	originalObjects[3]->type = "grass";
 }
 void Scene::drawTerrain()
 {
@@ -196,7 +180,7 @@ void Scene::drawObjects() {
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		//cout << "about to draw..." << endl;
-		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i].verts.size() * sizeof(vec3), &objectsToDraw[i].verts[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -206,7 +190,7 @@ void Scene::drawObjects() {
 			0,                  // stride
 			(void*)0            // array buffer offset
 			);
-		glDrawArrays(GL_LINES, 0, objectsToDraw[i].verts.size());
+		glDrawArrays(GL_LINES, 0, objectsToDraw[i]->verts.size());
 	}
 }
 void Scene::drawEverything() {
@@ -234,7 +218,7 @@ void Scene::applyTexture() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
-
+// id: 
 void Scene::constructEnvironment() {
 	threadDone = false;
 	time = clock();
@@ -243,19 +227,7 @@ void Scene::constructEnvironment() {
 					   // and other things will of course depend on the object type
 	generator->setRadius(RADIUS);
 	for (size_t i = 0; i < originalObjects.size(); ++i) {
-		if (i == 0) {
-			typeOfObject = 'p';
-		}
-		else if (i == 1) {
-			typeOfObject = 't';
-		}
-		else if (i == 2) {
-			typeOfObject = 'f';
-		}
-		else if (i == 3) {
-			typeOfObject = 'g';
-		}
-		generator->randomizeObject(originalObjects[i], typeOfObject, objectsInMemory);
+		generator->randomizeObject(*originalObjects[i], objectsInMemory);
 	}
 	//destroy objects out of range
 	/*
@@ -278,6 +250,7 @@ void Scene::test() {
 
 }
 void Scene::removeFromVBO() {
+	/*
 	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
@@ -304,19 +277,42 @@ void Scene::removeFromVBO() {
 	}
 	cout << "destroyed: " << destroyed <<endl;
 	threadDone = true;
+	*/
+}
+void Scene::handleCollisionWithCamera() {
+	vec3 cPos = gCamera.position();
+
+	for (int i = 0; i < objectsToDraw.size(); ++i) {
+		Object* obj = objectsToDraw[i];
+		if (obj->type == "pinet2") {
+			//check the X axis
+			if (abs(cPos.x - obj->position.x) < 0 + obj->boundingBox.x) {
+				//check the Y axis
+				if (abs(cPos.y - obj->position.y) < 0 + obj->boundingBox.y) {
+					//check the Z axis
+					if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
+						
+						cout << "omfg just hit a tree" << endl;
+						//COLLISION, stop camera from moving in the current direction
+					}
+				}
+			}
+		}
+	}
 }
 int Scene::runEngine() { 
 	
-
+	
 	makeOriginalObjects();
 	//makeMultipleObjects();
 	//constructEnvironment();
 	//objectsToDraw = objectsInMemory;
-	initializeOpenGL();
-	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
+	initializeOpenGL();
+	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
@@ -327,7 +323,6 @@ int Scene::runEngine() {
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
-	
 	while (!glfwWindowShouldClose(window)) {
 		/*generator->setPlayerPos(getCameraPos());
 		generator->forward = gCamera.forward();
@@ -353,6 +348,7 @@ int Scene::runEngine() {
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
 		view_matrix = gCamera.matrix();
+		handleCollisionWithCamera();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;
 	//	view_matrix[0][0] = -1;
@@ -494,10 +490,9 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
 
-	glBindAttribLocation(ProgramID, 0, "in_Position");
+//	glBindAttribLocation(ProgramID, 0, "in_Position");
 
 	//appearing in the vertex shader.
-	glBindAttribLocation(ProgramID, 1, "in_Color");
 
 	glLinkProgram(ProgramID);
 
