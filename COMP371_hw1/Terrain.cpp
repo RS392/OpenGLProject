@@ -143,7 +143,7 @@ void Terrain::setInitialPoints()
 	for (int i = -1000*intervals; i < 1000*intervals-1000; i+=500)
 	{
 		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y, (float)getCameraPosition().z));
+		initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y-50, (float)getCameraPosition().z));
 	}
 	waterVertices.push_back(initialPoints[0].x);
 	waterVertices.push_back(-.01);
