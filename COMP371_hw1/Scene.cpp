@@ -5,6 +5,7 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
+#define SEEDISTANCE 1000
 
 GLFWwindow* window = 0x00;
 
@@ -111,11 +112,12 @@ Scene::Scene()
 		originalObjects.push_back(obj);
 	}
 
-	terrain = new Terrain();//for testing
+//	terrain = new Terrain();//for testing
 	time = clock();
 
-	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
-	
+//	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
+	gCamera.setNearAndFarPlanes(0.1f, SEEDISTANCE);
+
 	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
@@ -302,23 +304,17 @@ void Scene::handleCollisionWithCamera() {
 }
 int Scene::runEngine() { 
 	
-	
 	makeOriginalObjects();
-	//makeMultipleObjects();
-	//constructEnvironment();
-	//objectsToDraw = objectsInMemory;
-<<<<<<< HEAD
-	
-=======
-	initializeOpenGL();
-	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-	//terrain_shader_program = loadShaders("terrain.vs", "terrain.vs");
->>>>>>> f39c25cb3b6dd9559abdcba197a3533928d5b57d
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
+	//makeMultipleObjects();
+	//constructEnvironment();
+	//objectsToDraw = objectsInMemory;
+
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	//terrain_shader_program = loadShaders("terrain.vs", "terrain.vs");
 	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
@@ -330,6 +326,7 @@ int Scene::runEngine() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
+		/*
 		generator->setPlayerPos(getCameraPos());
 		generator->forward = gCamera.forward();
 		if (threadDone == true) {
@@ -346,7 +343,7 @@ int Scene::runEngine() {
 			objectsToDraw = objectsInMemory;
 
 		}
-		
+		*/
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;

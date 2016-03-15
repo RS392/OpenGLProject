@@ -13,7 +13,7 @@
 #include <future>
 using namespace std;
 using namespace glm;
-#define RADIUS 7000
+#define RADIUS 5000
 #define ENVIRONMENTREFRESHRATE 5
 //typedef vector<vec3> object;
 typedef vector<Object*> objects;
