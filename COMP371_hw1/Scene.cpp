@@ -5,10 +5,11 @@ using namespace std;
 using namespace glm;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-#define SEEDISTANCE 1000
+
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
+GLuint terrain_shader_program = 0;
 bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
@@ -113,15 +114,14 @@ Scene::Scene()
 	terrain = new Terrain();//for testing
 	time = clock();
 
-	gCamera.setNearAndFarPlanes(0.1f,SEEDISTANCE);
-
-	//gCamera.setNearAndFarPlanes(0.1f,5000.0f);
+	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
+	
 	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 	
 
-	
+	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);// terrain
 
 }
 
@@ -195,7 +195,7 @@ void Scene::drawObjects() {
 }
 void Scene::drawEverything() {
 	drawObjects();
-	drawTerrain();
+	//drawTerrain();
 
 }
 void Scene::applyTexture() {
@@ -307,7 +307,13 @@ int Scene::runEngine() {
 	//makeMultipleObjects();
 	//constructEnvironment();
 	//objectsToDraw = objectsInMemory;
+<<<<<<< HEAD
 	
+=======
+	initializeOpenGL();
+	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	//terrain_shader_program = loadShaders("terrain.vs", "terrain.vs");
+>>>>>>> f39c25cb3b6dd9559abdcba197a3533928d5b57d
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
@@ -324,25 +330,22 @@ int Scene::runEngine() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
-		/*generator->setPlayerPos(getCameraPos());
+		generator->setPlayerPos(getCameraPos());
 		generator->forward = gCamera.forward();
-		
 		if (threadDone == true) {
 		//	cout << "attempting to construct" << endl;
 			double timer = (clock() - time) / 1000.0f;
 			if (timer > ENVIRONMENTREFRESHRATE && (oldPlayerPos.z != getCameraPos().z || oldPlayerPos.x != getCameraPos().x)) {
-			//	cout << "constructing..." << endl;
-			//	thread t(&Scene::removeFromVBO, this);
-			//	t.detach();
+				cout << "constructing..." << endl;
+				thread t(&Scene::constructEnvironment, this);
+				t.detach();
 			}
 		}
-		//removeFromVBO();
 		if (threadDone == true) {
 			//cout << "about to draw" << endl;
-		//	objectsToDraw = objectsInTransit;
+			objectsToDraw = objectsInMemory;
 
 		}
-		*/
 		
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));

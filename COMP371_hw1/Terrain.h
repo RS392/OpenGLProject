@@ -10,14 +10,17 @@ class Terrain
 private:
 	Vector3D translateVector;
 	vector<GLfloat> vertices;
+	vector<GLfloat> textureVertices;//x, y, z, u, v
 	int offset;
 	int intervals;
 	vector<GLuint> wireFrameIndices;
 	vector<GLuint> indicesForTriangles;
 	vector<glm::vec3> initialPoints;
 	vector<float> probabilities;
-	
-
+	vector<float> waterVertices;
+	vector<GLuint> waterIndices;
+	vector<glm::vec3> lastVertices;
+	vector<glm::vec2> textureCoordinates;
 
 public:
 	Terrain();
@@ -43,6 +46,15 @@ public:
 	int getIntervals();
 
 	vector<GLuint> getIndicesForTriangles();
+	void setLastPoints();
 	vector <glm::vec3> getLastPoints();
+	
+	vector<float> getWaterVertices();
+	vector<GLuint> getWaterIndices();
+
+	void setTextureVertices();
+	void setWaterIndices();
+
+	void setTextureCoordinates(float, float, float, float, float, float, float, float);
 };
 

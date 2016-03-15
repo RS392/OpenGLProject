@@ -5,8 +5,9 @@
 
 Terrain::Terrain()
 {
-	setIntervals(10);
-	setTranslateVector(0.0, 0.0, 1.0);
+	setIntervals(100);
+	setTranslateVector(0.0, 0.0, 100.0);
+	setTextureCoordinates(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	setInitialPoints();
 	setVertices();
 }
@@ -86,8 +87,22 @@ void Terrain::setVertices()
 		}
 		
 	}
-
+	setLastPoints();
 	setWireFrameIndices(rowLength);
+}
+
+void Terrain::setTextureVertices()
+{
+
+}
+void Terrain::setTextureCoordinates(float u1, float v1, float u2, float v2, float u3 , float v3, float u4, float v4)
+{
+	textureCoordinates.push_back(glm::vec2(u1, v1));
+	textureCoordinates.push_back(glm::vec2(u2, v2));
+	textureCoordinates.push_back(glm::vec2(u3, v3));
+	textureCoordinates.push_back(glm::vec2(u4, v4));
+	
+
 }
 vector<GLfloat> Terrain::getVertices()
 {
@@ -124,11 +139,18 @@ vector<glm::vec3> Terrain::getInitialPoints()
 }
 void Terrain::setInitialPoints()
 {
-	for (int i = -10*intervals; i < 10*intervals; i++)
+	for (int i = -1000*intervals; i < 1000*intervals-1000; i+=500)
 	{
-		initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		//initialPoints.push_back(glm::vec3(0.0, (i / (float)intervals), -1.0));//first set of points are spread along y instead of x
+		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
+		initialPoints.push_back(glm::vec3((float)i, 0.0, 1500.0));
 	}
+	waterVertices.push_back(initialPoints[0].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(initialPoints[0].z);
+
+	waterVertices.push_back(initialPoints[initialPoints.size()-1].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(initialPoints[initialPoints.size() - 1].z);
 }
 /*
 Populates vector indices in the format required for GL_POINTS (i.e. (i[v1], i[v2]) where two vertices are required to form a line)
@@ -148,6 +170,8 @@ void Terrain::setWireFrameIndices(int initialSize)
 
 			if ((i%offset) != (offset - 1)) //not the last point of a set of translated points
 			{
+
+				//wireframe vertices
 				wireFrameIndices.push_back(i);
 				wireFrameIndices.push_back(i + 1); // (i, i+1)
 				
@@ -166,7 +190,33 @@ void Terrain::setWireFrameIndices(int initialSize)
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + 1); // (i, i+offset)
 				
+				//Texture vertices of i: x, y, z, u, v
+				textureVertices.push_back(vertices[i]);//x
+				textureVertices.push_back(vertices[i + 1]);//y
+				textureVertices.push_back(vertices[i + 2]);//z
+				textureVertices.push_back(textureCoordinates[0].x);//bottom left/origin
+				textureVertices.push_back(textureCoordinates[0].y);
 
+				//Texture vertices of i + 1: x, y, z, u, v
+				textureVertices.push_back(vertices[i+3]);//x
+				textureVertices.push_back(vertices[i + 4]);//y
+				textureVertices.push_back(vertices[i + 5]);//z
+				textureVertices.push_back(textureCoordinates[1].x);//bottom right
+				textureVertices.push_back(textureCoordinates[1].y);
+
+				//Texture vertices of i + offset: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3)]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
+				textureVertices.push_back(textureCoordinates[2].x);//top left
+				textureVertices.push_back(textureCoordinates[2].y);
+
+				//Texture vertices of i + offset + 1: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3) + 3]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 4]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 5]);//z
+				textureVertices.push_back(textureCoordinates[3].x);//top right
+				textureVertices.push_back(textureCoordinates[3].y);
 			}
 
 		}
@@ -186,13 +236,55 @@ vector<GLuint> Terrain::getIndicesForTriangles()
 	return indicesForTriangles;
 }
 
-vector<glm::vec3> Terrain::getLastPoints()
-{
-	vector<glm::vec3> lastVertices;
 
+void Terrain::setLastPoints()
+{
+	
 	for (int i = vertices.size() - offset * 3; i < vertices.size() - 3; i += 3)
 	{
-		lastVertices.push_back(glm::vec3(vertices[i], vertices[i+1], vertices[i+2]));
+		lastVertices.push_back(glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]));
 	}
+	waterVertices.push_back(lastVertices[0].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(lastVertices[0].z);
+
+	waterVertices.push_back(lastVertices[lastVertices.size() - 1].x);
+	waterVertices.push_back(-.01);
+	waterVertices.push_back(lastVertices[lastVertices.size() - 1].z);
+	setWaterIndices();
+}
+
+vector<glm::vec3> Terrain::getLastPoints()
+{
 	return lastVertices;
 }
+vector<float> Terrain::getWaterVertices()
+{
+	return waterVertices;
+}
+vector<GLuint> Terrain::getWaterIndices()
+{
+	return waterIndices;
+}
+
+void Terrain::setWaterIndices()
+{
+	waterIndices.push_back(0);
+	waterIndices.push_back(3);
+	
+	waterIndices.push_back(3);
+	waterIndices.push_back(9);
+
+	waterIndices.push_back(9);
+	waterIndices.push_back(0);
+
+	waterIndices.push_back(0);
+	waterIndices.push_back(9);
+
+	waterIndices.push_back(9);
+	waterIndices.push_back(6);
+
+	waterIndices.push_back(6);
+	waterIndices.push_back(0);
+}
+
