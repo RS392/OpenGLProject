@@ -315,7 +315,7 @@ void Scene::handleCollisionWithCamera() {
 				if (abs(cPos.y - obj->position.y) < 0 + obj->boundingBox.y) {
 					//check the Z axis
 					if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
-						
+						gCamera.setPosition(lastFrameCamPos);
 						cout << "omfg just hit a tree" << endl;
 						//COLLISION, stop camera from moving in the current direction
 					}
@@ -366,6 +366,7 @@ int Scene::runEngine() {
 
 		}
 		*/
+		lastFrameCamPos = gCamera.position();
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;

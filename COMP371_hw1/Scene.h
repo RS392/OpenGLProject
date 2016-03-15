@@ -42,6 +42,7 @@ private:
 	int numberOfOriginalObjects;
 	Terrain *terrain;
 	vec3 oldPlayerPos;
+	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
 	vector<vec2> treeUvs;
 	
