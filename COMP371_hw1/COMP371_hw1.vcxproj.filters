@@ -106,5 +106,11 @@
     <None Include="COMP371_hw1.fs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="terrain.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="terrain.fs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

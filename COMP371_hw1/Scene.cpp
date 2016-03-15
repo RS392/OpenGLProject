@@ -9,6 +9,7 @@ using namespace glm;
 GLFWwindow* window = 0x00;
 
 GLuint shader_program = 0;
+GLuint terrain_shader_program = 0;
 bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
@@ -313,6 +314,7 @@ int Scene::runEngine() {
 	//objectsToDraw = objectsInMemory;
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
+	//terrain_shader_program = loadShaders("terrain.vs", "terrain.vs");
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
