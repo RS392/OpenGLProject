@@ -16,7 +16,7 @@ using namespace glm;
 #define RADIUS 5000
 #define ENVIRONMENTREFRESHRATE 5
 //typedef vector<vec3> object;
-typedef vector<Object> objects;
+typedef vector<Object*> objects;
 class RandomAttributeGenerator
 {
 private:
@@ -30,7 +30,7 @@ private:
 	vec3 playerPos;
 	vec3 oldPlayerPos;
 	vec3 distanceTraveled;
-	
+	void changeObjectAttributes(Object& obj);
 public:
 	bool generatedOnce;
 	int maxDist;
@@ -40,6 +40,6 @@ public:
 	void setPlayerPos(vec3 pos);
 	RandomAttributeGenerator();
 	~RandomAttributeGenerator();
-	void randomizeObject(Object original, char type, objects &copies);
+	void randomizeObject(Object original, objects &copies);
 };
 
