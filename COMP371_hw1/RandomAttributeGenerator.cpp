@@ -46,8 +46,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 2000;
 	}
 	else if (original.type == "pinet2") {
-		min = 1000;
-		max = 2000;
+		min = 500;
+		max = 1000;
 	}
 	else if (original.type == "fern1") {
 		min = 1000;
