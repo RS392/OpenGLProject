@@ -15,6 +15,8 @@ bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
+GLuint texture_location = 0;
+GLuint textureID;
 
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
@@ -151,9 +153,9 @@ void Scene::makeOriginalObjects() {
 }
 void Scene::drawTerrain()
 {
-	glUseProgram(terrain_shader_program);
-	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
-	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
+	/*
+		Normal rendering
+	*/
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
 	//cout << terrain->getVertices().size() << endl;
@@ -176,7 +178,24 @@ void Scene::drawTerrain()
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
 	//glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
 	//cout << terrain->getVertices().size() << " size versus " << terrain->getIndicesForTriangles().size() << endl;
+	
+	/*  
+		Texture stuff: todo
+	
+	glUseProgram(terrain_shader_program);//
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
+
+
+	glEnableVertexAttribArray(0);//0 is filler
+	
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);//0 is filler
+
+	// connect the uv coords to the "vertTexCoord" attribute of the vertex shader
+	glEnableVertexAttribArray(1);//1 is filler
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));//1 is filler
 	glUseProgram(shader_program);
+	*/
 }
 
 
@@ -515,6 +534,9 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	//If you read the vertex shader file you'll see that the same variable names are used.
 	view_matrix_id = glGetUniformLocation(ProgramID, "view_matrix");
 	model_matrix_id = glGetUniformLocation(ProgramID, "model_matrix");
+	
+	texture_location = glGetUniformLocation(ProgramID, "textureSampler");
+	glUniform1i(texture_location, textureID);
 	//proj_matrix_id = glGetUniformLocation(ProgramID, "proj_matrix");
 
 	return ProgramID;
