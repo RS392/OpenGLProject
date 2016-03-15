@@ -111,14 +111,15 @@ Scene::Scene()
 		
 		originalObjects.push_back(obj);
 	}
-
-//	terrain = new Terrain();//for testing
+	
+	
 	time = clock();
-
+	glm::vec3 cameraPosition(0.0, 50, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 	gCamera.setNearAndFarPlanes(0.1f, SEEDISTANCE);
 
-	gCamera.setPosition(glm::vec3(0, 50, RADIUS));
+	gCamera.setPosition(cameraPosition);
+	terrain = new Terrain(cameraPosition);//for testing
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 	
@@ -150,7 +151,9 @@ void Scene::makeOriginalObjects() {
 }
 void Scene::drawTerrain()
 {
-
+	glUseProgram(terrain_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
 	//cout << terrain->getVertices().size() << endl;
@@ -173,7 +176,7 @@ void Scene::drawTerrain()
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
 	//glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
 	//cout << terrain->getVertices().size() << " size versus " << terrain->getIndicesForTriangles().size() << endl;
-
+	glUseProgram(shader_program);
 }
 
 
@@ -197,7 +200,7 @@ void Scene::drawObjects() {
 }
 void Scene::drawEverything() {
 	drawObjects();
-	//drawTerrain();
+	drawTerrain();
 
 }
 void Scene::applyTexture() {
@@ -314,7 +317,7 @@ int Scene::runEngine() {
 
 	initializeOpenGL();
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
-	//terrain_shader_program = loadShaders("terrain.vs", "terrain.vs");
+	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();

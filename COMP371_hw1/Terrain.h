@@ -9,6 +9,7 @@ class Terrain
 {
 private:
 	Vector3D translateVector;
+glm::vec3 cameraPosition;
 	vector<GLfloat> vertices;
 	vector<GLfloat> textureVertices;//x, y, z, u, v
 	int offset;
@@ -23,12 +24,16 @@ private:
 	vector<glm::vec2> textureCoordinates;
 
 public:
-	Terrain();
+	Terrain(glm::vec3);
 	~Terrain();
 
-	void setTranslateVector(double x, double y, double z);
+	void setTranslateVector(double, double, double);
+
+	void setCameraPosition(glm::vec3 pos) { cameraPosition = pos; }
+	glm::vec3 getCameraPosition() { return cameraPosition; }
 	Vector3D getTranslateVector();
 
+	
 	void setVertices();
 	vector<GLfloat> getVertices();
 

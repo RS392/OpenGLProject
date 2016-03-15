@@ -3,8 +3,9 @@
 #include "Terrain.h"
 
 
-Terrain::Terrain()
+Terrain::Terrain(glm::vec3 cameraPosition)
 {
+	setCameraPosition(cameraPosition);
 	setIntervals(100);
 	setTranslateVector(0.0, 0.0, 100.0);
 	setTextureCoordinates(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
@@ -87,7 +88,7 @@ void Terrain::setVertices()
 		}
 		
 	}
-	setLastPoints();
+	//setLastPoints(); //todo
 	setWireFrameIndices(rowLength);
 }
 
@@ -142,7 +143,7 @@ void Terrain::setInitialPoints()
 	for (int i = -1000*intervals; i < 1000*intervals-1000; i+=500)
 	{
 		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		initialPoints.push_back(glm::vec3((float)i, 0.0, 1500.0));
+		initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y, (float)getCameraPosition().z));
 	}
 	waterVertices.push_back(initialPoints[0].x);
 	waterVertices.push_back(-.01);
@@ -239,19 +240,23 @@ vector<GLuint> Terrain::getIndicesForTriangles()
 
 void Terrain::setLastPoints()
 {
-	
+	//todo	
 	for (int i = vertices.size() - offset * 3; i < vertices.size() - 3; i += 3)
 	{
 		lastVertices.push_back(glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]));
 	}
-	waterVertices.push_back(lastVertices[0].x);
-	waterVertices.push_back(-.01);
-	waterVertices.push_back(lastVertices[0].z);
+	if (lastVertices.size() > 0)
+	{
+		waterVertices.push_back(lastVertices[0].x);
+		waterVertices.push_back(-.01);
+		waterVertices.push_back(lastVertices[0].z);
 
-	waterVertices.push_back(lastVertices[lastVertices.size() - 1].x);
-	waterVertices.push_back(-.01);
-	waterVertices.push_back(lastVertices[lastVertices.size() - 1].z);
-	setWaterIndices();
+		waterVertices.push_back(lastVertices[lastVertices.size() - 1].x);
+		waterVertices.push_back(-.01);
+		waterVertices.push_back(lastVertices[lastVertices.size() - 1].z);
+		setWaterIndices();
+	}
+	
 }
 
 vector<glm::vec3> Terrain::getLastPoints()

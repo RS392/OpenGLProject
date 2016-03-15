@@ -16,7 +16,7 @@ gl_Position = CTM * vec4 (in_Position, 1.0);
 	}
 	else
 	{
-		out_Color = vec3 (in_Position.y/100,0.8,0);
+		out_Color = vec3 (0.3333333,0.419608,0.184314);
 	}
 
 }

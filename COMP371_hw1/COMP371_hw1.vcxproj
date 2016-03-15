@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CImg.h" />
     <ClInclude Include="CustomThread.h" />
     <ClInclude Include="Feature.h" />
     <ClInclude Include="FileReader.h" />
