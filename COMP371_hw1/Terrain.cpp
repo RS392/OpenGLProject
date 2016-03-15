@@ -7,6 +7,7 @@ Terrain::Terrain()
 {
 	setIntervals(100);
 	setTranslateVector(0.0, 0.0, 100.0);
+	setTextureCoordinates(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	setInitialPoints();
 	setVertices();
 }
@@ -89,6 +90,20 @@ void Terrain::setVertices()
 	setLastPoints();
 	setWireFrameIndices(rowLength);
 }
+
+void Terrain::setTextureVertices()
+{
+
+}
+void Terrain::setTextureCoordinates(float u1, float v1, float u2, float v2, float u3 , float v3, float u4, float v4)
+{
+	textureCoordinates.push_back(glm::vec2(u1, v1));
+	textureCoordinates.push_back(glm::vec2(u2, v2));
+	textureCoordinates.push_back(glm::vec2(u3, v3));
+	textureCoordinates.push_back(glm::vec2(u4, v4));
+	
+
+}
 vector<GLfloat> Terrain::getVertices()
 {
 	return vertices;
@@ -155,6 +170,8 @@ void Terrain::setWireFrameIndices(int initialSize)
 
 			if ((i%offset) != (offset - 1)) //not the last point of a set of translated points
 			{
+
+				//wireframe vertices
 				wireFrameIndices.push_back(i);
 				wireFrameIndices.push_back(i + 1); // (i, i+1)
 				
@@ -173,7 +190,33 @@ void Terrain::setWireFrameIndices(int initialSize)
 				wireFrameIndices.push_back(i + offset);// (i, i+offset+1)
 				wireFrameIndices.push_back(i + 1); // (i, i+offset)
 				
+				//Texture vertices of i: x, y, z, u, v
+				textureVertices.push_back(vertices[i]);//x
+				textureVertices.push_back(vertices[i + 1]);//y
+				textureVertices.push_back(vertices[i + 2]);//z
+				textureVertices.push_back(textureCoordinates[0].x);//bottom left/origin
+				textureVertices.push_back(textureCoordinates[0].y);
 
+				//Texture vertices of i + 1: x, y, z, u, v
+				textureVertices.push_back(vertices[i+3]);//x
+				textureVertices.push_back(vertices[i + 4]);//y
+				textureVertices.push_back(vertices[i + 5]);//z
+				textureVertices.push_back(textureCoordinates[1].x);//bottom right
+				textureVertices.push_back(textureCoordinates[1].y);
+
+				//Texture vertices of i + offset: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3)]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
+				textureVertices.push_back(textureCoordinates[2].x);//top left
+				textureVertices.push_back(textureCoordinates[2].y);
+
+				//Texture vertices of i + offset + 1: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3) + 3]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 4]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 5]);//z
+				textureVertices.push_back(textureCoordinates[3].x);//top right
+				textureVertices.push_back(textureCoordinates[3].y);
 			}
 
 		}
@@ -244,3 +287,4 @@ void Terrain::setWaterIndices()
 	waterIndices.push_back(6);
 	waterIndices.push_back(0);
 }
+
