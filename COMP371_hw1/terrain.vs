@@ -1,17 +1,17 @@
 
-
-#version 130
+#version 330
 
 uniform mat4 view_matrix, model_matrix;
 
-in  vec3 in_Position;		//vertex position
-in vec2 vertex_Texture_Coordinate;
-out vec2 out_Texture_Coordinate;
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec2 vertTexCoord;
+out vec2 fragTexCoord;
 
-void main () {
+void main() {
+
 	mat4 CTM = view_matrix;
-	gl_Position = CTM * vec4 (in_Position, 1.0);
-	out_Texture_Coordinate = vertex_Texture_Coordinate;
-	
-
+    // Pass the tex coord straight through to the fragment shader
+    fragTexCoord = vertTexCoord;
+    
+    gl_Position = CTM * vec4(in_Position, 1);
 }

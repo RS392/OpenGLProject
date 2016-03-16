@@ -93,10 +93,6 @@ void Terrain::setVertices()
 	setWireFrameIndices(rowLength);
 }
 
-void Terrain::setTextureVertices()
-{
-
-}
 void Terrain::setTextureCoordinates(float u1, float v1, float u2, float v2, float u3 , float v3, float u4, float v4)
 {
 	textureCoordinates.push_back(glm::vec2(u1, v1));
@@ -219,6 +215,7 @@ void Terrain::setWireFrameIndices(int initialSize)
 				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
 				textureVertices.push_back(textureCoordinates[2].x);//top left
 				textureVertices.push_back(textureCoordinates[2].y);
+				/**/
 			}
 
 		}

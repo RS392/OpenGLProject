@@ -36,28 +36,28 @@ public:
 
 	void setTest() 
 	{
-		test.push_back(-2000.0f);//x
+		test.push_back(-100.0f);//x
 		test.push_back(0.0f);//y
-		test.push_back(1500.0f);//z
+		test.push_back(5000.0f);//z
 		test.push_back(0.0f);//u
 		test.push_back(0.0f);//v
 
-		test.push_back(2000.0f);//x
+		test.push_back(1000.0f);//x
 		test.push_back(0.0f);//y
-		test.push_back(1500.0f);//z
+		test.push_back(5000.0f);//z
 		test.push_back(1.0f);//u
 		test.push_back(0.0f);//v
 
 
-		test.push_back(2000.0f);//x
+		test.push_back(1000.0f);//x
 		test.push_back(0.0f);//y
-		test.push_back(3000.0f);//z
+		test.push_back(5500.0f);//z
 		test.push_back(1.0f);//u
 		test.push_back(1.0f);//v
 
-		test.push_back(-2000.0f);//x
+		test.push_back(-1000.0f);//x
 		test.push_back(0.0f);//y
-		test.push_back(3000.0f);//z
+		test.push_back(5500.0f);//z
 		test.push_back(0.0f);//u
 		test.push_back(1.0f);//v
 
@@ -92,7 +92,7 @@ public:
 	vector<float> getWaterVertices();
 	vector<GLuint> getWaterIndices();
 
-	void setTextureVertices();
+	
 	vector<float> getTextureVertices() { return textureVertices; }
 	void setWaterIndices();
 
