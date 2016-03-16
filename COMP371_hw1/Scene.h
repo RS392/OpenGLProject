@@ -60,6 +60,7 @@ private:
 	void drawObjects();
 	void drawEverything();
 	void drawTerrain();
+	int testTexture(char*);
 	void applyTexture();
 public:
 	Scene();

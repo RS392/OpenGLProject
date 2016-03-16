@@ -22,6 +22,7 @@ glm::vec3 cameraPosition;
 	vector<GLuint> waterIndices;
 	vector<glm::vec3> lastVertices;
 	vector<glm::vec2> textureCoordinates;
+	vector<GLfloat> test;
 
 public:
 	Terrain(glm::vec3);
@@ -33,7 +34,41 @@ public:
 	glm::vec3 getCameraPosition() { return cameraPosition; }
 	Vector3D getTranslateVector();
 
-	
+	void setTest() 
+	{
+		test.push_back(-2000.0f);//x
+		test.push_back(0.0f);//y
+		test.push_back(1500.0f);//z
+		test.push_back(0.0f);//u
+		test.push_back(0.0f);//v
+
+		test.push_back(2000.0f);//x
+		test.push_back(0.0f);//y
+		test.push_back(1500.0f);//z
+		test.push_back(1.0f);//u
+		test.push_back(0.0f);//v
+
+
+		test.push_back(2000.0f);//x
+		test.push_back(0.0f);//y
+		test.push_back(3000.0f);//z
+		test.push_back(1.0f);//u
+		test.push_back(1.0f);//v
+
+		test.push_back(-2000.0f);//x
+		test.push_back(0.0f);//y
+		test.push_back(3000.0f);//z
+		test.push_back(0.0f);//u
+		test.push_back(1.0f);//v
+
+
+	}
+	/*
+		Simple quad
+	*/
+	vector<GLfloat> getTest() { 
+		
+		return test; }
 	void setVertices();
 	vector<GLfloat> getVertices();
 
@@ -58,6 +93,7 @@ public:
 	vector<GLuint> getWaterIndices();
 
 	void setTextureVertices();
+	vector<float> getTextureVertices() { return textureVertices; }
 	void setWaterIndices();
 
 	void setTextureCoordinates(float, float, float, float, float, float, float, float);

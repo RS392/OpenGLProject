@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "Scene.h"
-
+#include "CImg.h"
 using namespace std;
 using namespace glm;
+using namespace cimg_library;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
 #define SEEDISTANCE 1000
@@ -178,27 +179,76 @@ void Scene::drawTerrain()
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
 	//glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
 	//cout << terrain->getVertices().size() << " size versus " << terrain->getIndicesForTriangles().size() << endl;
+	//
 	
+
 	/*  
 		Texture stuff: todo
 	
+	
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		5 * sizeof(GLfloat),                  // stride
+		(void*)0            // array buffer offset
+		);
+	glEnableVertexAttribArray(0);
+	//cout << terrain->getTest().size() << endl;
+	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size()/5);
+
+	//switch shader programs
 	glUseProgram(terrain_shader_program);//
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-
-
-	glEnableVertexAttribArray(0);//0 is filler
 	
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);//0 is filler
+	
+	// connect the xyz to the "vertex_Texture_Coordinate" attribute of the vertex shader
+	GLint vertex_att = glGetAttribLocation(terrain_shader_program, "vertex_Texture_Coordinate");
+	glEnableVertexAttribArray(vertex_att);//0, "vertex_Texture_Coordinate"
+	glVertexAttribPointer(vertex_att, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
 
-	// connect the uv coords to the "vertTexCoord" attribute of the vertex shader
-	glEnableVertexAttribArray(1);//1 is filler
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));//1 is filler
-	glUseProgram(shader_program);
+	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
+	GLint text_att = glGetAttribLocation(terrain_shader_program, "out_Texture_Coordinate");
+	glEnableVertexAttribArray(text_att);//1, "out_Texture_Coordinate"
+	glVertexAttribPointer(text_att, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+	
+	GLuint test = testTexture("test.bmp");
+	
+	
+	glGenerateMipmap(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, test);
+	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
 	*/
 }
 
+int Scene::testTexture(char* path) {
+	glActiveTexture(GL_TEXTURE0);
+	CImg<unsigned char> image(path);
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D,
+		0,
+		GL_RGB,
+		image.width(),
+		image.height(),
+		0,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		image);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "out_Texture_Coordinate"), 1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+	return textureID;
+
+}
 void Scene::drawObjects() {
 	
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
@@ -346,6 +396,7 @@ int Scene::runEngine() {
 	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		/*
@@ -513,8 +564,9 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	glAttachShader(ProgramID, VertexShaderID);
 	glAttachShader(ProgramID, FragmentShaderID);
 
-//	glBindAttribLocation(ProgramID, 0, "in_Position");
-
+ 	glBindAttribLocation(ProgramID, 0, "in_Position");
+	glBindAttribLocation(ProgramID, 1, "vertex_Texture_Coordinate");
+	glBindAttribLocation(ProgramID, 2, "out_Texture_Coordinate");
 	//appearing in the vertex shader.
 
 	glLinkProgram(ProgramID);

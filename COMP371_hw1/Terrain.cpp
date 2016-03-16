@@ -11,6 +11,7 @@ Terrain::Terrain(glm::vec3 cameraPosition)
 	setTextureCoordinates(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	setInitialPoints();
 	setVertices();
+	setTest();
 }
 /*/ todo: first set of vertices = last
 Terrain::Terrain(vector<glm::vec3> last, Vector3D lastTranslateVector)
@@ -205,19 +206,19 @@ void Terrain::setWireFrameIndices(int initialSize)
 				textureVertices.push_back(textureCoordinates[1].x);//bottom right
 				textureVertices.push_back(textureCoordinates[1].y);
 
-				//Texture vertices of i + offset: x, y, z, u, v
-				textureVertices.push_back(vertices[i + (offset * 3)]);//x
-				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
-				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
-				textureVertices.push_back(textureCoordinates[2].x);//top left
-				textureVertices.push_back(textureCoordinates[2].y);
-
 				//Texture vertices of i + offset + 1: x, y, z, u, v
 				textureVertices.push_back(vertices[i + (offset * 3) + 3]);//x
 				textureVertices.push_back(vertices[i + (offset * 3) + 4]);//y
 				textureVertices.push_back(vertices[i + (offset * 3) + 5]);//z
 				textureVertices.push_back(textureCoordinates[3].x);//top right
 				textureVertices.push_back(textureCoordinates[3].y);
+
+				//Texture vertices of i + offset: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3)]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
+				textureVertices.push_back(textureCoordinates[2].x);//top left
+				textureVertices.push_back(textureCoordinates[2].y);
 			}
 
 		}
