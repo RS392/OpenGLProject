@@ -11,6 +11,7 @@ Terrain::Terrain(glm::vec3 cameraPosition)
 	setTextureCoordinates(0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
 	setInitialPoints();
 	setVertices();
+	setTest();
 }
 /*/ todo: first set of vertices = last
 Terrain::Terrain(vector<glm::vec3> last, Vector3D lastTranslateVector)
@@ -92,10 +93,6 @@ void Terrain::setVertices()
 	setWireFrameIndices(rowLength);
 }
 
-void Terrain::setTextureVertices()
-{
-
-}
 void Terrain::setTextureCoordinates(float u1, float v1, float u2, float v2, float u3 , float v3, float u4, float v4)
 {
 	textureCoordinates.push_back(glm::vec2(u1, v1));
@@ -143,7 +140,7 @@ void Terrain::setInitialPoints()
 	for (int i = -1000*intervals; i < 1000*intervals-1000; i+=500)
 	{
 		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y, (float)getCameraPosition().z));
+		initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y-50, (float)getCameraPosition().z));
 	}
 	waterVertices.push_back(initialPoints[0].x);
 	waterVertices.push_back(-.01);
@@ -205,19 +202,20 @@ void Terrain::setWireFrameIndices(int initialSize)
 				textureVertices.push_back(textureCoordinates[1].x);//bottom right
 				textureVertices.push_back(textureCoordinates[1].y);
 
-				//Texture vertices of i + offset: x, y, z, u, v
-				textureVertices.push_back(vertices[i + (offset * 3)]);//x
-				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
-				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
-				textureVertices.push_back(textureCoordinates[2].x);//top left
-				textureVertices.push_back(textureCoordinates[2].y);
-
 				//Texture vertices of i + offset + 1: x, y, z, u, v
 				textureVertices.push_back(vertices[i + (offset * 3) + 3]);//x
 				textureVertices.push_back(vertices[i + (offset * 3) + 4]);//y
 				textureVertices.push_back(vertices[i + (offset * 3) + 5]);//z
 				textureVertices.push_back(textureCoordinates[3].x);//top right
 				textureVertices.push_back(textureCoordinates[3].y);
+
+				//Texture vertices of i + offset: x, y, z, u, v
+				textureVertices.push_back(vertices[i + (offset * 3)]);//x
+				textureVertices.push_back(vertices[i + (offset * 3) + 1]);//y
+				textureVertices.push_back(vertices[i + (offset * 3) + 2]);//z
+				textureVertices.push_back(textureCoordinates[2].x);//top left
+				textureVertices.push_back(textureCoordinates[2].y);
+				/**/
 			}
 
 		}

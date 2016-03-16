@@ -1,8 +1,9 @@
 
-#version 130
+#version 150
+uniform sampler2D tex; //this is the texture
+in vec2 fragTexCoord; //this is the texture coord
+out vec4 finalColor; //this is the output color of the pixel
 
-in vec3 out_Color;
-out vec4 frag_colour;	//final output color used to render the point
-
-void main () {frag_colour = vec4 (out_Color, 1.0);
+void main() {
+    finalColor = texture(tex, fragTexCoord);
 }

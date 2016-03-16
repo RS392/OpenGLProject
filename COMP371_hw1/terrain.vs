@@ -1,22 +1,17 @@
 
-
-#version 130
+#version 330
 
 uniform mat4 view_matrix, model_matrix;
 
-in  vec3 in_Position;		//vertex position
-out vec3 out_Color;
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec2 vertTexCoord;
+out vec2 fragTexCoord;
 
-void main () {
-mat4 CTM = view_matrix;
-gl_Position = CTM * vec4 (in_Position, 1.0);
-	if(in_Position.y < -.1)
-	{
-		out_Color = vec3 (0.0,0.35,0.99);
-	}
-	else
-	{
-		out_Color = vec3 (0.3333333,0.419608,0.184314);
-	}
+void main() {
 
+	mat4 CTM = view_matrix;
+    // Pass the tex coord straight through to the fragment shader
+    fragTexCoord = vertTexCoord;
+    
+    gl_Position = CTM * vec4(in_Position, 1);
 }
