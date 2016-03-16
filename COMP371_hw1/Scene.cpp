@@ -182,73 +182,12 @@ void Scene::drawTerrain()
 	//
 	*/
 
-	/*  
-		Texture stuff: test vertices
-	
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTest().size(), (&terrain->getTest()[0]), GL_STATIC_DRAW);
-	
-	cout << terrain->getTest().size() << endl;
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		5 * sizeof(GLfloat),                  // stride
-		(void*)0            // array buffer offset
-		);
-	
-	glEnableVertexAttribArray(0);
-	//cout << terrain->getTest().size() << endl;
-	//glDrawArrays(GL_QUADS, 0, terrain->getTest().size()/5);
-	
-	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
-	
-	
-	//switch shader programs
-	glUseProgram(terrain_shader_program);//
-	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
-	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-																		
-	// connect the xyz to the "vertex_Texture_Coordinate" attribute of the vertex shader
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
-
-	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
-	
-	GLuint test = testTexture("test.bmp");
-	
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, test);
-	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"),0);
-	
-	glBindTexture(GL_TEXTURE_2D, test);
-	glDrawArrays(GL_QUADS, 0, terrain->getTest().size() / 5);
-	glBindTexture(GL_TEXTURE_2D, 0);/*
-	*/
 	/*
-		Texture vertices
+		Texture vertices are of the form x, y, z, u, v
 	*/
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
 
-	cout << terrain->getTest().size() << endl;
-	/*glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		5 * sizeof(GLfloat),                  // stride
-		(void*)0            // array buffer offset
-		);
-
-	glEnableVertexAttribArray(0);*/
-	//cout << terrain->getTest().size() << endl;
-	//glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
-	
 	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
 
 	
@@ -257,19 +196,18 @@ void Scene::drawTerrain()
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 																				   
-	// connect the xyz to the "vertex_Texture_Coordinate" attribute of the vertex shader
+	// connect the xyz vertex attribute of the vertex shader
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
 
-	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
+	// connect the uv coords to the texture coordinate attribute of the vertex shader
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 	
-	GLuint test = testTexture("test.bmp");
-
+	GLuint test = testTexture("test2.bmp");
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, test);
-	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 
 	//glBindTexture(GL_TEXTURE_2D, test);
 	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
@@ -283,16 +221,14 @@ int Scene::testTexture(char* path) {
 	//GLint texture_location = glGetUniformLocation(shader_program, "tex");
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width(), image.height(), 0, GL_BGR, GL_UNSIGNED_BYTE, image);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glEnable(GL_TEXTURE_2D);
 	glGenerateMipmap(GL_TEXTURE_2D); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
 	
-	glBindTexture(GL_TEXTURE_2D, 0);
 	return textureID;
 
 }
