@@ -22,7 +22,7 @@ public:
 	int zScale;
 	int xTranslation;
 	int zTranslation;
-
+	int number;
 	vec3 position;
 	vec3 boundingBox;
 	string type;

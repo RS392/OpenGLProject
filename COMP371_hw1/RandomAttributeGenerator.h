@@ -13,8 +13,8 @@
 #include <future>
 using namespace std;
 using namespace glm;
-#define RADIUS 5000
-#define ENVIRONMENTREFRESHRATE 5
+#define RADIUS 10000
+#define ENVIRONMENTREFRESHRATE 2
 //typedef vector<vec3> object;
 typedef vector<Object*> objects;
 class RandomAttributeGenerator

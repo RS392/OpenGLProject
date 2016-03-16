@@ -116,7 +116,7 @@ Scene::Scene()
 	time = clock();
 	glm::vec3 cameraPosition(0.0, 50, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
-	gCamera.setNearAndFarPlanes(0.1f, SEEDISTANCE);
+	gCamera.setNearAndFarPlanes(1.0f, SEEDISTANCE);
 
 	gCamera.setPosition(cameraPosition);
 	terrain = new Terrain(cameraPosition);//for testing
@@ -183,19 +183,22 @@ void Scene::drawTerrain()
 void Scene::drawObjects() {
 	
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		//cout << "about to draw..." << endl;
-		glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(
-			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-			);
-		glDrawArrays(GL_LINES, 0, objectsToDraw[i]->verts.size());
+		if (objectsToDraw[i] != NULL) {
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			//cout << "about to draw..." << endl;
+			glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+				);
+
+			glDrawArrays(GL_LINES, 0, objectsToDraw[i]->verts.size());
+		}
 	}
 }
 void Scene::drawEverything() {
@@ -254,56 +257,51 @@ void Scene::constructEnvironment() {
 void Scene::test() {
 
 }
-void Scene::removeFromVBO() {
-	/*
+void Scene::optimizeFromVBO() {
 	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
-	int destroyed = 0;
-	for (size_t i = 0; i < objectsInTransit.size(); ++i) {
-		int differenceX = (int)abs(objectsInTransit[i].verts[0][0] - playerPos[0]);
-		int differenceZ = (int)abs(objectsInTransit[i].verts[0][2] - playerPos[2]);
-		//int differenceX = (int)abs(abs(objectsInTransit[i].verts[0][0]) - abs(playerPos[0])); // 
-		//int differenceZ = (int)abs(abs(objectsInTransit[i].verts[0][2]) - abs(playerPos[2]));
-		cout << i << endl;
-		if (differenceZ > SEEDISTANCE*2 || differenceX > SEEDISTANCE*2 ) {
-			++destroyed;
-		//	objectsInTransit.erase(objectsInTransit.begin() + i);
-		}
-
-	}
 	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
-		int differenceX = (int)abs(objectsInMemory[i].verts[0][0] - playerPos[0]);
-		int differenceZ = (int)abs(objectsInMemory[i].verts[0][2] - playerPos[2]);
-		if (differenceZ < SEEDISTANCE * 2 || differenceX < SEEDISTANCE * 2) {
-			objectsInTransit.push_back(objectsInMemory[i]);
+		Object* obj = objectsInMemory[i];
+		if (obj != NULL) {
+			int differenceX = (int)abs(objectsInMemory[i]->verts[0][0] - playerPos[0]);
+			int differenceZ = (int)abs(objectsInMemory[i]->verts[0][2] - playerPos[2]);
+			int dist = SEEDISTANCE * 1.2;
+			if ((differenceZ < dist || differenceX < dist) && objectsToDraw[i] == NULL) {
+				objectsInTransit[i] = objectsInMemory[i];
+			}
+			else if ((differenceZ > dist || differenceX > dist)) {
+				objectsInTransit[i] = NULL;
+			}
 		}
-
 	}
-	cout << "destroyed: " << destroyed <<endl;
 	threadDone = true;
-	*/
 }
 void Scene::handleCollisionWithCamera() {
 	vec3 cPos = gCamera.position();
 
 	for (int i = 0; i < objectsToDraw.size(); ++i) {
 		Object* obj = objectsToDraw[i];
-		if (obj->type == "pinet2") {
-			//check the X axis
-			if (abs(cPos.x - obj->position.x) < 0 + obj->boundingBox.x) {
-				//check the Y axis
-				if (abs(cPos.y - obj->position.y) < 0 + obj->boundingBox.y) {
-					//check the Z axis
-					if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
-						gCamera.setPosition(lastFrameCamPos);
-						cout << "omfg just hit a tree" << endl;
-						//COLLISION, stop camera from moving in the current direction
+		if (obj != NULL) {
+			if (obj->type == "pinet2") {
+				//check the X axis
+				if (abs(cPos.x - obj->position.x) < 0 + obj->boundingBox.x) {
+					//check the Y axis
+					if (abs(cPos.y - obj->position.y) < 0 + obj->boundingBox.y) {
+						//check the Z axis
+						if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
+							gCamera.setPosition(lastFrameCamPos);
+							cout << "omfg just hit a tree" << endl;
+							//COLLISION, stop camera from moving in the current direction
+						}
 					}
 				}
 			}
 		}
 	}
+}
+void Scene::renewObjectsToDraw() {
+	objectsToDraw = objectsInTransit;
 }
 int Scene::runEngine() { 
 	
@@ -311,6 +309,7 @@ int Scene::runEngine() {
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
+	objectsInTransit = objectsInMemory;
 	//makeMultipleObjects();
 	//constructEnvironment();
 	//objectsToDraw = objectsInMemory;
@@ -328,6 +327,7 @@ int Scene::runEngine() {
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	double lastTime = glfwGetTime();
+	optimizeFromVBO();
 	while (!glfwWindowShouldClose(window)) {
 		/*
 		generator->setPlayerPos(getCameraPos());
@@ -347,11 +347,41 @@ int Scene::runEngine() {
 
 		}
 		*/
+		if (threadDone == true) {
+			//	cout << "attempting to construct" << endl;
+			double timer = (clock() - time) / 1000.0f;
+			if (timer > 1.5 ) {
+			//	cout << "constructing..." << endl;
+				thread t(&Scene::optimizeFromVBO, this);
+				t.detach();
+			}
+		}
+		
+		if (threadDone == true) {
+			double timer = (clock() - time) / 1000.0f;
+			if (timer > 1.0f) {
+				//	cout << "constructing..." << endl;
+	//			thread t(&Scene::renewObjectsToDraw, this);
+	//			t.detach();
+			}
+			
+
+		}
+		
+		objectsToDraw = objectsInTransit;
 		lastFrameCamPos = gCamera.position();
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
 		view_matrix = gCamera.matrix();
+		double timer = (clock() - time) / 1000.0f;
+		if (timer > 0.1f) {
+			//	cout << "constructing..." << endl;
+		//	thread t(&Scene::handleCollisionWithCamera, this);
+		//	t.detach();
+		//	thread tt(&Scene::drawObjects, this);
+		//	tt.detach();
+		}
 		handleCollisionWithCamera();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;

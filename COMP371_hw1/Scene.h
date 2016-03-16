@@ -38,6 +38,7 @@ private:
 	objects originalObjects;
 	objects objectsInMemory;
 	objects objectsToDraw;
+	objects objectsInTransit;
 	clock_t time;
 	int numberOfOriginalObjects;
 	Terrain *terrain;
@@ -45,9 +46,9 @@ private:
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
 	vector<vec2> treeUvs;
-	
+	void renewObjectsToDraw();
 	void handleCollisionWithCamera();
-	void removeFromVBO();
+	void optimizeFromVBO();
 	void constructEnvironment();
 	vec3 getCameraPos();
 	bool initializeOpenGL();

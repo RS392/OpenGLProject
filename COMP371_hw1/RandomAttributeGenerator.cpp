@@ -43,19 +43,19 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	double multiplier = 5;
 	if (original.type == "tree1") {
 		min = 1000;
-		max = 2000;
+		max = 3000;
 	}
 	else if (original.type == "pinet2") {
-		min = 500;
-		max = 1000;
+		min = 1000;
+		max = 3000;
 	}
 	else if (original.type == "fern1") {
 		min = 1000;
-		max = 2000;
+		max = 3000;
 	}
 	else if (original.type == "grass") {
 		min = 1000;
-		max = 2000;
+		max = 3000;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
@@ -96,17 +96,18 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 	m.unlock();
 }
 void RandomAttributeGenerator::changeObjectAttributes(Object& obj) {
-	if (obj.type == "pinet2") {
+	//if (obj.type == "pinet2") {
 		double x = (-5 + obj.xTranslation);
 		double y = 0;
 		double z = (-5 + obj.zTranslation);
 
 		obj.position = vec3(x, y, z);
-		double xx = (50);
+		
+		double xx = (20);
 		double yy = 185;
-		double zz = (50);
+		double zz = (20);
 		obj.boundingBox = vec3(xx, yy, zz);
-	}
+	//}
 }
 void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
 

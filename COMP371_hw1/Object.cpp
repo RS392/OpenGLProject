@@ -10,6 +10,7 @@ Object::Object()
 	zScale = 0;
 	xTranslation = 0;
 	zTranslation = 0;
+	number = 0;
 }
 
 
