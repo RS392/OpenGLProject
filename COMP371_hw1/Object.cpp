@@ -17,3 +17,16 @@ Object::Object()
 Object::~Object()
 {
 }
+void Object::combineVXUvs() {
+	for (int i = 0; i < verts.size(); ++i) {
+		vector<float> comb(5);
+		comb[0] = verts[i][0];
+		comb[1] = verts[i][1];
+		comb[2] = verts[i][2];
+
+		comb[3] = uvs[i][0];
+		comb[4] = uvs[i][1];
+		vxuvs.push_back(comb);
+
+	}
+}

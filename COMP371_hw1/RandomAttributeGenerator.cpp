@@ -42,16 +42,16 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	//cout << distanceTraveled[2] << endl;
 	double multiplier = 5;
 	if (original.type == "tree1") {
-		min = 1000;
-		max = 3000;
+		min = 100;
+		max = 300;
 	}
 	else if (original.type == "pinet2") {
-		min = 1000;
-		max = 3000;
+		min = 100;
+		max = 300;
 	}
 	else if (original.type == "fern1") {
-		min = 1000;
-		max = 3000;
+		min = 100;
+		max = 300;
 	}
 	else if (original.type == "grass") {
 		min = 1000;
