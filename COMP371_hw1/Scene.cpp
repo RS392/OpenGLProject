@@ -19,6 +19,11 @@ GLuint proj_matrix_id = 0;
 GLuint texture_location = 0;
 GLuint terr_textureID;
 GLuint textureID;
+GLuint pinet2_textureID;
+GLuint tree1_textureID;
+GLuint fern1_textureID;
+GLuint grass_textureID;
+
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
 
@@ -34,8 +39,10 @@ GLfloat point_size = 3.0f;
 
 //vector<vec3> treeVertices(1);
 
-
 TGAFILE treeTGA;
+TGAFILE pinetTGA;
+TGAFILE fernTGA;
+TGAFILE grassTGA;
 
 bool clicked;
 double oldX = 0;
@@ -139,10 +146,13 @@ void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
 	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
-	fileReader->loadTGAFile("pinet2.tga",&treeTGA);
+	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
 	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
+	//fileReader->loadTGAFile("tree1.tga", &treeTGA);//not in dir
 	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, treeUvs, treeNormals);
+	//fileReader->loadTGAFile("fern1.tga", &fernTGA);//not in dir
 	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, treeUvs, treeNormals);
+	//fileReader->loadTGAFile("grass.tga", &grassTGA);//not in dir
 	originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
 	originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
 	originalObjects[2]->verts.erase(originalObjects[2]->verts.begin());
@@ -174,6 +184,8 @@ void Scene::drawTerrain()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 	
 	glActiveTexture(GL_TEXTURE0);
+	
+	
 	glBindTexture(GL_TEXTURE_2D, terr_textureID);
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 
@@ -192,8 +204,9 @@ GLuint Scene::testTexture(char* path) {
 	glGenerateMipmap(GL_TEXTURE_2D); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return textureID;
 
@@ -221,25 +234,18 @@ void Scene::drawObjects() {
 }
 void Scene::drawTexturizedObjects() {//todo  add offset for texture coordinates
 
-	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
+	for (size_t i = 0; i < 1; i++){// objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(
-				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-				3,                  // size
-				GL_FLOAT,           // type
-				GL_FALSE,           // normalized?
-				0,                  // stride
-				(void*)0            // array buffer offset
-				);
-
-			glDrawArrays(GL_QUADS, 0, objectsToDraw[i]->verts.size());
 		}
 	}
-	glBufferData(GL_ARRAY_BUFFER, treeUvs.size()*sizeof(vec2), &treeUvs[0], GL_STATIC_DRAW);
+	int offset = treeUvs.size()*sizeof(vec3) *(3 / 2);//because there is a 1:1 relationship between u,v coordinates
+													//and xyz and uv coordinates are 2/3 the size
+	offset = objectsToDraw[0]->verts.size()*sizeof(vec3);
+	glBufferData(GL_ARRAY_BUFFER, treeUvs.size()*sizeof(vec2), &treeUvs[0], GL_STATIC_DRAW); //load u,v coords after. verify that all are in same place
+	
 	//switch shader programs
 	glUseProgram(terrain_shader_program);
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
@@ -247,19 +253,31 @@ void Scene::drawTexturizedObjects() {//todo  add offset for texture coordinates
 
 	// connect the xyz vertex attribute of the vertex shader
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);//no offset for vertices coordinate
+	glVertexAttribPointer(
+		0,					// layout in shader
+		3,					// size
+		GL_FLOAT,			// type
+		GL_FALSE,			// normalized?
+		0,					//no offset for vertices coordinate
+		NULL
+	);
 
 	// connect the uv coords to the texture coordinate attribute of the vertex shader
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 0, (const GLvoid*)(3 * sizeof(GLfloat)));//set offset for u,v coordinates
-
-
-	glUseProgram(shader_program);//
+	glVertexAttribPointer(
+		1,					// layout in shader
+		2,					// size
+		GL_FLOAT,			// type
+		GL_TRUE,			// normalized?
+		0,					//no offset for vertices coordinate
+		(const GLvoid*)offset);//set offset to first component of u,v coordinates
+	
 }
 void Scene::drawEverything() {
+	
 	drawObjects();
 	drawTerrain();
-
+	
 }
 void Scene::applyTexture() {
 	glGenTextures(1, &TBO);
@@ -272,14 +290,13 @@ void Scene::applyTexture() {
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
 		GL_RGB,
-		(GLsizei)treeTGA.imageWidth,
-		(GLsizei)treeTGA.imageHeight,
+		(GLsizei)pinetTGA.imageWidth,
+		(GLsizei)pinetTGA.imageHeight,
 		0,
 		GL_RGB,
 		GL_UNSIGNED_BYTE,
-		treeTGA.imageData);
+		pinetTGA.imageData);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
 }
 // id: 
 void Scene::constructEnvironment() {
@@ -378,6 +395,7 @@ int Scene::runEngine() {
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
 	terr_textureID = testTexture("test2.bmp");
+	applyTexture();//test
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
