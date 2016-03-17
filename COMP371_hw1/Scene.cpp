@@ -9,7 +9,7 @@ using namespace cimg_library;
 #define SEEDISTANCE 1000
 
 GLFWwindow* window = 0x00;
-
+Object* pinet2;
 GLuint shader_program = 0;
 GLuint terrain_shader_program = 0;
 bool terrainView = true;
@@ -122,7 +122,7 @@ Scene::Scene()
 		originalObjects.push_back(obj);
 	}
 	
-	
+	pinet2 = new Object();
 	time = clock();
 	glm::vec3 cameraPosition(0.0, 50, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
@@ -146,6 +146,9 @@ void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
 	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__pinet2.obj", pinet2->verts, pinet2->uvs, treeNormals);
+	pinet2->combineVXUvs();
+
 	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
 	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
 	//fileReader->loadTGAFile("tree1.tga", &treeTGA);//not in dir
@@ -363,7 +366,6 @@ void Scene::handleCollisionWithCamera() {
 						//check the Z axis
 						if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
 							gCamera.setPosition(lastFrameCamPos);
-							cout << "omfg just hit a tree" << endl;
 							//COLLISION, stop camera from moving in the current direction
 						}
 					}
