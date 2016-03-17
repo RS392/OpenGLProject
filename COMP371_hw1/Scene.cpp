@@ -17,8 +17,8 @@ GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
 GLuint texture_location = 0;
+GLuint terr_textureID;
 GLuint textureID;
-
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
 
@@ -155,44 +155,13 @@ void Scene::makeOriginalObjects() {
 void Scene::drawTerrain()
 {
 	/*
-		Normal rendering
-	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getVertices().size(), (&terrain->getVertices()[0]), GL_STATIC_DRAW);
-	//cout << terrain->getVertices().size() << endl;
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-		);
-		
-	glEnableVertexAttribArray(0);
-	
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*terrain->getWireFrameIndices().size(), (&terrain->getWireFrameIndices()[0]), GL_STATIC_DRAW);
-	glDrawElements(GL_LINES, terrain->getWireFrameIndices().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-	//glDrawArrays(GL_POINTS, 0, (terrain->getVertices().size()/3));
-	//glDrawArrays(GL_POINTS, 0, (terrain->getVertices().size()));
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getIndicesForTriangles().size(), (&terrain->getIndicesForTriangles()[0]), GL_STATIC_DRAW);
-	//glDrawElements(GL_TRIANGLES, terrain->getIndicesForTriangles().size(), GL_UNSIGNED_INT, nullptr);//Terrain test
-	//cout << terrain->getVertices().size() << " size versus " << terrain->getIndicesForTriangles().size() << endl;
-	//
-	*/
-
-	/*
 		Texture vertices are of the form x, y, z, u, v
 	*/
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
 
-	// connect the uv coords to the "out_Texture_Coordinate" attribute of the vertex shader
-
-	
 	//switch shader programs
-	glUseProgram(terrain_shader_program);//
+	glUseProgram(terrain_shader_program);
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 																				   
@@ -204,21 +173,18 @@ void Scene::drawTerrain()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 	
-	GLuint test = testTexture("test2.bmp");
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, test);
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 
-	//glBindTexture(GL_TEXTURE_2D, test);
 	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-int Scene::testTexture(char* path) {
+GLuint Scene::testTexture(char* path) {
 	
 	CImg<unsigned char> image(path);
 	GLuint textureID;
-	//GLint texture_location = glGetUniformLocation(shader_program, "tex");
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image);
@@ -228,7 +194,7 @@ int Scene::testTexture(char* path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	
+	glBindTexture(GL_TEXTURE_2D, 0);
 	return textureID;
 
 }
@@ -374,9 +340,11 @@ int Scene::runEngine() {
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
+	terr_textureID = testTexture("test2.bmp");
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	
 	double lastTime = glfwGetTime();
