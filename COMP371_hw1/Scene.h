@@ -59,9 +59,10 @@ private:
 	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
 	void makeOriginalObjects();
 	void drawObjects();
+	void drawTexturizedObjects();
 	void drawEverything();
 	void drawTerrain();
-	int testTexture(char*);
+	GLuint testTexture(char*);
 	void applyTexture();
 public:
 	Scene();
