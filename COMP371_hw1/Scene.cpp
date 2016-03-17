@@ -219,6 +219,43 @@ void Scene::drawObjects() {
 		}
 	}
 }
+void Scene::drawTexturizedObjects() {//todo  add offset for texture coordinates
+
+	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
+		if (objectsToDraw[i] != NULL) {
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			//cout << "about to draw..." << endl;
+			glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(void*)0            // array buffer offset
+				);
+
+			glDrawArrays(GL_QUADS, 0, objectsToDraw[i]->verts.size());
+		}
+	}
+	glBufferData(GL_ARRAY_BUFFER, treeUvs.size()*sizeof(vec2), &treeUvs[0], GL_STATIC_DRAW);
+	//switch shader programs
+	glUseProgram(terrain_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
+
+	// connect the xyz vertex attribute of the vertex shader
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);//no offset for vertices coordinate
+
+	// connect the uv coords to the texture coordinate attribute of the vertex shader
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 0, (const GLvoid*)(3 * sizeof(GLfloat)));//set offset for u,v coordinates
+
+
+	glUseProgram(shader_program);//
+}
 void Scene::drawEverything() {
 	drawObjects();
 	drawTerrain();
