@@ -148,7 +148,7 @@ void Scene::makeOriginalObjects() {
 	
 	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
 	fileReader->loadObj("obj__pinet2.obj", pinet2->verts, pinet2->uvs, treeNormals);
-	pinet2->combineVXUvs();
+	pinet2->combineVXUvs2();
 
 	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
 	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
