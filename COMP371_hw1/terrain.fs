@@ -5,5 +5,6 @@ in vec2 fragTexCoord; //this is the texture coord
 out vec4 finalColor; //this is the output color of the pixel
 
 void main() {
-    finalColor = texture(tex, fragTexCoord);
+     finalColor = texture(tex, fragTexCoord);
+	//finalColor = vec4(fragTexCoord, 0.0,0.0);
 }

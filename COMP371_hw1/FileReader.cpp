@@ -68,7 +68,7 @@ void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 
 	// Read the image data.
 	fread(tgaFile->imageData, sizeof(unsigned char), imageSize, filePtr);
-
+	
 	// Change from BGR to RGB so OpenGL can read the image data.
 	for (int imageIdx = 0; imageIdx < imageSize; imageIdx += colorMode)
 	{
@@ -76,7 +76,7 @@ void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 		tgaFile->imageData[imageIdx] = tgaFile->imageData[imageIdx + 2];
 		tgaFile->imageData[imageIdx + 2] = colorSwap;
 	}
-
+	
 	fclose(filePtr);
 	return;
 }

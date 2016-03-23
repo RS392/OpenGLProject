@@ -63,6 +63,7 @@ private:
 	void drawEverything();
 	void drawTerrain();
 	GLuint testTexture(char*);
+	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();
 public:
 	Scene();
