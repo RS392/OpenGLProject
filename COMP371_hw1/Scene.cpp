@@ -570,7 +570,6 @@ int Scene::runEngine() {
 
 		glfwPollEvents();
 		// put the stuff we've been drawing onto the display
-	
 		glfwSwapBuffers(window);
 	}
 
@@ -723,7 +722,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
-
+	
 	glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
 
