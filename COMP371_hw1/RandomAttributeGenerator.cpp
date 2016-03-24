@@ -121,6 +121,13 @@ void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
 			obj.verts[i][0] += (float)xTranslation;
 			obj.verts[i][2] += (float)zTranslation;
 		}
+		/*
+		for (int i = 0; i < obj.vertSize; ++i) {
+			if (i == )
+			obj.vxuvs[i] = (double)xTranslation;
+
+
+		}*/
 	}
 	else {
 		
