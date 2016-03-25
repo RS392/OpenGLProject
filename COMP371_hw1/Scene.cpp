@@ -146,16 +146,16 @@ Scene::~Scene()
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
-	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, originalObjects[0]->uvs, treeNormals);
 	fileReader->loadObj("obj__pinet2.obj", pinet2->verts, pinet2->uvs, treeNormals);
 	pinet2->combineVXUvs2();
 
 	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
-	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, originalObjects[1]->uvs, treeNormals);
 	fileReader->loadTGAFile("tree1.tga", &treeTGA);//not in dir
-	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, treeNormals);
 	fileReader->loadTGAFile("fern1.tga", &fernTGA);//not in dir
-	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, originalObjects[3]->uvs, treeNormals);
 	fileReader->loadTGAFile("grass.tga", &grassTGA);//not in dir
 	originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
 	originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
@@ -190,8 +190,8 @@ void Scene::drawTerrain()
 	glActiveTexture(GL_TEXTURE0);
 	
 	
-	//glBindTexture(GL_TEXTURE_2D, terr_textureID);
-	glBindTexture(GL_TEXTURE_2D, tree1_textureID);//fine
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);
+	//glBindTexture(GL_TEXTURE_2D, tree1_textureID);//fine
 	//glBindTexture(GL_TEXTURE_2D, pinet2_textureID);//fine
 	//glBindTexture(GL_TEXTURE_2D, fern1_textureID);//fine
 	//glBindTexture(GL_TEXTURE_2D, grass_textureID);//looks fine
@@ -199,6 +199,7 @@ void Scene::drawTerrain()
 
 	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	glUseProgram(shader_program);
 }
 
 GLuint Scene::testTexture(char* path) {
@@ -268,30 +269,28 @@ void Scene::drawObjects() {
 	}
 }
 void Scene::drawTexturizedObjects() {
-	/*
 	//switch shader programs
 	 glUseProgram(terrain_shader_program);
 	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-	
+
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			
-			//todo bind buffer data
-			
-			// connect the xyz vertex attribute of the vertex shader
+			//cout << "about to draw..." << endl;
+			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2)), NULL, GL_STATIC_DRAW);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
-				0,								//to match layout in the shader
-				3,								//size
-				GL_FLOAT,						// type
-				GL_FALSE,						// normalized?
-				0,								// stride
-				(void*)0							// array buffer offset
-				);			
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(const GLvoid *)0            // array buffer offset
+				);
 			
-			//connect the uv coords to the texture coordinate attribute of the vertex shader
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(
 				1,								//to match layout in the shader
@@ -299,51 +298,50 @@ void Scene::drawTexturizedObjects() {
 				GL_FLOAT,						// type
 				GL_FALSE,						// normalized?
 				0,								// stride
-				(void*)0//todo pointer offset
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//todo pointer offset
 				);
-			
 			glActiveTexture(GL_TEXTURE0);
 			
 			if (objectsToDraw[i]->type.compare("pinet2") == 0)
 			{
 				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
 				glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
-				
+
 				//bind appropriate texture
 			}
 			if (objectsToDraw[i]->type.compare("tree1") == 0)
 			{
-				glBindTexture(GL_TEXTURE_2D, terr_textureID);
-				//glBindTexture(GL_TEXTURE_2D, tree1_textureID);
+				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
+				glBindTexture(GL_TEXTURE_2D, tree1_textureID);
 				//bind appropriate texture
 			}
-			if (objectsToDraw[i]->type.compare("fern1") == 0)
+			if(objectsToDraw[i]->type.compare("fern1") == 0)
 			{
-				glBindTexture(GL_TEXTURE_2D, terr_textureID);
-				//glBindTexture(GL_TEXTURE_2D, fern1_textureID);
+				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
+				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
 				//bind appropriate texture
 			}
 			if (objectsToDraw[i]->type.compare("grass") == 0)
 			{
-				glBindTexture(GL_TEXTURE_2D, terr_textureID);
-				//glBindTexture(GL_TEXTURE_2D, grass_textureID);
+				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
+				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 				//bind appropriate texture
 			}
-			
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			
+			//glBindTexture(GL_TEXTURE_2D, 0);
 			glDrawArrays(GL_QUADS, 0, objectsToDraw[i]->verts.size());
-			glBindTexture(GL_TEXTURE_2D, 0);
-			
-			
 		}
 	}
-	glUseProgram(shader_program);*/
+	
+
 }
 void Scene::drawEverything() {
 	
-	drawObjects();
+	//drawObjects();
+	drawTexturizedObjects();
 	drawTerrain();
-	//drawTexturizedObjects();
+	
 }
 void Scene::applyTexture() {
 	glGenTextures(1, &TBO);
@@ -548,7 +546,7 @@ int Scene::runEngine() {
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.8f);
-		//glColor4f(0.1f,0.2f,0.2f,0.5f);
+		glColor4f(0.1f,0.2f,0.2f,0.5f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
 
