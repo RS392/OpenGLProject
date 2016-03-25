@@ -24,6 +24,7 @@ void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 	filePtr = fopen(filename, "rb");
 	if (filePtr == NULL)
 	{
+		cout << "couldnt open tga file: " << filename << endl;
 		return;
 	}
 
@@ -88,7 +89,7 @@ bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vect
 	vector< vec3 > temp_normals;
 	FILE * file = fopen(path, "r");
 	if (file == NULL) {
-	    printf("Impossible to open the file !\n");
+		cout << "couldnt open file: " << path << endl;
 		return false;
 	}
 

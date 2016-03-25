@@ -45,18 +45,15 @@ private:
 	vec3 oldPlayerPos;
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
-	vector<vec2> treeUvs;
 	void renewObjectsToDraw();
 	void handleCollisionWithCamera();
 	void optimizeFromVBO();
 	void constructEnvironment();
 	vec3 getCameraPos();
 	bool initializeOpenGL();
-	bool initializeProgram();
 	bool cleanUp();
 	GLuint loadShaders(string vertex_shader_path, string fragment_shader_path);
 	void test();
-	void mouseCallBack(GLFWwindow* window, int xpos, int ypos);
 	void makeOriginalObjects();
 	void drawObjects();
 	void drawTexturizedObjects();

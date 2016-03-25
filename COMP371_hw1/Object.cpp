@@ -69,8 +69,5 @@ void Object::combineVXUvs2() {
 		vxuvs.push_back(uvs[i][0]);
 		vxuvs.push_back(uvs[i][1]);
 	}
-	for (int i = vxuvs.size() - 6; i < vxuvs.size(); ++i) {
-		cout << vxuvs[i] << ", ";
-	}
 	
 }

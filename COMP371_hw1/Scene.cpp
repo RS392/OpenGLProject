@@ -19,10 +19,71 @@ GLuint proj_matrix_id = 0;
 GLuint texture_location = 0;
 GLuint terr_textureID;
 GLuint textureID;
+
+
+GLuint pinet1_textureID;
 GLuint pinet2_textureID;
 GLuint tree1_textureID;
+GLuint tree2_textureID;
+GLuint tree3_textureID;
+GLuint tree4_textureID;
+GLuint tree5_textureID;
+GLuint tree6_textureID;
 GLuint fern1_textureID;
+GLuint fern2_textureID;
+GLuint fern3_textureID;
+GLuint flow2_textureID;
+GLuint flow3_textureID;
+GLuint shr1h_textureID;
+GLuint shr2_textureID;
+GLuint shr3_textureID;
+GLuint shr4_textureID;
+GLuint shr9_textureID;
+GLuint shr15_textureID;
+GLuint shr16_textureID;
+GLuint shr17h_textureID;
+GLuint shr18h_textureID;
+GLuint shr19h_textureID;
+GLuint weed1_textureID;
+GLuint weed3_textureID;
+GLuint weed4_textureID;
+GLuint weed4a_textureID;
+GLuint weed5_textureID;
+GLuint weed6_textureID;
 GLuint grass_textureID;
+
+
+TGAFILE tree1TGA;
+TGAFILE tree2TGA;
+TGAFILE tree3TGA;
+TGAFILE tree4TGA;
+TGAFILE tree5TGA;
+TGAFILE tree6TGA;
+TGAFILE pinet1TGA;
+TGAFILE pinet2TGA;
+TGAFILE fern1TGA;
+TGAFILE fern2TGA;
+TGAFILE fern3TGA;
+TGAFILE flow2TGA;
+TGAFILE flow3TGA;
+TGAFILE shr1hTGA;
+TGAFILE shr2TGA;
+TGAFILE shr3TGA;
+TGAFILE shr4TGA;
+TGAFILE shr9TGA;
+TGAFILE shr15TGA;
+TGAFILE shr16TGA;
+TGAFILE shr17hTGA;
+TGAFILE shr18hTGA;
+TGAFILE shr19hTGA;
+TGAFILE weed1TGA;
+TGAFILE weed3TGA;
+TGAFILE weed4TGA;
+TGAFILE weed4aTGA;
+TGAFILE weed5TGA;
+TGAFILE weed6TGA;
+TGAFILE grassTGA;
+
 
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
@@ -37,12 +98,7 @@ GLuint VBO, VAO, EBO, TBO, VBO2, VBO3;
 
 GLfloat point_size = 3.0f;
 
-//vector<vec3> treeVertices(1);
 
-TGAFILE treeTGA;
-TGAFILE pinetTGA;
-TGAFILE fernTGA;
-TGAFILE grassTGA;
 
 bool clicked;
 double oldX = 0;
@@ -115,7 +171,7 @@ void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
-	numberOfOriginalObjects = 4;
+	numberOfOriginalObjects = 30;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object* obj = new Object(); // empty place holder to allocate memory
 		
@@ -125,7 +181,7 @@ Scene::Scene()
 	pinet2 = new Object();
 	//pinet2->combineVXUvs();
 	time = clock();
-	glm::vec3 cameraPosition(0.0, 50, RADIUS);
+	glm::vec3 cameraPosition(0.0, 20, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
@@ -146,25 +202,98 @@ Scene::~Scene()
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
-	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, originalObjects[0]->uvs, treeNormals);
-	fileReader->loadObj("obj__pinet2.obj", pinet2->verts, pinet2->uvs, treeNormals);
-	pinet2->combineVXUvs2();
+	fileReader->loadObj("features/obj__pinet1.obj", originalObjects[0]->verts, originalObjects[0]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__pinet2.obj", originalObjects[1]->verts, originalObjects[1]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree2.obj", originalObjects[3]->verts, originalObjects[3]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree3.obj", originalObjects[4]->verts, originalObjects[4]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree4.obj", originalObjects[5]->verts, originalObjects[5]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree5.obj", originalObjects[6]->verts, originalObjects[6]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__tree6.obj", originalObjects[7]->verts, originalObjects[7]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__fern1.obj", originalObjects[8]->verts, originalObjects[8]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__fern2.obj", originalObjects[9]->verts, originalObjects[9]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__fern3.obj", originalObjects[10]->verts, originalObjects[10]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__flow2.obj", originalObjects[11]->verts, originalObjects[11]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__flow3.obj", originalObjects[12]->verts, originalObjects[12]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed1.obj", originalObjects[13]->verts, originalObjects[13]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed3.obj", originalObjects[14]->verts, originalObjects[14]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed4.obj", originalObjects[15]->verts, originalObjects[15]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed4a.obj", originalObjects[16]->verts, originalObjects[16]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed5.obj", originalObjects[17]->verts, originalObjects[17]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__weed6.obj", originalObjects[18]->verts, originalObjects[18]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr1h.obj", originalObjects[19]->verts, originalObjects[19]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr2.obj", originalObjects[20]->verts, originalObjects[20]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr3.obj", originalObjects[21]->verts, originalObjects[21]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr4.obj", originalObjects[22]->verts, originalObjects[22]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr9.obj", originalObjects[23]->verts, originalObjects[23]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr15.obj", originalObjects[24]->verts, originalObjects[24]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr16.obj", originalObjects[25]->verts, originalObjects[25]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr18h.obj", originalObjects[27]->verts, originalObjects[27]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__shr19h.obj", originalObjects[28]->verts, originalObjects[28]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__grass.obj", originalObjects[29]->verts, originalObjects[29]->uvs, treeNormals);
 
-	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
-	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, originalObjects[1]->uvs, treeNormals);
-	fileReader->loadTGAFile("tree1.tga", &treeTGA);//not in dir
-	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, treeNormals);
-	fileReader->loadTGAFile("fern1.tga", &fernTGA);//not in dir
-	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, originalObjects[3]->uvs, treeNormals);
-	fileReader->loadTGAFile("grass.tga", &grassTGA);//not in dir
-	//originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
-	//originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
-	//originalObjects[2]->verts.erase(originalObjects[2]->verts.begin());
-	//originalObjects[3]->verts.erase(originalObjects[3]->verts.begin());
-	originalObjects[0]->type = "pinet2";
-	originalObjects[1]->type = "tree1";
-	originalObjects[2]->type = "fern1";
-	originalObjects[3]->type = "grass";
+	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
+	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
+	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
+	fileReader->loadTGAFile("features/tree2.tga", &tree2TGA);
+	fileReader->loadTGAFile("features/tree3.tga", &tree3TGA);
+	fileReader->loadTGAFile("features/tree4.tga", &tree4TGA);
+	fileReader->loadTGAFile("features/tree5.tga", &tree5TGA);
+	fileReader->loadTGAFile("features/tree6.tga", &tree6TGA);
+	fileReader->loadTGAFile("features/fern1.tga", &fern1TGA);
+	fileReader->loadTGAFile("features/fern2.tga", &fern2TGA);
+	fileReader->loadTGAFile("features/fern3.tga", &fern3TGA);
+	fileReader->loadTGAFile("features/flow2.tga", &flow2TGA);
+	fileReader->loadTGAFile("features/flow3.tga", &flow3TGA);
+	fileReader->loadTGAFile("features/weed1.tga", &weed1TGA);
+	fileReader->loadTGAFile("features/weed3.tga", &weed3TGA);
+	fileReader->loadTGAFile("features/weed4.tga", &weed4TGA);
+	fileReader->loadTGAFile("features/weed4a.tga", &weed4aTGA);
+	fileReader->loadTGAFile("features/weed5.tga", &weed5TGA);
+	fileReader->loadTGAFile("features/weed6.tga", &weed6TGA);
+	fileReader->loadTGAFile("features/shr1h.tga", &shr1hTGA);
+	fileReader->loadTGAFile("features/shr2.tga", &shr2TGA);
+	fileReader->loadTGAFile("features/shr3.tga", &shr3TGA);
+	fileReader->loadTGAFile("features/shr4.tga", &shr4TGA);
+	fileReader->loadTGAFile("features/shr9.tga", &shr9TGA);
+	fileReader->loadTGAFile("features/shr15.tga", &shr15TGA);
+	fileReader->loadTGAFile("features/shr16.tga", &shr16TGA);
+	fileReader->loadTGAFile("features/shr17h.tga", &shr17hTGA);
+	fileReader->loadTGAFile("features/shr18h.tga", &shr18hTGA);
+	fileReader->loadTGAFile("features/shr19h.tga", &shr19hTGA);
+	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
+
+	originalObjects[0]->type = "pinet1";
+	originalObjects[1]->type = "pinet2";
+	originalObjects[2]->type = "tree1";
+	originalObjects[3]->type = "tree2";
+	originalObjects[4]->type = "tree3";
+	originalObjects[5]->type = "tree4";
+	originalObjects[6]->type = "tree5";
+	originalObjects[7]->type = "tree6";
+	originalObjects[8]->type = "fern1";
+	originalObjects[9]->type = "fern2";
+	originalObjects[10]->type = "fern3";
+	originalObjects[11]->type = "flow2";
+	originalObjects[12]->type = "flow3";
+	originalObjects[13]->type = "weed1";
+	originalObjects[14]->type = "weed3";
+	originalObjects[15]->type = "weed4";
+	originalObjects[16]->type = "weed4a";
+	originalObjects[17]->type = "weed5";
+	originalObjects[18]->type = "weed6";
+	originalObjects[19]->type = "shr1";
+	originalObjects[20]->type = "shr2";
+	originalObjects[21]->type = "shr3";
+	originalObjects[22]->type = "shr4";
+	originalObjects[23]->type = "shr9";
+	originalObjects[24]->type = "shr15";
+	originalObjects[25]->type = "shr16";
+	originalObjects[26]->type = "shr17h";
+	originalObjects[27]->type = "shr18h";
+	originalObjects[28]->type = "shr19h";
+	originalObjects[29]->type = "grass";
 }
 void Scene::drawTerrain()
 {
@@ -204,12 +333,14 @@ GLuint Scene::testTexture(char* path) {
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image);
 	glEnable(GL_TEXTURE_2D);
+	
 	glGenerateMipmap(GL_TEXTURE_2D); 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return textureID;
 
@@ -241,17 +372,12 @@ GLuint testObjectTextures(TGAFILE image)
 	return textureID;
 
 }
-bool once = false;
 
 void Scene::drawObjects() {
 	
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
-			if (once == false && objectsToDraw[i]->type == "grass") {
-				once = true;
-				cout << objectsToDraw[i]->uvs.size() << " sizeeeeeeeeee "<<endl;
-
-			}
+		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
@@ -302,7 +428,10 @@ void Scene::drawTexturizedObjects() {
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
 			glActiveTexture(GL_TEXTURE0);
-			
+			if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, pinet1_textureID);
+			}
 			if (objectsToDraw[i]->type.compare("pinet2") == 0)//bind pine tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
@@ -311,9 +440,109 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, tree1_textureID);
 			}
+			if (objectsToDraw[i]->type.compare("tree2") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree2_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("tree3") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree3_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("tree4") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree4_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("tree5") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree5_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("tree6") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree6_textureID);
+			}
 			if(objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("fern2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, fern2_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("fern3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, fern3_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("flow2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, flow2_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("flow3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, flow3_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed1") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed1_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed3_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed4") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed4_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed4a") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed4a_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed5") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed5_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("weed6") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed6_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr1h") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr1h_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr2_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr3_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr4") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr4_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr9") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr9_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr15") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr15_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr16") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr16_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr17h") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr18") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr18h_textureID);
+			}
+			if (objectsToDraw[i]->type.compare("shr19") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr19h_textureID);
 			}
 			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
@@ -338,6 +567,7 @@ void Scene::drawEverything() {
 	drawTerrain();
 	
 }
+/*
 void Scene::applyTexture() {
 	glGenTextures(1, &TBO);
 	glBindTexture(GL_TEXTURE_2D, TBO);
@@ -356,34 +586,16 @@ void Scene::applyTexture() {
 		GL_UNSIGNED_BYTE,
 		pinetTGA.imageData);
 	glBindTexture(GL_TEXTURE_2D, 0);
-}
+}*/
 // id: 
 void Scene::constructEnvironment() {
-	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
-	char typeOfObject; // 'p' for pinet, 'f' for fern, 't' for tree. // This is important to know because sizes
-					   // and other things will of course depend on the object type
 	generator->setRadius(RADIUS);
 	for (size_t i = 0; i < originalObjects.size(); ++i) {
 		generator->randomizeObject(*originalObjects[i], objectsInMemory);
 	}
-	//destroy objects out of range
-	/*
-	for (size_t i = 0; i < objectsInMemory.size(); ++i) {
-		int differenceX = (int) abs(abs(objectsInMemory[i].verts[0][0]) - abs(playerPos[0])); // 
-		int differenceZ = (int) abs(abs(objectsInMemory[i].verts[0][2]) - abs(playerPos[2]));
-
-		if (differenceZ > RADIUS * 1.1 ) {
-			
-			objectsInMemory.erase(objectsInMemory.begin() + i);
-		}
-
-	}*/
 	
-	//oldPlayerPos = getCameraPos();
-	//generator->setOldPlayerPos(oldPlayerPos);
-	threadDone = true;
 }
 void Scene::test() {
 
@@ -414,7 +626,8 @@ void Scene::handleCollisionWithCamera() {
 	for (int i = 0; i < objectsToDraw.size(); ++i) {
 		Object* obj = objectsToDraw[i];
 		if (obj != NULL) {
-			if (obj->type == "pinet2") {
+			if (obj->type == "pinet2" || obj->type == "pinet1" || obj->type == "tree1" || obj->type == "tree6"
+				|| obj->type == "tree2" || obj->type == "tree3" || obj->type == "tree4" || obj->type == "tree5") {
 				//check the X axis
 				if (abs(cPos.x - obj->position.x) < 0 + obj->boundingBox.x) {
 					//check the Y axis
@@ -456,9 +669,35 @@ int Scene::runEngine() {
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
 	terr_textureID = testTexture("dirt1.bmp");
-	pinet2_textureID = testObjectTextures(pinetTGA);
-	tree1_textureID = testObjectTextures(treeTGA);
-	fern1_textureID = testObjectTextures(fernTGA);
+	pinet1_textureID = testObjectTextures(pinet1TGA);
+	pinet2_textureID = testObjectTextures(pinet2TGA);
+	tree1_textureID = testObjectTextures(tree1TGA);
+	tree2_textureID = testObjectTextures(tree2TGA);
+	tree3_textureID = testObjectTextures(tree3TGA);
+	tree4_textureID = testObjectTextures(tree4TGA);
+	tree5_textureID = testObjectTextures(tree5TGA);
+	tree6_textureID = testObjectTextures(tree6TGA);
+	fern1_textureID = testObjectTextures(fern1TGA);
+	fern2_textureID = testObjectTextures(fern2TGA);
+	fern3_textureID = testObjectTextures(fern3TGA);
+	flow2_textureID = testObjectTextures(flow2TGA);
+	flow3_textureID = testObjectTextures(flow3TGA);
+	weed1_textureID = testObjectTextures(weed1TGA);
+	weed3_textureID = testObjectTextures(weed3TGA);
+	weed4_textureID = testObjectTextures(weed4TGA);
+	weed4a_textureID = testObjectTextures(weed4aTGA);
+	weed5_textureID = testObjectTextures(weed5TGA);
+	weed6_textureID = testObjectTextures(weed6TGA);
+	shr1h_textureID = testObjectTextures(shr1hTGA);
+	shr2_textureID = testObjectTextures(shr2TGA);
+	shr3_textureID = testObjectTextures(shr3TGA);
+	shr4_textureID = testObjectTextures(shr4TGA);
+	shr9_textureID = testObjectTextures(shr9TGA);
+	shr15_textureID = testObjectTextures(shr15TGA);
+	shr16_textureID = testObjectTextures(shr16TGA);
+	shr17h_textureID = testObjectTextures(shr17hTGA);
+	shr18h_textureID = testObjectTextures(shr18hTGA);
+	shr19h_textureID = testObjectTextures(shr19hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
 	//applyTexture();//test
 	glGenBuffers(1, &VBO);
@@ -547,7 +786,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 		
 		//glColor4f(0.1f,0.2f,0.2f,0.5f);
 		glPointSize(point_size);

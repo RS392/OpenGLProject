@@ -41,21 +41,29 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	distanceTraveled = playerPos - oldPlayerPos;
 	//cout << distanceTraveled[2] << endl;
 	double multiplier = 5;
-	if (original.type == "tree1") {
-		min = 100;
+	if (original.type.find("tree")) {
+		min = 200;
 		max = 300;
 	}
-	else if (original.type == "pinet2") {
-		min = 100;
+	else if (original.type.find("pinet")) {
+		min = 200;
 		max = 300;
 	}
-	else if (original.type == "fern1") {
-		min = 100;
+	else if (original.type.find("fern")) {
+		min = 200;
 		max = 300;
 	}
 	else if (original.type == "grass") {
 		min = 1000;
-		max = 3000;
+		max = 1500;
+	}
+	else if (original.type.find("flow")) {
+		min = 200;
+		max = 300;
+	}
+	else if (original.type.find("shr")) {
+		min = 150;
+		max = 300;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
@@ -80,6 +88,7 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		//copies.push_back(obj);
 	}
 	cout << "Done."<< endl;
+
 }
 void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 //	cout << "trying to do one object" << endl;
@@ -89,7 +98,7 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 	//cout << obj.verts[2][2] << endl;
 	changeObjectLocation(obj);
 	//cout << obj.verts[2][2] << endl;
-	changeObjectSize(obj);
+//	changeObjectSize(obj);
 	changeObjectAttributes(obj);
 	Object* pObj = new Object(obj);
 	copies.push_back(pObj);
