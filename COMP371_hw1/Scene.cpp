@@ -127,7 +127,7 @@ Scene::Scene()
 	time = clock();
 	glm::vec3 cameraPosition(0.0, 50, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
-	gCamera.setNearAndFarPlanes(1.0f, SEEDISTANCE);
+	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
 	gCamera.setPosition(cameraPosition);
 	terrain = new Terrain(cameraPosition);//for testing
@@ -146,16 +146,16 @@ Scene::~Scene()
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 	
-	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__pinet2.obj", originalObjects[0]->verts, originalObjects[0]->uvs, treeNormals);
 	fileReader->loadObj("obj__pinet2.obj", pinet2->verts, pinet2->uvs, treeNormals);
 	pinet2->combineVXUvs2();
 
 	fileReader->loadTGAFile("pinet2.tga",&pinetTGA);//verify that the naming convention is consistent
-	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__tree1.obj", originalObjects[1]->verts, originalObjects[1]->uvs, treeNormals);
 	fileReader->loadTGAFile("tree1.tga", &treeTGA);//not in dir
-	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__fern1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, treeNormals);
 	fileReader->loadTGAFile("fern1.tga", &fernTGA);//not in dir
-	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, treeUvs, treeNormals);
+	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, originalObjects[3]->uvs, treeNormals);
 	fileReader->loadTGAFile("grass.tga", &grassTGA);//not in dir
 	originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
 	originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
@@ -246,10 +246,17 @@ GLuint testObjectTextures(TGAFILE image)
 	return textureID;
 
 }
+bool once = false;
+
 void Scene::drawObjects() {
 	
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
+			if (once == false && objectsToDraw[i]->type == "grass") {
+				once = true;
+				cout << objectsToDraw[i]->uvs.size() << " sizeeeeeeeeee "<<endl;
+
+			}
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size() * sizeof(vec3), &objectsToDraw[i]->verts[0], GL_STATIC_DRAW);
@@ -404,8 +411,8 @@ void Scene::optimizeFromVBO() {
 		if (obj != NULL) {
 			int differenceX = (int)abs(objectsInMemory[i]->verts[0][0] - playerPos[0]);
 			int differenceZ = (int)abs(objectsInMemory[i]->verts[0][2] - playerPos[2]);
-			int dist = SEEDISTANCE * 1.2;
-			if ((differenceZ < dist || differenceX < dist) && objectsToDraw[i] == NULL) {
+			int dist = SEEDISTANCE * 1.7;
+			if ((differenceZ < dist && differenceX < dist) && objectsInTransit[i] == NULL) {
 				objectsInTransit[i] = objectsInMemory[i];
 			}
 			else if ((differenceZ > dist || differenceX > dist)) {
@@ -440,6 +447,8 @@ void Scene::handleCollisionWithCamera() {
 void Scene::renewObjectsToDraw() {
 	objectsToDraw = objectsInTransit;
 }
+
+
 int Scene::runEngine() { 
 	
 	makeOriginalObjects();
@@ -452,6 +461,7 @@ int Scene::runEngine() {
 	//objectsToDraw = objectsInMemory;
 
 	initializeOpenGL();
+	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
@@ -473,6 +483,8 @@ int Scene::runEngine() {
 	
 	double lastTime = glfwGetTime();
 	optimizeFromVBO();
+
+
 	while (!glfwWindowShouldClose(window)) {
 		/*
 		generator->setPlayerPos(getCameraPos());
