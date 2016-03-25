@@ -157,10 +157,10 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("fern1.tga", &fernTGA);//not in dir
 	fileReader->loadObj("obj__grass.obj", originalObjects[3]->verts, originalObjects[3]->uvs, treeNormals);
 	fileReader->loadTGAFile("grass.tga", &grassTGA);//not in dir
-	originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
-	originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
-	originalObjects[2]->verts.erase(originalObjects[2]->verts.begin());
-	originalObjects[3]->verts.erase(originalObjects[3]->verts.begin());
+	//originalObjects[0]->verts.erase(originalObjects[0]->verts.begin());
+	//originalObjects[1]->verts.erase(originalObjects[1]->verts.begin());
+	//originalObjects[2]->verts.erase(originalObjects[2]->verts.begin());
+	//originalObjects[3]->verts.erase(originalObjects[3]->verts.begin());
 	originalObjects[0]->type = "pinet2";
 	originalObjects[1]->type = "tree1";
 	originalObjects[2]->type = "fern1";
@@ -188,13 +188,7 @@ void Scene::drawTerrain()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 	
 	glActiveTexture(GL_TEXTURE0);
-	
-	
 	glBindTexture(GL_TEXTURE_2D, terr_textureID);
-	//glBindTexture(GL_TEXTURE_2D, tree1_textureID);//fine
-	//glBindTexture(GL_TEXTURE_2D, pinet2_textureID);//fine
-	//glBindTexture(GL_TEXTURE_2D, fern1_textureID);//fine
-	//glBindTexture(GL_TEXTURE_2D, grass_textureID);//looks fine
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 
 	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
@@ -278,9 +272,9 @@ void Scene::drawTexturizedObjects() {
 		if (objectsToDraw[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
-			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2)), NULL, GL_STATIC_DRAW);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);
-			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);
+			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
 				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -298,39 +292,33 @@ void Scene::drawTexturizedObjects() {
 				GL_FLOAT,						// type
 				GL_FALSE,						// normalized?
 				0,								// stride
-				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//todo pointer offset
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
 			glActiveTexture(GL_TEXTURE0);
 			
-			if (objectsToDraw[i]->type.compare("pinet2") == 0)
+			if (objectsToDraw[i]->type.compare("pinet2") == 0)//bind pine tree texture
 			{
-				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
 				glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
-
-				//bind appropriate texture
 			}
-			if (objectsToDraw[i]->type.compare("tree1") == 0)
+			if (objectsToDraw[i]->type.compare("tree1") == 0)//bind regular tree texture
 			{
-				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
 				glBindTexture(GL_TEXTURE_2D, tree1_textureID);
-				//bind appropriate texture
 			}
-			if(objectsToDraw[i]->type.compare("fern1") == 0)
+			if(objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
 			{
-				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
 				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
-				//bind appropriate texture
 			}
-			if (objectsToDraw[i]->type.compare("grass") == 0)
+			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
-				//glBindTexture(GL_TEXTURE_2D, terr_textureID);
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
-				//bind appropriate texture
 			}
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			
-			//glBindTexture(GL_TEXTURE_2D, 0);
+			//
+			glDepthMask(false);
 			glDrawArrays(GL_QUADS, 0, objectsToDraw[i]->verts.size());
+			glDepthMask(true);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 	
@@ -545,8 +533,11 @@ int Scene::runEngine() {
 		//time = clock() - 2000;
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 0.8f);
-		glColor4f(0.1f,0.2f,0.2f,0.5f);
+		
+		
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		
+		//glColor4f(0.1f,0.2f,0.2f,0.5f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
 
@@ -736,6 +727,8 @@ bool Scene::initializeOpenGL() {
 
 	/// Enable the depth test i.e. draw a pixel if it's closer to the viewer
 	glEnable(GL_DEPTH_TEST); /// Enable depth-testing
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
 	glDepthFunc(GL_LESS);	/// The type of testing i.e. a smaller value as "closer"
 
 	return true;
