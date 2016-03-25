@@ -94,7 +94,7 @@ glm::mat4 view_matrix;
 glm::mat4 model_matrix;
 
 
-GLuint VBO, VAO, EBO, TBO, VBO2, VBO3;
+GLuint VBO, VAO, EBO, TBO, VBO2, VBO3, VBO4;
 
 GLfloat point_size = 3.0f;
 
@@ -567,6 +567,7 @@ void Scene::drawEverything() {
 	
 	//drawObjects();
 	drawTerrain();
+	drawBoundaries();
 	drawTexturizedObjects();
 	
 	
@@ -591,7 +592,90 @@ void Scene::applyTexture() {
 		pinetTGA.imageData);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }*/
-// id: 
+
+void Scene::setBoundaries() {
+	
+	GLfloat height = 300;
+
+	//FAR
+	boundaries[0] = RADIUS;
+	boundaries[1] = 0;
+	boundaries[2] = 0;
+	boundaries[3] = -RADIUS;
+	boundaries[4] = 0;
+	boundaries[5] = 0;
+	boundaries[6] = -RADIUS;
+	boundaries[7] = height;
+	boundaries[8] = 0;
+	boundaries[9] = RADIUS;
+	boundaries[10] = height;
+	boundaries[11] = 0;
+	boundaries[12] = RADIUS;
+	boundaries[13] = 0;
+	boundaries[14] = 0;
+	boundaries[15] = -RADIUS;
+	boundaries[16] = 0;
+	boundaries[17] = 0;
+
+	//LEFT
+	boundaries[18] = -RADIUS;
+	boundaries[19] = 0;
+	boundaries[20] = 2 * RADIUS;
+	boundaries[21] = -RADIUS;
+	boundaries[22] = height;
+	boundaries[23] = 2 * RADIUS;
+	boundaries[24] = -RADIUS;
+	boundaries[25] = height;
+	boundaries[26] = 0;
+	boundaries[27] = -RADIUS;
+	boundaries[28] = 0;
+	boundaries[29] = 0;
+	boundaries[30] = -RADIUS;
+	boundaries[31] = 0;
+	boundaries[32] = 2 * RADIUS;
+
+	//NEAR
+	boundaries[33] = RADIUS;
+	boundaries[34] = 0;
+	boundaries[35] = 2 * RADIUS;
+	boundaries[36] = RADIUS;
+	boundaries[37] = height;
+	boundaries[38] = 2 * RADIUS;
+	boundaries[39] = -RADIUS;
+	boundaries[40] = height;
+	boundaries[41] = 2 * RADIUS;
+	boundaries[42] = -RADIUS;
+	boundaries[43] = 0;
+	boundaries[44] = 2 * RADIUS;
+	boundaries[45] = RADIUS;
+	boundaries[46] = 0;
+	boundaries[47] = 2 * RADIUS;
+
+	//RIGHT
+	boundaries[48] = RADIUS;
+	boundaries[49] = 0;
+	boundaries[50] = 0;
+	boundaries[51] = RADIUS;
+	boundaries[52] = height;
+	boundaries[53] = 0;
+	boundaries[54] = RADIUS;
+	boundaries[55] = height;
+	boundaries[56] = 2 * RADIUS;
+	boundaries[57] = RADIUS;
+	boundaries[58] = 0;
+	boundaries[59] = 2 * RADIUS;
+}
+
+void Scene::drawBoundaries() {
+	
+	glGenBuffers(1, &VBO4);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(boundaries), &boundaries[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);
+}
+
 void Scene::constructEnvironment() {
 	time = clock();
 	vec3 playerPos = getCameraPos();
@@ -703,6 +787,7 @@ int Scene::runEngine() {
 	shr18h_textureID = testObjectTextures(shr18hTGA);
 	shr19h_textureID = testObjectTextures(shr19hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
+	setBoundaries();
 	//applyTexture();//test
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &VBO2);
