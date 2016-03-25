@@ -358,7 +358,7 @@ GLuint testObjectTextures(TGAFILE image)
 
 	glTexImage2D(GL_TEXTURE_2D,
 		0,
-		GL_RGB,
+		GL_RGBA,
 		(GLsizei)image.imageWidth,
 		(GLsizei)image.imageHeight,
 		0,
@@ -551,9 +551,12 @@ void Scene::drawTexturizedObjects() {
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			
 			//
-			glDepthMask(false);
-			glDrawArrays(GL_QUADS, 0, objectsToDraw[i]->verts.size());
-			glDepthMask(true);
+			//glDepthMask(GL_FALSE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
+			glDisable(GL_BLEND);
+			//glDepthMask(GL_TRUE);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
@@ -563,8 +566,9 @@ void Scene::drawTexturizedObjects() {
 void Scene::drawEverything() {
 	
 	//drawObjects();
-	drawTexturizedObjects();
 	drawTerrain();
+	drawTexturizedObjects();
+	
 	
 }
 /*
@@ -786,9 +790,9 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	    glClearColor(0.0f, 0.0f, 1.0f, 0.0);
 		
-		//glColor4f(0.1f,0.2f,0.2f,0.5f);
+		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
 
@@ -977,9 +981,7 @@ bool Scene::initializeOpenGL() {
 	printf("OpenGL version supported %s\n", version);
 
 	/// Enable the depth test i.e. draw a pixel if it's closer to the viewer
-	glEnable(GL_DEPTH_TEST); /// Enable depth-testing
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
+	
 	glDepthFunc(GL_LESS);	/// The type of testing i.e. a smaller value as "closer"
 
 	return true;
