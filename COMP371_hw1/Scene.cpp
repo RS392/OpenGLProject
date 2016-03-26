@@ -83,7 +83,7 @@ TGAFILE weed4aTGA;
 TGAFILE weed5TGA;
 TGAFILE weed6TGA;
 TGAFILE grassTGA;
-
+TGAFILE terrainTGA;
 
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
@@ -91,7 +91,7 @@ int width = 800, widthB = 800;
 ///Transformations
 glm::mat4 proj_matrix;
 glm::mat4 view_matrix;
-glm::mat4 model_matrix;
+glm::mat4 model_matrix(1.0f);
 
 
 GLuint VBO, VAO, EBO, TBO, VBO2, VBO3;
@@ -187,6 +187,7 @@ Scene::Scene()
 
 	gCamera.setPosition(cameraPosition);
 	terrain = new Terrain(cameraPosition);//for testing
+	setTerrainTranslationMatrices();
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 	
@@ -198,10 +199,23 @@ Scene::Scene()
 Scene::~Scene()
 {
 }
-
+/*
+	Creates a vector containing a set of matrices to be used in the vertex shader to tile the terrain.
+	If the camera moves past a threshold where the terrain exists, more matrices should be pushed to this vector
+*/
+void Scene::setTerrainTranslationMatrices() 
+{
+	mat4 transform_matrix = mat4(1.0f);
+	vec3 translateVector = vec3(terrain->getTranslateVector().getX(), terrain->getTranslateVector().getY(), terrain->getTranslateVector().getZ());
+	for (double i = -1.0*getCameraPos().z; i < 2.0*getCameraPos().z; i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
+	{
+		transform_matrix = glm::translate(transform_matrix, translateVector);
+		terrainTranslationMatrices.push_back(transform_matrix);
+	}
+}
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
-	
+
 	fileReader->loadObj("features/obj__pinet1.obj", originalObjects[0]->verts, originalObjects[0]->uvs, treeNormals);
 	fileReader->loadObj("features/obj__pinet2.obj", originalObjects[1]->verts, originalObjects[1]->uvs, treeNormals);
 	fileReader->loadObj("features/obj__tree1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, treeNormals);
@@ -233,6 +247,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__shr19h.obj", originalObjects[28]->verts, originalObjects[28]->uvs, treeNormals);
 	fileReader->loadObj("features/obj__grass.obj", originalObjects[29]->verts, originalObjects[29]->uvs, treeNormals);
 
+	fileReader->loadTGAFile("features/texture_soil.tga", &terrainTGA);
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
 	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
 	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
@@ -295,34 +310,42 @@ void Scene::makeOriginalObjects() {
 	originalObjects[28]->type = "shr19h";
 	originalObjects[29]->type = "grass";
 }
+bool once = true;
 void Scene::drawTerrain()
 {
+	
 	/*
 		Texture vertices are of the form x, y, z, u, v
 	*/
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
-
 	//switch shader programs
 	glUseProgram(terrain_shader_program);
-	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
-	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-																				   
+	//glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	
+		
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
+	
 	// connect the xyz vertex attribute of the vertex shader
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
 
 	// connect the uv coords to the texture coordinate attribute of the vertex shader
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_TRUE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, terr_textureID);
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-
-	glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
+	for (int i = 0; i < terrainTranslationMatrices.size(); i++)
+	{
+		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(terrainTranslationMatrices[i]));//use translated model matrix
+		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
+	}
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glUseProgram(shader_program);
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
+	/**/
 }
 
 GLuint Scene::testTexture(char* path) {
@@ -335,11 +358,12 @@ GLuint Scene::testTexture(char* path) {
 	glEnable(GL_TEXTURE_2D);
 	
 	glGenerateMipmap(GL_TEXTURE_2D); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);//target, pname, param
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return textureID;
@@ -672,7 +696,8 @@ int Scene::runEngine() {
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
-	terr_textureID = testTexture("dirt1.bmp");
+	//terr_textureID = testTexture("dirt1.bmp");
+	terr_textureID = testObjectTextures(terrainTGA);
 	pinet1_textureID = testObjectTextures(pinet1TGA);
 	pinet2_textureID = testObjectTextures(pinet2TGA);
 	tree1_textureID = testObjectTextures(tree1TGA);
@@ -790,7 +815,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-	    glClearColor(0.0f, 0.0f, 1.0f, 0.0);
+	    glClearColor(1.0f, 1.0f, 1.0f, 0.0);
 		
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);

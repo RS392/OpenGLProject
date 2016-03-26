@@ -16,6 +16,7 @@ glm::vec3 cameraPosition;
 	int intervals;
 	vector<GLuint> wireFrameIndices;
 	vector<GLuint> indicesForTriangles;
+	
 	vector<glm::vec3> initialPoints;
 	vector<float> probabilities;
 	vector<float> waterVertices;
@@ -23,6 +24,10 @@ glm::vec3 cameraPosition;
 	vector<glm::vec3> lastVertices;
 	vector<glm::vec2> textureCoordinates;
 	vector<GLfloat> test;
+	vector<vec3> quadXYZs;
+	vector<vec2> quadUvs;
+	vector<GLuint> quadIndices;
+
 
 public:
 	Terrain(glm::vec3);
@@ -76,8 +81,11 @@ public:
 	vector<glm::vec3> getInitialPoints();
 	void setInitialPoints();
 
+	vector<GLuint> getQuadIndices() { return quadIndices; }
+	void setQuadIndices(int);
 	void setWireFrameIndices(int);
 	vector<GLuint> getWireFrameIndices();
+	vector<vec2> getQuadUVs() { return quadUvs; }
 
 	void setProbabilities(double, double, double);
 	vector<float> getProbabilities();

@@ -45,6 +45,7 @@ private:
 	vec3 oldPlayerPos;
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
+	vector<mat4> terrainTranslationMatrices;
 	void renewObjectsToDraw();
 	void handleCollisionWithCamera();
 	void optimizeFromVBO();
@@ -62,6 +63,7 @@ private:
 	GLuint testTexture(char*);
 	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();
+	void setTerrainTranslationMatrices();
 public:
 	Scene();
 	~Scene();

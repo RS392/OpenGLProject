@@ -9,7 +9,7 @@ out vec2 fragTexCoord;
 
 void main() {
 
-	mat4 CTM = view_matrix;
+	mat4 CTM = view_matrix * model_matrix;
     // Pass the tex coord straight through to the fragment shader
     fragTexCoord = vertTexCoord;
     
