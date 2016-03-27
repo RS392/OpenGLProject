@@ -42,8 +42,6 @@ GLuint shr9_textureID;
 GLuint shr15_textureID;
 GLuint shr16_textureID;
 GLuint shr17h_textureID;
-GLuint shr18h_textureID;
-GLuint shr19h_textureID;
 GLuint weed1_textureID;
 GLuint weed3_textureID;
 GLuint weed4_textureID;
@@ -74,8 +72,6 @@ TGAFILE shr9TGA;
 TGAFILE shr15TGA;
 TGAFILE shr16TGA;
 TGAFILE shr17hTGA;
-TGAFILE shr18hTGA;
-TGAFILE shr19hTGA;
 TGAFILE weed1TGA;
 TGAFILE weed3TGA;
 TGAFILE weed4TGA;
@@ -115,7 +111,7 @@ double gScrollY = 0.0;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 220.0; //units per second
+	const float moveSpeed = 150.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -171,7 +167,7 @@ void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
-	numberOfOriginalObjects = 30;
+	numberOfOriginalObjects = 28;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object* obj = new Object(); // empty place holder to allocate memory
 		
@@ -243,9 +239,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__shr15.obj", originalObjects[24]->verts, originalObjects[24]->uvs, treeNormals);
 	fileReader->loadObj("features/obj__shr16.obj", originalObjects[25]->verts, originalObjects[25]->uvs, treeNormals);
 	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, treeNormals);
-	fileReader->loadObj("features/obj__shr18h.obj", originalObjects[27]->verts, originalObjects[27]->uvs, treeNormals);
-	fileReader->loadObj("features/obj__shr19h.obj", originalObjects[28]->verts, originalObjects[28]->uvs, treeNormals);
-	fileReader->loadObj("features/obj__grass.obj", originalObjects[29]->verts, originalObjects[29]->uvs, treeNormals);
+	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, treeNormals);
 
 	fileReader->loadTGAFile("features/texture_soil.tga", &terrainTGA);
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
@@ -275,8 +269,6 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/shr15.tga", &shr15TGA);
 	fileReader->loadTGAFile("features/shr16.tga", &shr16TGA);
 	fileReader->loadTGAFile("features/shr17h.tga", &shr17hTGA);
-	fileReader->loadTGAFile("features/shr18h.tga", &shr18hTGA);
-	fileReader->loadTGAFile("features/shr19h.tga", &shr19hTGA);
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
 	originalObjects[0]->type = "pinet1";
@@ -298,7 +290,7 @@ void Scene::makeOriginalObjects() {
 	originalObjects[16]->type = "weed4a";
 	originalObjects[17]->type = "weed5";
 	originalObjects[18]->type = "weed6";
-	originalObjects[19]->type = "shr1";
+	originalObjects[19]->type = "shr1h";
 	originalObjects[20]->type = "shr2";
 	originalObjects[21]->type = "shr3";
 	originalObjects[22]->type = "shr4";
@@ -306,9 +298,7 @@ void Scene::makeOriginalObjects() {
 	originalObjects[24]->type = "shr15";
 	originalObjects[25]->type = "shr16";
 	originalObjects[26]->type = "shr17h";
-	originalObjects[27]->type = "shr18h";
-	originalObjects[28]->type = "shr19h";
-	originalObjects[29]->type = "grass";
+	originalObjects[27]->type = "grass";
 }
 bool once = true;
 void Scene::drawTerrain()
@@ -560,14 +550,8 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
 			}
-			if (objectsToDraw[i]->type.compare("shr18") == 0)//bind fern texture
-			{
-				glBindTexture(GL_TEXTURE_2D, shr18h_textureID);
-			}
-			if (objectsToDraw[i]->type.compare("shr19") == 0)//bind fern texture
-			{
-				glBindTexture(GL_TEXTURE_2D, shr19h_textureID);
-			}
+		
+			
 			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
@@ -738,6 +722,7 @@ void Scene::handleCollisionWithCamera() {
 	for (int i = 0; i < objectsToDraw.size(); ++i) {
 		Object* obj = objectsToDraw[i];
 		if (obj != NULL) {
+
 			if (obj->type == "pinet2" || obj->type == "pinet1" || obj->type == "tree1" || obj->type == "tree6"
 				|| obj->type == "tree2" || obj->type == "tree3" || obj->type == "tree4" || obj->type == "tree5") {
 				//check the X axis
@@ -748,6 +733,7 @@ void Scene::handleCollisionWithCamera() {
 						if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
 							gCamera.setPosition(lastFrameCamPos);
 							//COLLISION, stop camera from moving in the current direction
+						//	cout << obj->type << endl;
 						}
 					}
 				}
@@ -809,8 +795,6 @@ int Scene::runEngine() {
 	shr15_textureID = testObjectTextures(shr15TGA);
 	shr16_textureID = testObjectTextures(shr16TGA);
 	shr17h_textureID = testObjectTextures(shr17hTGA);
-	shr18h_textureID = testObjectTextures(shr18hTGA);
-	shr19h_textureID = testObjectTextures(shr19hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
 	setBoundaries();
 	//applyTexture();//test
@@ -900,7 +884,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-	    glClearColor(1.0f, 1.0f, 1.0f, 0.0);
+	    glClearColor(0.0f, 0.0f, 0.0f, 0.0);
 		
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);

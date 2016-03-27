@@ -1,6 +1,2 @@
-#TargetFrameworkVersion=v4.0:PlatformToolSet=v140:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit:WindowsTargetPlatformVersion=8.1
-<<<<<<< HEAD
-Debug|Win32|C:\Users\JF\Documents\Lori\OpenGLProject\|
-=======
-Debug|Win32|C:\Users\Clément\Desktop\Concordia\COMP 371\Project\|
->>>>>>> 06d7b58997901d92b6547b83782f70b9ec2a9b8b
+#TargetFrameworkVersion=v4.0:PlatformToolSet=v140:EnableManagedIncrementalBuild=false:VCToolArchitecture=Native32Bit
+Debug|Win32|C:\Users\Radu\Desktop\OpenGLProject\|

@@ -41,29 +41,35 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	distanceTraveled = playerPos - oldPlayerPos;
 	//cout << distanceTraveled[2] << endl;
 	double multiplier = 5;
-	if (original.type.find("tree")) {
-		min = 200;
-		max = 300;
+
+	if (original.type.find("tree") != string::npos) {
+		min = 400;
+		max = 600;
 	}
-	else if (original.type.find("pinet")) {
-		min = 200;
-		max = 300;
+	else if (original.type.find("pinet") != string::npos) {
+		min = 400;
+		max = 600;
 	}
-	else if (original.type.find("fern")) {
-		min = 200;
-		max = 300;
+	else if (original.type.find("fern") != string::npos) {
+		min = 400;
+		max = 500;
 	}
-	else if (original.type == "grass") {
-		min = 1000;
-		max = 1500;
+	
+	else if (original.type.find("flow") != string::npos) {
+		min = 500;
+		max = 600;
 	}
-	else if (original.type.find("flow")) {
-		min = 200;
-		max = 300;
-	}
-	else if (original.type.find("shr")) {
+	else if (original.type.find("shr") != string::npos) {
 		min = 150;
 		max = 300;
+	}
+	else if (original.type.find("weed") != string::npos) {
+		min = 250;
+		max = 400;
+	}
+	else if (original.type.find("grass") != string::npos){
+		min = 10000;
+		max = 12500;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
