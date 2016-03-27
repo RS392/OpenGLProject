@@ -72,6 +72,7 @@ private:
 	void drawTerrain();
 	void setBoundaries();
 	void drawBoundaries();
+	void boundariesCollision();
 	GLuint testTexture(char*);
 	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();

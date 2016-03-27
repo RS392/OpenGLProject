@@ -107,12 +107,14 @@ tdogl::Camera gCamera;
 Light light;
 double gScrollY = 0.0;
 
+//To leave enough space for the objects drawn at the very edge of the forest
+GLfloat boundOffset = 50;
 
 // update the scene based on the time elapsed since last update
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 150.0f; //units per second
+	const float moveSpeed = 1000.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -618,72 +620,72 @@ void Scene::setBoundaries() {
 	GLfloat height = 300;
 
 	//FAR
-	boundaries[0] = RADIUS;
+	boundaries[0] = RADIUS + boundOffset;
 	boundaries[1] = 0;
-	boundaries[2] = 0;
-	boundaries[3] = -RADIUS;
+	boundaries[2] = -boundOffset;
+	boundaries[3] = -RADIUS - boundOffset;
 	boundaries[4] = 0;
-	boundaries[5] = 0;
-	boundaries[6] = -RADIUS;
+	boundaries[5] = -boundOffset;
+	boundaries[6] = -RADIUS - boundOffset;
 	boundaries[7] = height;
-	boundaries[8] = 0;
-	boundaries[9] = RADIUS;
+	boundaries[8] = -boundOffset;
+	boundaries[9] = RADIUS + boundOffset;
 	boundaries[10] = height;
-	boundaries[11] = 0;
-	boundaries[12] = RADIUS;
+	boundaries[11] = -boundOffset;
+	boundaries[12] = RADIUS + boundOffset;
 	boundaries[13] = 0;
-	boundaries[14] = 0;
-	boundaries[15] = -RADIUS;
+	boundaries[14] = -boundOffset;
+	boundaries[15] = -RADIUS - boundOffset;
 	boundaries[16] = 0;
-	boundaries[17] = 0;
+	boundaries[17] = -boundOffset;
 
 	//LEFT
-	boundaries[18] = -RADIUS;
+	boundaries[18] = -RADIUS - boundOffset;
 	boundaries[19] = 0;
-	boundaries[20] = 2 * RADIUS;
-	boundaries[21] = -RADIUS;
+	boundaries[20] = 2 * RADIUS + boundOffset;
+	boundaries[21] = -RADIUS - boundOffset;
 	boundaries[22] = height;
-	boundaries[23] = 2 * RADIUS;
-	boundaries[24] = -RADIUS;
+	boundaries[23] = 2 * RADIUS + boundOffset;
+	boundaries[24] = -RADIUS - boundOffset;
 	boundaries[25] = height;
-	boundaries[26] = 0;
-	boundaries[27] = -RADIUS;
+	boundaries[26] = -boundOffset;
+	boundaries[27] = -RADIUS - boundOffset;
 	boundaries[28] = 0;
-	boundaries[29] = 0;
-	boundaries[30] = -RADIUS;
+	boundaries[29] = -boundOffset;
+	boundaries[30] = -RADIUS - boundOffset;
 	boundaries[31] = 0;
-	boundaries[32] = 2 * RADIUS;
+	boundaries[32] = 2 * RADIUS + boundOffset;
 
 	//NEAR
-	boundaries[33] = RADIUS;
+	boundaries[33] = RADIUS + boundOffset;
 	boundaries[34] = 0;
-	boundaries[35] = 2 * RADIUS;
-	boundaries[36] = RADIUS;
+	boundaries[35] = 2 * RADIUS + boundOffset;
+	boundaries[36] = RADIUS + boundOffset;
 	boundaries[37] = height;
-	boundaries[38] = 2 * RADIUS;
-	boundaries[39] = -RADIUS;
+	boundaries[38] = 2 * RADIUS + boundOffset;
+	boundaries[39] = -RADIUS + boundOffset;
 	boundaries[40] = height;
-	boundaries[41] = 2 * RADIUS;
-	boundaries[42] = -RADIUS;
+	boundaries[41] = 2 * RADIUS + boundOffset;
+	boundaries[42] = -RADIUS + boundOffset;
 	boundaries[43] = 0;
-	boundaries[44] = 2 * RADIUS;
-	boundaries[45] = RADIUS;
+	boundaries[44] = 2 * RADIUS + boundOffset;
+	boundaries[45] = RADIUS + boundOffset;
 	boundaries[46] = 0;
-	boundaries[47] = 2 * RADIUS;
+	boundaries[47] = 2 * RADIUS + boundOffset;
 
 	//RIGHT
-	boundaries[48] = RADIUS;
+	boundaries[48] = RADIUS + boundOffset;
 	boundaries[49] = 0;
-	boundaries[50] = 0;
-	boundaries[51] = RADIUS;
+	boundaries[50] = -boundOffset;
+	boundaries[51] = RADIUS + boundOffset;
 	boundaries[52] = height;
-	boundaries[53] = 0;
-	boundaries[54] = RADIUS;
+	boundaries[53] = -boundOffset;
+	boundaries[54] = RADIUS + boundOffset;
 	boundaries[55] = height;
-	boundaries[56] = 2 * RADIUS;
-	boundaries[57] = RADIUS;
+	boundaries[56] = 2 * RADIUS + boundOffset;
+	boundaries[57] = RADIUS + boundOffset;
 	boundaries[58] = 0;
-	boundaries[59] = 2 * RADIUS;
+	boundaries[59] = 2 * RADIUS + boundOffset;
 }
 
 void Scene::drawBoundaries() {
@@ -694,6 +696,28 @@ void Scene::drawBoundaries() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);
+}
+
+void Scene::boundariesCollision() {
+
+	glm::vec3 pos = gCamera.position();
+
+	if (pos.x >= RADIUS + boundOffset) {
+		
+		gCamera.setPosition(glm::vec3(RADIUS + boundOffset - 1, lastFrameCamPos.y, lastFrameCamPos.z));
+	}
+	else if (pos.x <= -RADIUS - boundOffset) {
+
+		gCamera.setPosition(glm::vec3(-RADIUS - boundOffset + 1, lastFrameCamPos.y, lastFrameCamPos.z));
+	}
+	else if (pos.z <= -boundOffset) {
+
+		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, -boundOffset + 1));
+	}
+	else if (pos.z >= 2 * RADIUS + boundOffset) {
+
+		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, 2 * RADIUS + boundOffset - 1));
+	}
 }
 
 void Scene::constructEnvironment() {
@@ -878,6 +902,7 @@ int Scene::runEngine() {
 		//	tt.detach();
 		}
 		handleCollisionWithCamera();
+		boundariesCollision();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;
 	//	view_matrix[0][0] = -1;
