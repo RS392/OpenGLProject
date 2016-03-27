@@ -30,10 +30,18 @@
 #include "ctime"
 #include "Camera.h"
 using namespace std;
+struct Light {
+	glm::vec3 position;
+	glm::vec3 intensities; //a.k.a. the color of the light
+};
+
+// ...
+
 
 class Scene
 {
 private:
+	
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objectsInMemory;

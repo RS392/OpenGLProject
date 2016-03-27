@@ -104,6 +104,7 @@ GLfloat displacementx = 0.0f;
 
 bool threadDone;
 tdogl::Camera gCamera;
+Light light;
 double gScrollY = 0.0;
 
 
@@ -157,7 +158,7 @@ void Update(float secondsElapsed) {
 	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
 	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
 	gCamera.setFieldOfView(fieldOfView);
-	
+	light.position = gCamera.position();
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -419,9 +420,11 @@ void Scene::drawTexturizedObjects() {
 		if (objectsToDraw[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
-			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
+	//		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
+
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
 				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -441,6 +444,16 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(
+				2,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->normals.size() * sizeof(vec3))//offset
+				);
+
 			glActiveTexture(GL_TEXTURE0);
 			if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
 			{
@@ -550,14 +563,13 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
 			}
-		
-			
 			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 			}
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-			
+			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 			//
 			//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
@@ -747,7 +759,8 @@ void Scene::renewObjectsToDraw() {
 
 
 int Scene::runEngine() { 
-	
+	light.position = gCamera.position();
+	light.intensities = glm::vec3(1, 1, 1); //white
 	makeOriginalObjects();
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
@@ -884,7 +897,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-	    glClearColor(0.0f, 0.0f, 0.0f, 0.0);
+	    glClearColor(0.0f, 0.0f, 1.0f, 0.0);
 		
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
