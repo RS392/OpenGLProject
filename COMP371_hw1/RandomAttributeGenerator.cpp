@@ -68,8 +68,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 400;
 	}
 	else if (original.type.find("grass") != string::npos){
-		min = 10000;
-		max = 12500;
+		min = 8000;
+		max = 10500;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;

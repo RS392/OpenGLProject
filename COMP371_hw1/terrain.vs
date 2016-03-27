@@ -12,6 +12,5 @@ void main() {
 	mat4 CTM = view_matrix * model_matrix;
     // Pass the tex coord straight through to the fragment shader
     fragTexCoord = vertTexCoord;
-    
     gl_Position = CTM * vec4(in_Position, 1);
 }

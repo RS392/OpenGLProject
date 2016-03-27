@@ -47,6 +47,7 @@ private:
 	vector<vec3> treeNormals;
 	vector<mat4> terrainTranslationMatrices;
 	GLfloat boundaries[60];
+
 	void renewObjectsToDraw();
 	void handleCollisionWithCamera();
 	void optimizeFromVBO();
