@@ -11,6 +11,7 @@ Every feature( like a tree or a rock), will be an object therefore will have to 
 using namespace std;
 typedef vector<vec3> vertices;
 typedef vector<vec2> UVs;
+
 //typedef vector<vector<float>> vertsAndUvs; // first vxuvs option
 typedef vector<float> vertsAndUvs; // second vxuvs option
 
@@ -37,6 +38,7 @@ public:
 	vec3 boundingBox;
 	string type;
 	vertices verts;
+	vector<vec3> normals;
 	Object();
 	~Object();
 };

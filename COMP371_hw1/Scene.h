@@ -45,11 +45,11 @@ private:
 	vec3 oldPlayerPos;
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
-<<<<<<< HEAD
+
 	vector<mat4> terrainTranslationMatrices;
-=======
+
 	GLfloat boundaries[60];
->>>>>>> 06d7b58997901d92b6547b83782f70b9ec2a9b8b
+
 	void renewObjectsToDraw();
 	void handleCollisionWithCamera();
 	void optimizeFromVBO();
