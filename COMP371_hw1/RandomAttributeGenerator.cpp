@@ -43,33 +43,33 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	double multiplier = 5;
 
 	if (original.type.find("tree") != string::npos) {
-		min = 300;
-		max = 400;
+		min = 3;
+		max = 4;
 	}
 	else if (original.type.find("pinet") != string::npos) {
-		min = 300;
-		max = 400;
+		min = 3;
+		max = 4;
 	}
 	else if (original.type.find("fern") != string::npos) {
-		min = 300;
-		max = 400;
+		min = 3;
+		max = 4;
 	}
 	
 	else if (original.type.find("flow") != string::npos) {
-		min = 300;
-		max = 400;
+		min = 3;
+		max = 4;
 	}
 	else if (original.type.find("shr") != string::npos) {
-		min = 150;
-		max = 300;
+		min = 1;
+		max = 3;
 	}
 	else if (original.type.find("weed") != string::npos) {
-		min = 250;
-		max = 400;
+		min = 2;
+		max = 4;
 	}
 	else if (original.type.find("grass") != string::npos){
-		min = 4000;
-		max = 6500;
+		min = 4;
+		max = 6;
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
