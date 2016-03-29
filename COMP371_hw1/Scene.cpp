@@ -166,7 +166,11 @@ void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 }
 Scene::Scene()
 {
+	UserInput* title = new UserInput();
 	generator = new RandomAttributeGenerator();
+	generator->setTitle(title);
+	//cout << title->getMultiplier();
+
 	numberOfOriginalObjects = 28;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object* obj = new Object(); // empty place holder to allocate memory
@@ -577,7 +581,6 @@ void Scene::drawEverything() {
 	drawTerrain();
 	drawBoundaries();
 	drawTexturizedObjects();
-	
 	
 }
 /*
