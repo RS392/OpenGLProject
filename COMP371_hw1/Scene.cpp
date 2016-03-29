@@ -413,6 +413,7 @@ void Scene::drawObjects() {
 		}
 	}
 }
+
 void Scene::drawTexturizedObjects() {
 	//switch shader programs
 	 glUseProgram(terrain_shader_program);
@@ -421,6 +422,7 @@ void Scene::drawTexturizedObjects() {
 
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
+		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
@@ -574,7 +576,7 @@ void Scene::drawTexturizedObjects() {
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
-
+			
 			//
 			//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
