@@ -29,6 +29,7 @@
 #include "Terrain.h"
 #include "ctime"
 #include "Camera.h"
+#include "UserInput.h"
 using namespace std;
 struct Light {
 	glm::vec3 position;

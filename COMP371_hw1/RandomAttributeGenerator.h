@@ -9,6 +9,7 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include "CustomThread.h"
+#include "UserInput.h"
 #include <mutex>
 #include <future>
 using namespace std;
@@ -21,6 +22,7 @@ class RandomAttributeGenerator
 {
 private:
 	mutex m;
+	UserInput* title;
 	
 	void alterObj(Object &obj, objects &copies);
 	unsigned int generateRandomInt(unsigned long a, unsigned long b, unsigned long c);
@@ -41,5 +43,6 @@ public:
 	RandomAttributeGenerator();
 	~RandomAttributeGenerator();
 	void randomizeObject(Object original, objects &copies);
+	void setTitle(UserInput* t);
 };
 

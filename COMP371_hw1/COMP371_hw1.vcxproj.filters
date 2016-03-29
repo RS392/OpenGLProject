@@ -60,6 +60,9 @@
     <ClInclude Include="CImg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UserInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -101,6 +104,9 @@
     <ClCompile Include="CustomThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UserInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COMP371_hw1.vs">
@@ -113,6 +119,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="terrain.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="feature.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="feature.vs">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

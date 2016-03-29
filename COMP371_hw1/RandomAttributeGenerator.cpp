@@ -40,36 +40,51 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	int min, max, nbOfCopies;
 	distanceTraveled = playerPos - oldPlayerPos;
 	//cout << distanceTraveled[2] << endl;
-	double multiplier = 5;
+	// double multiplier = 5;
 
 	if (original.type.find("tree") != string::npos) {
-		min = 3;
-		max = 4;
+
+		min = 400 * title->getMultiplier();
+		max = 600 * title->getMultiplier();
 	}
 	else if (original.type.find("pinet") != string::npos) {
-		min = 3;
-		max = 4;
+		min = 400 * title->getMultiplier();
+		max = 600 * title->getMultiplier();
 	}
 	else if (original.type.find("fern") != string::npos) {
-		min = 3;
-		max = 4;
+		min = 400 * title->getMultiplier();
+		max = 500 * title->getMultiplier();
 	}
 	
 	else if (original.type.find("flow") != string::npos) {
-		min = 3;
-		max = 4;
+		min = 500 * title->getMultiplier();
+		max = 600 * title->getMultiplier();
+	}
+	else if (original.type.find("pinet") != string::npos) {
+		min = 300 * title->getMultiplier();
+		max = 400 * title->getMultiplier();
+	}
+	else if (original.type.find("fern") != string::npos) {
+		min = 300 * title->getMultiplier();
+		max = 400 * title->getMultiplier();
+	}
+	
+	else if (original.type.find("flow") != string::npos) {
+		min = 300 * title->getMultiplier();
+		max = 400 * title->getMultiplier();
 	}
 	else if (original.type.find("shr") != string::npos) {
-		min = 1;
-		max = 3;
+		min = 150 * title->getMultiplier();
+		max = 300 * title->getMultiplier();
 	}
 	else if (original.type.find("weed") != string::npos) {
-		min = 2;
-		max = 4;
+		min = 250 * title->getMultiplier();
+		max = 400 * title->getMultiplier();
 	}
 	else if (original.type.find("grass") != string::npos){
-		min = 4;
-		max = 6;
+
+		min = 8000 * title->getMultiplier();
+		max = 10500 * title->getMultiplier();
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
@@ -174,4 +189,8 @@ void RandomAttributeGenerator::changeObjectSize(Object &obj) {
 		obj.verts[i][1] *= (float)yScale;
 		obj.verts[i][2] *= (float)zScale;
 	}
+}
+
+void RandomAttributeGenerator::setTitle(UserInput* t) {
+	title = t;
 }

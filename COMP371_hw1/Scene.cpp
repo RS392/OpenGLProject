@@ -12,6 +12,7 @@ GLFWwindow* window = 0x00;
 Object* pinet2;
 GLuint shader_program = 0;
 GLuint terrain_shader_program = 0;
+GLuint feature_shader_program = 0;
 bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
@@ -169,7 +170,11 @@ void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 }
 Scene::Scene()
 {
+	UserInput* title = new UserInput();
 	generator = new RandomAttributeGenerator();
+	generator->setTitle(title);
+	//cout << title->getMultiplier();
+
 	numberOfOriginalObjects = 28;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object* obj = new Object(); // empty place holder to allocate memory
@@ -244,7 +249,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, originalObjects[26]->normals);
 	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals);
 
-	fileReader->loadTGAFile("features/texture_soil.tga", &terrainTGA);
+	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
 	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
 	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
@@ -412,6 +417,7 @@ void Scene::drawObjects() {
 		}
 	}
 }
+
 void Scene::drawTexturizedObjects() {
 	//switch shader programs
 	 glUseProgram(terrain_shader_program);
@@ -420,12 +426,13 @@ void Scene::drawTexturizedObjects() {
 
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
+		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
-	//		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
+	 		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
@@ -573,8 +580,7 @@ void Scene::drawTexturizedObjects() {
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x,light.position.y,light.position.z);
 			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y,light.intensities.z);
-
-			//glDepthMask(GL_FALSE);
+//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
@@ -590,9 +596,8 @@ void Scene::drawEverything() {
 	
 	//drawObjects();
 	drawTerrain();
-	drawBoundaries();
+	//drawBoundaries();
 	drawTexturizedObjects();
-	
 	
 }
 /*
@@ -799,6 +804,7 @@ int Scene::runEngine() {
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
+	//feature_shader_program = loadShaders("feature.vs", "feature.fs");
 	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
