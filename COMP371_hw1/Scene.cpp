@@ -423,7 +423,7 @@ void Scene::drawTexturizedObjects() {
 	 glUseProgram(terrain_shader_program);
 	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-
+	// cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
 		

@@ -1,7 +1,7 @@
 
 #version 150
 
-uniform mat4 model;
+uniform mat4 model_matrix;
 uniform sampler2D tex; //this is the texture
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
@@ -17,11 +17,11 @@ uniform struct Light {
 
 void main() {
 //calculate normal in world coordinates
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
+    mat3 normalMatrix = transpose(inverse(mat3(model_matrix)));
     vec3 normal = normalize(normalMatrix * fragNormal);
     
     //calculate the location of this fragment (pixel) in world coordinates
-    vec3 fragPosition = vec3(model * vec4(fragVert, 1));
+    vec3 fragPosition = vec3(model_matrix * vec4(fragVert, 1));
     
     //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
