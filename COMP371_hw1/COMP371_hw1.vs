@@ -8,7 +8,7 @@ in  vec3 in_Position;		//vertex position
 out vec3 out_Color;
 
 void main () {
-mat4 CTM = view_matrix;
+mat4 CTM = view_matrix * model_matrix;
 gl_Position = CTM * vec4 (in_Position, 1.0);
 	if(in_Position.y < -.1)
 	{

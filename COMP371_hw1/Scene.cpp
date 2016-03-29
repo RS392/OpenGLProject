@@ -43,8 +43,6 @@ GLuint shr9_textureID;
 GLuint shr15_textureID;
 GLuint shr16_textureID;
 GLuint shr17h_textureID;
-GLuint shr18h_textureID;
-GLuint shr19h_textureID;
 GLuint weed1_textureID;
 GLuint weed3_textureID;
 GLuint weed4_textureID;
@@ -75,8 +73,6 @@ TGAFILE shr9TGA;
 TGAFILE shr15TGA;
 TGAFILE shr16TGA;
 TGAFILE shr17hTGA;
-TGAFILE shr18hTGA;
-TGAFILE shr19hTGA;
 TGAFILE weed1TGA;
 TGAFILE weed3TGA;
 TGAFILE weed4TGA;
@@ -109,14 +105,17 @@ GLfloat displacementx = 0.0f;
 
 bool threadDone;
 tdogl::Camera gCamera;
+Light light;
 double gScrollY = 0.0;
 
+//To leave enough space for the objects drawn at the very edge of the forest
+GLfloat boundOffset = 50;
 
 // update the scene based on the time elapsed since last update
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 220.0; //units per second
+	const float moveSpeed = 1000.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -162,7 +161,7 @@ void Update(float secondsElapsed) {
 	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
 	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
 	gCamera.setFieldOfView(fieldOfView);
-	
+	light.position = gCamera.position();
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -172,7 +171,7 @@ void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 Scene::Scene()
 {
 	generator = new RandomAttributeGenerator();
-	numberOfOriginalObjects = 30;
+	numberOfOriginalObjects = 28;
 	for (int i = 0; i < numberOfOriginalObjects; ++i) {
 		Object* obj = new Object(); // empty place holder to allocate memory
 		
@@ -244,9 +243,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__shr15.obj", originalObjects[24]->verts, originalObjects[24]->uvs, originalObjects[24]->normals);
 	fileReader->loadObj("features/obj__shr16.obj", originalObjects[25]->verts, originalObjects[25]->uvs, originalObjects[25]->normals);
 	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, originalObjects[26]->normals);
-	fileReader->loadObj("features/obj__shr18h.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals);
-	fileReader->loadObj("features/obj__shr19h.obj", originalObjects[28]->verts, originalObjects[28]->uvs, originalObjects[28]->normals);
-	fileReader->loadObj("features/obj__grass.obj", originalObjects[29]->verts, originalObjects[29]->uvs, originalObjects[29]->normals);
+	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals);
 
 	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
@@ -276,8 +273,6 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/shr15.tga", &shr15TGA);
 	fileReader->loadTGAFile("features/shr16.tga", &shr16TGA);
 	fileReader->loadTGAFile("features/shr17h.tga", &shr17hTGA);
-	fileReader->loadTGAFile("features/shr18h.tga", &shr18hTGA);
-	fileReader->loadTGAFile("features/shr19h.tga", &shr19hTGA);
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
 	originalObjects[0]->type = "pinet1";
@@ -299,7 +294,7 @@ void Scene::makeOriginalObjects() {
 	originalObjects[16]->type = "weed4a";
 	originalObjects[17]->type = "weed5";
 	originalObjects[18]->type = "weed6";
-	originalObjects[19]->type = "shr1";
+	originalObjects[19]->type = "shr1h";
 	originalObjects[20]->type = "shr2";
 	originalObjects[21]->type = "shr3";
 	originalObjects[22]->type = "shr4";
@@ -307,9 +302,7 @@ void Scene::makeOriginalObjects() {
 	originalObjects[24]->type = "shr15";
 	originalObjects[25]->type = "shr16";
 	originalObjects[26]->type = "shr17h";
-	originalObjects[27]->type = "shr18h";
-	originalObjects[28]->type = "shr19h";
-	originalObjects[29]->type = "grass";
+	originalObjects[27]->type = "grass";
 }
 bool once = true;
 void Scene::drawTerrain()
@@ -430,9 +423,11 @@ void Scene::drawTexturizedObjects() {
 		if (objectsToDraw[i] != NULL) {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
-			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
+	//		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
+
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
 				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -452,6 +447,16 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(
+				2,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->normals.size() * sizeof(vec3))//offset
+				);
+
 			glActiveTexture(GL_TEXTURE0);
 			if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
 			{
@@ -561,20 +566,18 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
 			}
-			if (objectsToDraw[i]->type.compare("shr18") == 0)//bind fern texture
-			{
-				glBindTexture(GL_TEXTURE_2D, shr18h_textureID);
-			}
-			if (objectsToDraw[i]->type.compare("shr19") == 0)//bind fern texture
-			{
-				glBindTexture(GL_TEXTURE_2D, shr19h_textureID);
-			}
 			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 			}
+
 			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			
+
+			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+
 			//
 			//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
@@ -623,72 +626,72 @@ void Scene::setBoundaries() {
 	GLfloat height = 300;
 
 	//FAR
-	boundaries[0] = RADIUS;
+	boundaries[0] = RADIUS + boundOffset;
 	boundaries[1] = 0;
-	boundaries[2] = 0;
-	boundaries[3] = -RADIUS;
+	boundaries[2] = -boundOffset;
+	boundaries[3] = -RADIUS - boundOffset;
 	boundaries[4] = 0;
-	boundaries[5] = 0;
-	boundaries[6] = -RADIUS;
+	boundaries[5] = -boundOffset;
+	boundaries[6] = -RADIUS - boundOffset;
 	boundaries[7] = height;
-	boundaries[8] = 0;
-	boundaries[9] = RADIUS;
+	boundaries[8] = -boundOffset;
+	boundaries[9] = RADIUS + boundOffset;
 	boundaries[10] = height;
-	boundaries[11] = 0;
-	boundaries[12] = RADIUS;
+	boundaries[11] = -boundOffset;
+	boundaries[12] = RADIUS + boundOffset;
 	boundaries[13] = 0;
-	boundaries[14] = 0;
-	boundaries[15] = -RADIUS;
+	boundaries[14] = -boundOffset;
+	boundaries[15] = -RADIUS - boundOffset;
 	boundaries[16] = 0;
-	boundaries[17] = 0;
+	boundaries[17] = -boundOffset;
 
 	//LEFT
-	boundaries[18] = -RADIUS;
+	boundaries[18] = -RADIUS - boundOffset;
 	boundaries[19] = 0;
-	boundaries[20] = 2 * RADIUS;
-	boundaries[21] = -RADIUS;
+	boundaries[20] = 2 * RADIUS + boundOffset;
+	boundaries[21] = -RADIUS - boundOffset;
 	boundaries[22] = height;
-	boundaries[23] = 2 * RADIUS;
-	boundaries[24] = -RADIUS;
+	boundaries[23] = 2 * RADIUS + boundOffset;
+	boundaries[24] = -RADIUS - boundOffset;
 	boundaries[25] = height;
-	boundaries[26] = 0;
-	boundaries[27] = -RADIUS;
+	boundaries[26] = -boundOffset;
+	boundaries[27] = -RADIUS - boundOffset;
 	boundaries[28] = 0;
-	boundaries[29] = 0;
-	boundaries[30] = -RADIUS;
+	boundaries[29] = -boundOffset;
+	boundaries[30] = -RADIUS - boundOffset;
 	boundaries[31] = 0;
-	boundaries[32] = 2 * RADIUS;
+	boundaries[32] = 2 * RADIUS + boundOffset;
 
 	//NEAR
-	boundaries[33] = RADIUS;
+	boundaries[33] = RADIUS + boundOffset;
 	boundaries[34] = 0;
-	boundaries[35] = 2 * RADIUS;
-	boundaries[36] = RADIUS;
+	boundaries[35] = 2 * RADIUS + boundOffset;
+	boundaries[36] = RADIUS + boundOffset;
 	boundaries[37] = height;
-	boundaries[38] = 2 * RADIUS;
-	boundaries[39] = -RADIUS;
+	boundaries[38] = 2 * RADIUS + boundOffset;
+	boundaries[39] = -RADIUS + boundOffset;
 	boundaries[40] = height;
-	boundaries[41] = 2 * RADIUS;
-	boundaries[42] = -RADIUS;
+	boundaries[41] = 2 * RADIUS + boundOffset;
+	boundaries[42] = -RADIUS + boundOffset;
 	boundaries[43] = 0;
-	boundaries[44] = 2 * RADIUS;
-	boundaries[45] = RADIUS;
+	boundaries[44] = 2 * RADIUS + boundOffset;
+	boundaries[45] = RADIUS + boundOffset;
 	boundaries[46] = 0;
-	boundaries[47] = 2 * RADIUS;
+	boundaries[47] = 2 * RADIUS + boundOffset;
 
 	//RIGHT
-	boundaries[48] = RADIUS;
+	boundaries[48] = RADIUS + boundOffset;
 	boundaries[49] = 0;
-	boundaries[50] = 0;
-	boundaries[51] = RADIUS;
+	boundaries[50] = -boundOffset;
+	boundaries[51] = RADIUS + boundOffset;
 	boundaries[52] = height;
-	boundaries[53] = 0;
-	boundaries[54] = RADIUS;
+	boundaries[53] = -boundOffset;
+	boundaries[54] = RADIUS + boundOffset;
 	boundaries[55] = height;
-	boundaries[56] = 2 * RADIUS;
-	boundaries[57] = RADIUS;
+	boundaries[56] = 2 * RADIUS + boundOffset;
+	boundaries[57] = RADIUS + boundOffset;
 	boundaries[58] = 0;
-	boundaries[59] = 2 * RADIUS;
+	boundaries[59] = 2 * RADIUS + boundOffset;
 }
 
 void Scene::drawBoundaries() {
@@ -699,6 +702,28 @@ void Scene::drawBoundaries() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);
+}
+
+void Scene::boundariesCollision() {
+
+	glm::vec3 pos = gCamera.position();
+
+	if (pos.x >= RADIUS + boundOffset) {
+		
+		gCamera.setPosition(glm::vec3(RADIUS + boundOffset - 1, lastFrameCamPos.y, lastFrameCamPos.z));
+	}
+	else if (pos.x <= -RADIUS - boundOffset) {
+
+		gCamera.setPosition(glm::vec3(-RADIUS - boundOffset + 1, lastFrameCamPos.y, lastFrameCamPos.z));
+	}
+	else if (pos.z <= -boundOffset) {
+
+		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, -boundOffset + 1));
+	}
+	else if (pos.z >= 2 * RADIUS + boundOffset) {
+
+		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, 2 * RADIUS + boundOffset - 1));
+	}
 }
 
 void Scene::constructEnvironment() {
@@ -739,6 +764,7 @@ void Scene::handleCollisionWithCamera() {
 	for (int i = 0; i < objectsToDraw.size(); ++i) {
 		Object* obj = objectsToDraw[i];
 		if (obj != NULL) {
+
 			if (obj->type == "pinet2" || obj->type == "pinet1" || obj->type == "tree1" || obj->type == "tree6"
 				|| obj->type == "tree2" || obj->type == "tree3" || obj->type == "tree4" || obj->type == "tree5") {
 				//check the X axis
@@ -749,6 +775,7 @@ void Scene::handleCollisionWithCamera() {
 						if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
 							gCamera.setPosition(lastFrameCamPos);
 							//COLLISION, stop camera from moving in the current direction
+						//	cout << obj->type << endl;
 						}
 					}
 				}
@@ -762,7 +789,8 @@ void Scene::renewObjectsToDraw() {
 
 
 int Scene::runEngine() { 
-	
+	light.position = gCamera.position();
+	light.intensities = glm::vec3(1, 1, 1); //white
 	makeOriginalObjects();
 	cout << "building, please wait..." << endl;
 	constructEnvironment();
@@ -811,8 +839,6 @@ int Scene::runEngine() {
 	shr15_textureID = testObjectTextures(shr15TGA);
 	shr16_textureID = testObjectTextures(shr16TGA);
 	shr17h_textureID = testObjectTextures(shr17hTGA);
-	shr18h_textureID = testObjectTextures(shr18hTGA);
-	shr19h_textureID = testObjectTextures(shr19hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
 	setBoundaries();
 	//applyTexture();//test
@@ -883,6 +909,7 @@ int Scene::runEngine() {
 		//	tt.detach();
 		}
 		handleCollisionWithCamera();
+		boundariesCollision();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;
 	//	view_matrix[0][0] = -1;
@@ -902,7 +929,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-	    glClearColor(1.0f, 1.0f, 1.0f, 0.0);
+	    glClearColor(0.0f, 0.0f, 1.0f, 0.0);
 		
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);

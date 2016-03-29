@@ -30,10 +30,18 @@
 #include "ctime"
 #include "Camera.h"
 using namespace std;
+struct Light {
+	glm::vec3 position;
+	glm::vec3 intensities; //a.k.a. the color of the light
+};
+
+// ...
+
 
 class Scene
 {
 private:
+	
 	RandomAttributeGenerator* generator;
 	objects originalObjects;
 	objects objectsInMemory;
@@ -45,9 +53,7 @@ private:
 	vec3 oldPlayerPos;
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
-
 	vector<mat4> terrainTranslationMatrices;
-
 	GLfloat boundaries[60];
 
 	void renewObjectsToDraw();
@@ -66,6 +72,7 @@ private:
 	void drawTerrain();
 	void setBoundaries();
 	void drawBoundaries();
+	void boundariesCollision();
 	GLuint testTexture(char*);
 	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();
