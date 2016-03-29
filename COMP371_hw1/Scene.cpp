@@ -585,7 +585,7 @@ void Scene::drawTexturizedObjects() {
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x,light.position.y,light.position.z);
 			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y,light.intensities.z);
-//glDepthMask(GL_FALSE);
+			//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
