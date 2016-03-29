@@ -426,7 +426,7 @@ void Scene::drawTexturizedObjects() {
 			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
-	//		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
+	 		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
@@ -454,7 +454,7 @@ void Scene::drawTexturizedObjects() {
 				GL_FLOAT,						// type
 				GL_FALSE,						// normalized?
 				0,								// stride
-				(const GLvoid *)(objectsToDraw[i]->normals.size() * sizeof(vec3))//offset
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2))//offset
 				);
 
 			glActiveTexture(GL_TEXTURE0);
@@ -571,9 +571,6 @@ void Scene::drawTexturizedObjects() {
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 			}
 
-			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-			
-
 			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 			glUniform3d(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
@@ -595,7 +592,7 @@ void Scene::drawEverything() {
 	
 	//drawObjects();
 	drawTerrain();
-	drawBoundaries();
+	//drawBoundaries();
 	drawTexturizedObjects();
 	
 	
@@ -804,7 +801,7 @@ int Scene::runEngine() {
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
-	feature_shader_program = loadShaders("feature.vs", "feature.fs");
+	//feature_shader_program = loadShaders("feature.vs", "feature.fs");
 	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
