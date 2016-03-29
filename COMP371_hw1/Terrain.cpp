@@ -12,19 +12,20 @@ Terrain::Terrain(glm::vec3 cameraPosition)
 	setInitialPoints();
 	setVertices();
 	setTest();
+	setNormals();
 }
-/*/ todo: first set of vertices = last
-Terrain::Terrain(vector<glm::vec3> last, Vector3D lastTranslateVector)
-{
-	setIntervals(10);
-	setTranslateVector(lastTranslateVector.getX(), lastTranslateVector.getY(),lastTranslateVector.getZ());
-	setInitialPoints();
-	setVertices();
-}*/
+
 Terrain::~Terrain()
 {
 }
-
+void Terrain::setNormals()
+{
+	int numberVertices = vertices.size() / 3;
+	for (int i = 0; i < numberVertices; i++)
+	{
+		normals.push_back(vec3(0.0f, 1.0f, 0.0f));
+	}
+}
 void Terrain::setTranslateVector(double x, double y, double z)
 {
 	translateVector = Vector3D(x, y, z);

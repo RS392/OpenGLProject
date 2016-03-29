@@ -9,7 +9,7 @@ class Terrain
 {
 private:
 	Vector3D translateVector;
-glm::vec3 cameraPosition;
+	glm::vec3 cameraPosition;
 	vector<GLfloat> vertices;
 	vector<GLfloat> textureVertices;//x, y, z, u, v
 	int offset;
@@ -27,6 +27,7 @@ glm::vec3 cameraPosition;
 	vector<vec3> quadXYZs;
 	vector<vec2> quadUvs;
 	vector<GLuint> quadIndices;
+	vector<vec3> normals;
 
 
 public:
@@ -34,11 +35,11 @@ public:
 	~Terrain();
 
 	void setTranslateVector(double, double, double);
-
+	void setNormals();
 	void setCameraPosition(glm::vec3 pos) { cameraPosition = pos; }
 	glm::vec3 getCameraPosition() { return cameraPosition; }
 	Vector3D getTranslateVector();
-
+	vector<vec3> getNormals() { return normals; }
 	void setTest() 
 	{
 		test.push_back(-100.0f);//x
