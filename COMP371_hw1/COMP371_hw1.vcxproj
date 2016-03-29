@@ -191,6 +191,8 @@
   <ItemGroup>
     <None Include="COMP371_hw1.fs" />
     <None Include="COMP371_hw1.vs" />
+    <None Include="feature.fs" />
+    <None Include="feature.vs" />
     <None Include="terrain.fs" />
     <None Include="terrain.vs" />
   </ItemGroup>

@@ -115,5 +115,11 @@
     <None Include="terrain.fs">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="feature.fs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="feature.vs">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

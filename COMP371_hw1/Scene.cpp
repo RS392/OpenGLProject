@@ -12,6 +12,7 @@ GLFWwindow* window = 0x00;
 Object* pinet2;
 GLuint shader_program = 0;
 GLuint terrain_shader_program = 0;
+GLuint feature_shader_program = 0;
 bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
@@ -247,7 +248,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__shr19h.obj", originalObjects[28]->verts, originalObjects[28]->uvs, originalObjects[28]->normals);
 	fileReader->loadObj("features/obj__grass.obj", originalObjects[29]->verts, originalObjects[29]->uvs, originalObjects[29]->normals);
 
-	fileReader->loadTGAFile("features/texture_soil.tga", &terrainTGA);
+	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
 	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
 	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
@@ -572,7 +573,7 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 			}
-			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			
 			//
 			//glDepthMask(GL_FALSE);
@@ -775,6 +776,7 @@ int Scene::runEngine() {
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
+	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
