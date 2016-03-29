@@ -85,7 +85,6 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 
 		min = 8000 * title->getMultiplier();
 		max = 10500 * title->getMultiplier();
-
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
