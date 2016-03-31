@@ -317,8 +317,9 @@ void Scene::drawTerrain()
 	*/
 	//switch shader programs
 	glUseProgram(terrain_shader_program);
-	//glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
-	
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 		
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
@@ -428,6 +429,7 @@ void Scene::drawTexturizedObjects() {
 	 glUseProgram(terrain_shader_program);
 	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
+	 glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
 	// cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
@@ -904,7 +906,9 @@ int Scene::runEngine() {
 		double thisTime = glfwGetTime();
 		Update((float)(thisTime - lastTime));
 		lastTime = thisTime;
-		view_matrix = gCamera.matrix();
+		//view_matrix = gCamera.matrix();//is projection()*view()
+		view_matrix = gCamera.view();
+		proj_matrix = gCamera.projection();
 		double timer = (clock() - time) / 1000.0f;
 		if (timer > 0.1f) {
 			//	cout << "constructing..." << endl;
@@ -1084,7 +1088,7 @@ GLuint Scene::loadShaders(string vertex_shader_path, string fragment_shader_path
 	
 	texture_location = glGetUniformLocation(ProgramID, "textureSampler");
 	glUniform1i(texture_location, textureID);
-	//proj_matrix_id = glGetUniformLocation(ProgramID, "proj_matrix");
+	proj_matrix_id = glGetUniformLocation(ProgramID, "proj_matrix");
 
 	return ProgramID;
 }

@@ -3,6 +3,7 @@
 
 uniform mat4 view_matrix, model_matrix;
 
+
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec2 vertTexCoord;
 out vec2 fragTexCoord;

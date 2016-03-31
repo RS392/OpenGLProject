@@ -16,7 +16,7 @@ uniform struct Light {
 } light;
 
 void main() {
-	mat4 model = view_matrix * model_matrix;
+	mat4 model = proj_matrix * view_matrix * model_matrix;
 	//calculate normal in world coordinates
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
     //mat3 normalMatrix = transpose(inverse(mat3(model)));
@@ -37,10 +37,15 @@ void main() {
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
     vec4 surfaceColor = texture(tex, fragTexCoord);
+	mat4 inverseView = inverse(view_matrix);
+	vec4 camera = inverseView[3];
+	
+	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+	
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else
-		finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+		
    // finalColor = texture(tex, fragTexCoord);
 	 //finalColor.y = finalColor.y - n;
 	//finalColor = vec4(fragTexCoord, 0.0,0.0);
