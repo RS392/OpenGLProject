@@ -20,8 +20,16 @@ void main() {
 	//calculate normal in world coordinates
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
     //mat3 normalMatrix = transpose(inverse(mat3(model)));
-    vec3 normal = normalize(normalMatrix * fragNormal);
-    
+    mat4 inverseView = inverse(view_matrix);
+	vec4 camera = inverseView[3];
+	
+    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
+	vec3 normal = normalize(normalMatrix * fragNormal);
+	if(dot(cameraToPoint, fragNormal) > 0)
+	{
+		normal *= -1.0;
+	}
+	
     //calculate the location of this fragment (pixel) in world coordinates
     vec3 fragPosition = vec3(model * vec4(fragVert, 1));
     
@@ -37,8 +45,7 @@ void main() {
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
     vec4 surfaceColor = texture(tex, fragTexCoord);
-	mat4 inverseView = inverse(view_matrix);
-	vec4 camera = inverseView[3];
+	
 	
 	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 	
