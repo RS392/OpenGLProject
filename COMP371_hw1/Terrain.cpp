@@ -117,15 +117,14 @@ vector<glm::vec3> Terrain::getInitialPoints()
 	return initialPoints;
 }
 /*
-	Sets initial points extending from x=  -.5*RADIUS to x=  .5*RADIUS, which is centered around the initial x value of the camera position
+	Sets initial points extending from  x= -RADIUS to x = RADIUS, which is centered around the initial x value of the camera position
 */
 void Terrain::setInitialPoints()
 {
 	for (double i = -1.0*getCameraPosition().z; i < getCameraPosition().z; i+=100)//centered around camera
 	{
-		//initialPoints.push_back(glm::vec3((i / (float)intervals), 0.0, -1.0));
-		initialPoints.push_back(glm::vec3((float)i, 0.0f, -1.0*getCameraPosition().z));//getCameraPosition().z is RADIUS
-		//initialPoints.push_back(glm::vec3((float)i, getCameraPosition().y - 50, 10000));//getCameraPosition().z is RADIUS
+		//initialPoints.push_back(glm::vec3((float)i, 0.0f, -1.0*getCameraPosition().z));//getCameraPosition().z is RADIUS
+		initialPoints.push_back(glm::vec3((float)i, 0.0f, 0.0f));//getCameraPosition().z is RADIUS
 	}
 	/*waterVertices.push_back(initialPoints[0].x);
 	waterVertices.push_back(-.01);
