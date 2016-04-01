@@ -339,11 +339,19 @@ void Scene::drawTerrain()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, terr_textureID);
+	
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 	for (int i = 0; i < terrainTranslationMatrices.size(); i++)
 	{
+
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(terrainTranslationMatrices[i]));//use translated model matrix
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
+		//glDisable(GL_BLEND);
+		
 	}
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -423,17 +431,26 @@ void Scene::drawObjects() {
 		}
 	}
 }
-
+//bool once = true;
+/*bool sortByFirstVertex(const Object lhs, const Object rhs)
+{
+	return lhs.verts[0].z < rhs.verts[0].z;
+}*/
 void Scene::drawTexturizedObjects() {
+	if (once)
+	{
+		
+		//sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);
+		once = false;
+	}
 	//switch shader programs
-	 glUseProgram(terrain_shader_program);
+	 glUseProgram(feature_shader_program);
 	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 	 glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
 	// cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
-		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
@@ -584,9 +601,9 @@ void Scene::drawTexturizedObjects() {
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 			}
 
-			glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x,light.position.y,light.position.z);
-			glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y,light.intensities.z);
+			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x,light.position.y,light.position.z);
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y,light.intensities.z);
 			//glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -811,7 +828,7 @@ int Scene::runEngine() {
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
-	//feature_shader_program = loadShaders("feature.vs", "feature.fs");
+	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
@@ -938,8 +955,8 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
-	    glClearColor(0.0f, 0.0f, 1.0f, 0.0);
-		
+	    glClearColor(0.02f, 0.1f, 0.3f, 0.0);
+		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
