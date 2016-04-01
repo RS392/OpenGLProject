@@ -24,18 +24,16 @@ void main() {
 	vec4 camera = inverseView[3];
 	
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
-	//vec3 normal = normalize(normalMatrix * fragNormal);
-	//vec3 normal = -1.0*cameraToPoint;
-	//vec3 normal = -1.0*normalize(cameraToPoint);
-	vec3 normal = normalize(cameraToPoint);
-	if(dot(normalize(cameraToPoint), fragNormal) > 0)
-	{
-		normal *= -1.0;
-	}
+	//vec3 normal = normalize(normalMatrix * fragNormal);//black
+	//vec3 normal = -1.0*cameraToPoint;//black
+	//vec3 normal = cameraToPoint;//too bright
+	vec3 normal = normalize(cameraToPoint);//black
+	//vec3 normal = normalize(-1.0*cameraToPoint);//black
+	
 	float q = length(cameraToPoint);
 	float a = 1.0;//0.6
-	float b = 0.5;
-	float c = 0.1;
+	float b = 0.4;
+	float c = 0.9;
 	float attenuation = 1.0/(a + b*q+c*q*q);
 	//float attenuation = 1.0;
     //calculate the location of this fragment (pixel) in world coordinates

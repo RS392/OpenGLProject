@@ -347,8 +347,8 @@ void Scene::drawTerrain()
 	{
 
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(terrainTranslationMatrices[i]));//use translated model matrix
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glEnable(GL_BLEND);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
 		//glDisable(GL_BLEND);
 		
@@ -432,25 +432,30 @@ void Scene::drawObjects() {
 	}
 }
 //bool once = true;
-/*bool sortByFirstVertex(const Object lhs, const Object rhs)
+/*bool sortByFirstVertex(const Object* lhs, const Object* rhs) // objects = vector<Object*>
 {
-	return lhs.verts[0].z < rhs.verts[0].z;
+	return lhs->verts[0].z > rhs->verts[0].z;
 }*/
 void Scene::drawTexturizedObjects() {
-	if (once)
-	{
-		
-		//sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);
-		once = false;
-	}
+	
 	//switch shader programs
 	 glUseProgram(feature_shader_program);
 	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 	 glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
 	// cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
+	/* if (objectsToDraw[0] != NULL)
+	 {
+		 if (once)
+		 {
+
+			 sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);//verts  = vector<vec3>. .z
+			 once = false;
+		 }
+	 }*/
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
+			
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
 			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
