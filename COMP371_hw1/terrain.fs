@@ -25,11 +25,15 @@ void main() {
 	
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
 	vec3 normal = normalize(normalMatrix * fragNormal);
-	if(dot(cameraToPoint, fragNormal) > 0)
+	if(dot(normalize(cameraToPoint), fragNormal) > 0)
 	{
 		normal *= -1.0;
 	}
-	
+	float q = length(cameraToPoint);
+	float a = 0.6;
+	float b = 0.5;
+	float c = 0.1;
+	float attenuation = 1.0/(a + b*q+q*q);
     //calculate the location of this fragment (pixel) in world coordinates
     vec3 fragPosition = vec3(model * vec4(fragVert, 1));
     
@@ -37,8 +41,8 @@ void main() {
     vec3 surfaceToLight = light.position - fragPosition;
 	
     //calculate the cosine of the angle of incidence
-    float brightness = dot(normal, surfaceToLight) / (length(surfaceToLight) * length(normal));
-    brightness = clamp(brightness, 0, 1);
+    float brightness = dot(normal, surfaceToLight) * attenuation;// / (length(surfaceToLight) * length(normal));
+    brightness = clamp(brightness, 0, 1) ;
 
     //calculate final color of the pixel, based on:
     // 1. The angle of incidence: brightness
