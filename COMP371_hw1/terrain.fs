@@ -19,22 +19,24 @@ void main() {
 	mat4 model = proj_matrix * view_matrix * model_matrix;
 	//calculate normal in world coordinates
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
-    //mat3 normalMatrix = transpose(inverse(mat3(model)));
     mat4 inverseView = inverse(view_matrix);
-	vec4 camera = inverseView[3];
+	vec4 camera = inverseView[3];//checked xyz
 
 	//calculate the location of this fragment (pixel) in world coordinates
 	vec3 fragPosition = vec3(model * vec4(fragVert, 1));
-    vec3 cameraToPoint = -1.0*vec3(fragPosition.x - camera.x, fragPosition.y - camera.y, fragPosition.z - camera.z);
+    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
 	
-	vec3 normal = normalize(cameraToPoint);
+	vec3 camToPoint = vec3(model*vec4(cameraToPoint, 1.0));
+	vec3 normal = normalize(normalMatrix*camToPoint);
 	
+	float offset = 10000 -camera.z;
 	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
-	float q = 10000.0 - length(surfaceToLight);
+	//float q = 10000.0 - length(surfaceToLight);
+	float q = 10000-offset - length(surfaceToLight);
 	float a = 1.0;
 	float b = 0.5;
-	float c = 0.4;
+	float c = 0.09;
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
@@ -51,8 +53,8 @@ void main() {
 		discard;
 	 }
 	
-	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 	
+	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else
