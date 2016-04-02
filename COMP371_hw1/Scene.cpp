@@ -161,10 +161,8 @@ void Update(float secondsElapsed) {
 	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
 	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
 	gCamera.setFieldOfView(fieldOfView);
-	//light.position = gCamera.position();
-	light.position.x = gCamera.position().x;
-	light.position.y = gCamera.position().y - 1.5;
-	light.position.z = gCamera.position().z;
+	light.position = gCamera.position();
+	light.position.y -= 1.5;
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -322,7 +320,7 @@ void Scene::drawTerrain()
 	glUseProgram(terrain_shader_program);
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
-	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 		
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
@@ -358,8 +356,8 @@ void Scene::drawTerrain()
 	}
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glUseProgram(shader_program);
-	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
+	//glUseProgram(shader_program);
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
 	/**/
 }
 
@@ -446,16 +444,6 @@ void Scene::drawTexturizedObjects() {
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
-   // cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
-
-	if (once)
-	{
-		if (objectsToDraw[0] != NULL)
-		{
-			//sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);//verts  = vector<vec3>. .z
-			once = false;
-		}
-	
 
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
@@ -622,7 +610,7 @@ void Scene::drawTexturizedObjects() {
 			glDepthMask(GL_TRUE);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-	}
+	
 }
 
 }
@@ -823,9 +811,8 @@ void Scene::renewObjectsToDraw() {
 
 
 int Scene::runEngine() { 
-	light.position.x = gCamera.position().x;
-	light.position.y = gCamera.position().y - 1.5;
-	light.position.z = gCamera.position().z;
+	light.position = gCamera.position();
+	light.position.y -= 1.5;
 	light.intensities = glm::vec3(1, 1, 1); //white
 	makeOriginalObjects();
 	cout << "building, please wait..." << endl;

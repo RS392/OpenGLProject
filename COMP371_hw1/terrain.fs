@@ -31,22 +31,14 @@ void main() {
 	
 	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
-	float q = length(surfaceToLight);
-	float a = 10000.0;//0.6
-	float b = 0.001;
-	float c = 0.001;
+	float q = 10000.0 - length(surfaceToLight);
+	float a = 1.0;
+	float b = 0.5;
+	float c = 0.4;
 	float attenuation = 1.0/(a + b*q+c*q*q);
-	//float attenuation = 1.0/(c*q);
-	//float attenuation = 0.00001;//super dim.  0.0001 is full brightness
-	//float attenuation = 0.0001;//full brightness
-	//float attenuation = 1.0;
-   
-  
-    
-   
-	
+		
     //calculate the cosine of the angle of incidence
-    float brightness = dot(normal, surfaceToLight)* attenuation;//  / (length(surfaceToLight) * length(normal));//;
+    float brightness = dot(normal, surfaceToLight) * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
     //calculate final color of the pixel, based on:
@@ -56,7 +48,7 @@ void main() {
     vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
-		//discard;
+		discard;
 	 }
 	
 	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
