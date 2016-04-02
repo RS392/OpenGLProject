@@ -16,6 +16,7 @@ uniform struct Light {
 } light;
 
 void main() {
+	
 	mat4 model = proj_matrix * view_matrix * model_matrix;
 	//calculate normal in world coordinates
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
@@ -25,6 +26,7 @@ void main() {
 	
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
 	vec3 normal = normalize(normalMatrix * fragNormal);
+
 	if(dot(normalize(cameraToPoint), fragNormal) > 0)
 	{
 		normal *= -1.0;

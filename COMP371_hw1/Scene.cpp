@@ -161,7 +161,10 @@ void Update(float secondsElapsed) {
 	if (fieldOfView < 5.0f) fieldOfView = 5.0f;
 	if (fieldOfView > 130.0f) fieldOfView = 130.0f;
 	gCamera.setFieldOfView(fieldOfView);
-	light.position = gCamera.position();
+	//light.position = gCamera.position();
+	light.position.x = gCamera.position().x;
+	light.position.y = gCamera.position().y - 1.5;
+	light.position.z = gCamera.position().z;
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -347,10 +350,10 @@ void Scene::drawTerrain()
 	{
 
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(terrainTranslationMatrices[i]));//use translated model matrix
-		//glEnable(GL_BLEND);
-		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
-		//glDisable(GL_BLEND);
+		glDisable(GL_BLEND);
 		
 	}
 	
@@ -432,36 +435,38 @@ void Scene::drawObjects() {
 	}
 }
 //bool once = true;
-/*bool sortByFirstVertex(const Object* lhs, const Object* rhs) // objects = vector<Object*>
+bool sortByFirstVertex(const Object* lhs, const Object* rhs) // objects = vector<Object*>
 {
-	return lhs->verts[0].z > rhs->verts[0].z;
-}*/
+	return lhs->verts[0].z < rhs->verts[0].z;
+}
 void Scene::drawTexturizedObjects() {
-	
-	//switch shader programs
-	 glUseProgram(feature_shader_program);
-	 glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
-	 glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-	 glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
-	// cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
-	/* if (objectsToDraw[0] != NULL)
-	 {
-		 if (once)
-		 {
 
-			 sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);//verts  = vector<vec3>. .z
-			 once = false;
-		 }
-	 }*/
+	//switch shader programs
+	glUseProgram(feature_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
+	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
+   // cout << gCamera.position().x << "," << gCamera.position().y << "," << gCamera.position().x << endl;
+
+	if (once)
+	{
+		if (objectsToDraw[0] != NULL)
+		{
+			//sort(objectsToDraw.begin(), objectsToDraw.end(), sortByFirstVertex);//verts  = vector<vec3>. .z
+			once = false;
+		}
+	
+
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
 			
+		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
-			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3)+objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
-	 		glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
@@ -472,7 +477,7 @@ void Scene::drawTexturizedObjects() {
 				0,                  // stride
 				(const GLvoid *)0            // array buffer offset
 				);
-			
+
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(
 				1,								//to match layout in the shader
@@ -525,7 +530,7 @@ void Scene::drawTexturizedObjects() {
 			{
 				glBindTexture(GL_TEXTURE_2D, tree6_textureID);
 			}
-			if(objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
+			if (objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
 			}
@@ -607,18 +612,18 @@ void Scene::drawTexturizedObjects() {
 			}
 
 			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x,light.position.y,light.position.z);
-			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y,light.intensities.z);
-			//glDepthMask(GL_FALSE);
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+			glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
 			glDisable(GL_BLEND);
-			//glDepthMask(GL_TRUE);
+			glDepthMask(GL_TRUE);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
-	
+}
 
 }
 void Scene::drawEverything() {
@@ -818,7 +823,9 @@ void Scene::renewObjectsToDraw() {
 
 
 int Scene::runEngine() { 
-	light.position = gCamera.position();
+	light.position.x = gCamera.position().x;
+	light.position.y = gCamera.position().y - 1.5;
+	light.position.z = gCamera.position().z;
 	light.intensities = glm::vec3(1, 1, 1); //white
 	makeOriginalObjects();
 	cout << "building, please wait..." << endl;
@@ -960,6 +967,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		
+		glEnable(GL_DEPTH_TEST);
 	    glClearColor(0.02f, 0.1f, 0.3f, 0.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);

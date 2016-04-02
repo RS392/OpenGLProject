@@ -22,25 +22,28 @@ void main() {
     //mat3 normalMatrix = transpose(inverse(mat3(model)));
     mat4 inverseView = inverse(view_matrix);
 	vec4 camera = inverseView[3];
+
+	//calculate the location of this fragment (pixel) in world coordinates
+	vec3 fragPosition = vec3(model * vec4(fragVert, 1));
+    vec3 cameraToPoint = -1.0*vec3(fragPosition.x - camera.x, fragPosition.y - camera.y, fragPosition.z - camera.z);
 	
-    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
-	//vec3 normal = normalize(normalMatrix * fragNormal);//black
-	//vec3 normal = -1.0*cameraToPoint;//black
-	//vec3 normal = cameraToPoint;//too bright
-	vec3 normal = normalize(cameraToPoint);//black
-	//vec3 normal = normalize(-1.0*cameraToPoint);//black
+	vec3 normal = normalize(cameraToPoint);
 	
-	float q = length(cameraToPoint);
-	float a = 1.0;//0.6
-	float b = 0.4;
-	float c = 0.9;
-	float attenuation = 1.0/(a + b*q+c*q*q);
-	//float attenuation = 1.0;
-    //calculate the location of this fragment (pixel) in world coordinates
-    vec3 fragPosition = vec3(model * vec4(fragVert, 1));
-    
-    //calculate the vector from this pixels surface to the light source
+	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
+	float q = length(surfaceToLight);
+	float a = 10000.0;//0.6
+	float b = 0.001;
+	float c = 0.001;
+	float attenuation = 1.0/(a + b*q+c*q*q);
+	//float attenuation = 1.0/(c*q);
+	//float attenuation = 0.00001;//super dim.  0.0001 is full brightness
+	//float attenuation = 0.0001;//full brightness
+	//float attenuation = 1.0;
+   
+  
+    
+   
 	
     //calculate the cosine of the angle of incidence
     float brightness = dot(normal, surfaceToLight)* attenuation;//  / (length(surfaceToLight) * length(normal));//;
