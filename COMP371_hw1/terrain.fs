@@ -23,20 +23,19 @@ void main() {
 	vec4 camera = inverseView[3];//checked xyz
 
 	//calculate the location of this fragment (pixel) in world coordinates
-	vec3 fragPosition = vec3(model * vec4(fragVert, 1));
+	vec3 fragPosition = vec3(model_matrix * vec4(fragVert, 1));
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
 	
 	vec3 camToPoint = vec3(model*vec4(cameraToPoint, 1.0));
 	vec3 normal = normalize(normalMatrix*camToPoint);
 	
-	float offset = 10000 -camera.z;
 	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
-	//float q = 10000.0 - length(surfaceToLight);
-	float q = 10000-offset - length(surfaceToLight);
+	
+	float q = length(surfaceToLight);
 	float a = 1.0;
 	float b = 0.5;
-	float c = 0.09;
+	float c = 0.01;
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
@@ -51,8 +50,7 @@ void main() {
 	if(surfaceColor.a < 0.5)
 	{ 
 		discard;
-	 }
-	
+	}
 	
 	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 //	if (normal.x == 0)
