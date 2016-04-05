@@ -82,7 +82,7 @@ void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 	return;
 }
 
-bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals, vector <vec3> out_tangents, vector <vec3> out_bitangents) {
+bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals, vector <vec3> & out_tangents, vector <vec3> & out_bitangents) {
 	vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 	vector< vec3 > temp_vertices;
 	vector< vec2 > temp_uvs;

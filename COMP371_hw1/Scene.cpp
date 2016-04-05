@@ -795,7 +795,7 @@ void Scene::drawEverything() {
 	//drawObjects();
 	drawTerrain();
 	//drawBoundaries();
-	//drawTexturizedObjects();
+	drawTexturizedObjects();
 	
 }
 
