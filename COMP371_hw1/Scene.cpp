@@ -207,13 +207,6 @@ void Update(float secondsElapsed) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
 
-	/*
-	if (moving) {
-		PlaySound(TEXT("footsteps2.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
-	} else 
-		PlaySound(NULL, 0, 0);
-	*/
-
 	//rotate camera based on mouse movement
 	const float mouseSensitivity = 0.1f;
 	double mouseX, mouseY;
@@ -286,9 +279,6 @@ Scene::Scene()
 	setTerrainTranslationMatrices();
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
-	
-
-	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);// terrain
 
 }
 
@@ -1016,7 +1006,7 @@ int Scene::runEngine() {
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
-	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
