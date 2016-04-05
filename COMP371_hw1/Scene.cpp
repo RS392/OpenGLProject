@@ -17,11 +17,14 @@ bool terrainView = true;
 GLuint view_matrix_id = 0;
 GLuint model_matrix_id = 0;
 GLuint proj_matrix_id = 0;
+GLuint MVP_id = 0;
+GLuint model_View_matrix_id = 0;
+GLuint model_View_3x3_matrix_id = 0;
 GLuint texture_location = 0;
-GLuint terr_textureID;
+
 GLuint textureID;
 
-
+GLuint terr_textureID;
 GLuint pinet1_textureID;
 GLuint pinet2_textureID;
 GLuint tree1_textureID;
@@ -51,6 +54,35 @@ GLuint weed5_textureID;
 GLuint weed6_textureID;
 GLuint grass_textureID;
 
+GLuint terr_texture_normalID;
+GLuint pinet1_texture_normalID;
+GLuint pinet2_texture_normalID;
+GLuint tree1_texture_normalID;
+GLuint tree2_texture_normalID;
+GLuint tree3_texture_normalID;
+GLuint tree4_texture_normalID;
+GLuint tree5_texture_normalID;
+GLuint tree6_texture_normalID;
+GLuint fern1_texture_normalID;
+GLuint fern2_texture_normalID;
+GLuint fern3_texture_normalID;
+GLuint flow2_texture_normalID;
+GLuint flow3_texture_normalID;
+GLuint shr1h_texture_normalID;
+GLuint shr2_texture_normalID;
+GLuint shr3_texture_normalID;
+GLuint shr4_texture_normalID;
+GLuint shr9_texture_normalID;
+GLuint shr15_texture_normalID;
+GLuint shr16_texture_normalID;
+GLuint shr17h_texture_normalID;
+GLuint weed1_texture_normalID;
+GLuint weed3_texture_normalID;
+GLuint weed4_texture_normalID;
+GLuint weed4a_texture_normalID;
+GLuint weed5_texture_normalID;
+GLuint weed6_texture_normalID;
+GLuint grass_texture_normalID;
 
 TGAFILE tree1TGA;
 TGAFILE tree2TGA;
@@ -82,6 +114,36 @@ TGAFILE weed6TGA;
 TGAFILE grassTGA;
 TGAFILE terrainTGA;
 
+TGAFILE tree1_normalTGA;
+TGAFILE tree2_normalTGA;
+TGAFILE tree3_normalTGA;
+TGAFILE tree4_normalTGA;
+TGAFILE tree5_normalTGA;
+TGAFILE tree6_normalTGA;
+TGAFILE pinet1_normalTGA;
+TGAFILE pinet2_normalTGA;
+TGAFILE fern1_normalTGA;
+TGAFILE fern2_normalTGA;
+TGAFILE fern3_normalTGA;
+TGAFILE flow2_normalTGA;
+TGAFILE flow3_normalTGA;
+TGAFILE shr1h_normalTGA;
+TGAFILE shr2_normalTGA;
+TGAFILE shr3_normalTGA;
+TGAFILE shr4_normalTGA;
+TGAFILE shr9_normalTGA;
+TGAFILE shr15_normalTGA;
+TGAFILE shr16_normalTGA;
+TGAFILE shr17h_normalTGA;
+TGAFILE weed1_normalTGA;
+TGAFILE weed3_normalTGA;
+TGAFILE weed4a_normalTGA;
+TGAFILE weed4_normalTGA;
+TGAFILE weed5_normalTGA;
+TGAFILE weed6_normalTGA;
+TGAFILE grass_normalTGA;
+TGAFILE terrain_normalTGA;
+
 int height = 500, heightB = 600;
 int width = 800, widthB = 800;
 
@@ -89,7 +151,9 @@ int width = 800, widthB = 800;
 glm::mat4 proj_matrix;
 glm::mat4 view_matrix;
 glm::mat4 model_matrix(1.0f);
-
+glm::mat4 model_View_matrix;
+glm::mat3 model_View_3x3_matrix;
+glm::mat4 MVP;
 
 GLuint VBO, VAO, EBO, TBO, VBO2, VBO3, VBO4;
 
@@ -221,34 +285,34 @@ void Scene::setTerrainTranslationMatrices()
 void Scene::makeOriginalObjects() {
 	FileReader* fileReader = new FileReader();
 
-	fileReader->loadObj("features/obj__pinet1.obj", originalObjects[0]->verts, originalObjects[0]->uvs, originalObjects[0]->normals);
-	fileReader->loadObj("features/obj__pinet2.obj", originalObjects[1]->verts, originalObjects[1]->uvs, originalObjects[1]->normals);
-	fileReader->loadObj("features/obj__tree1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, originalObjects[2]->normals);
-	fileReader->loadObj("features/obj__tree2.obj", originalObjects[3]->verts, originalObjects[3]->uvs, originalObjects[3]->normals);
-	fileReader->loadObj("features/obj__tree3.obj", originalObjects[4]->verts, originalObjects[4]->uvs, originalObjects[4]->normals);
-	fileReader->loadObj("features/obj__tree4.obj", originalObjects[5]->verts, originalObjects[5]->uvs, originalObjects[5]->normals);
-	fileReader->loadObj("features/obj__tree5.obj", originalObjects[6]->verts, originalObjects[6]->uvs, originalObjects[6]->normals);
-	fileReader->loadObj("features/obj__tree6.obj", originalObjects[7]->verts, originalObjects[7]->uvs, originalObjects[7]->normals);
-	fileReader->loadObj("features/obj__fern1.obj", originalObjects[8]->verts, originalObjects[8]->uvs, originalObjects[8]->normals);
-	fileReader->loadObj("features/obj__fern2.obj", originalObjects[9]->verts, originalObjects[9]->uvs, originalObjects[9]->normals);
-	fileReader->loadObj("features/obj__fern3.obj", originalObjects[10]->verts, originalObjects[10]->uvs, originalObjects[10]->normals);
-	fileReader->loadObj("features/obj__flow2.obj", originalObjects[11]->verts, originalObjects[11]->uvs, originalObjects[11]->normals);
-	fileReader->loadObj("features/obj__flow3.obj", originalObjects[12]->verts, originalObjects[12]->uvs, originalObjects[12]->normals);
-	fileReader->loadObj("features/obj__weed1.obj", originalObjects[13]->verts, originalObjects[13]->uvs, originalObjects[13]->normals);
-	fileReader->loadObj("features/obj__weed3.obj", originalObjects[14]->verts, originalObjects[14]->uvs, originalObjects[14]->normals);
-	fileReader->loadObj("features/obj__weed4.obj", originalObjects[15]->verts, originalObjects[15]->uvs, originalObjects[15]->normals);
-	fileReader->loadObj("features/obj__weed4a.obj", originalObjects[16]->verts, originalObjects[16]->uvs, originalObjects[16]->normals);
-	fileReader->loadObj("features/obj__weed5.obj", originalObjects[17]->verts, originalObjects[17]->uvs, originalObjects[17]->normals);
-	fileReader->loadObj("features/obj__weed6.obj", originalObjects[18]->verts, originalObjects[18]->uvs, originalObjects[18]->normals);
-	fileReader->loadObj("features/obj__shr1h.obj", originalObjects[19]->verts, originalObjects[19]->uvs, originalObjects[19]->normals);
-	fileReader->loadObj("features/obj__shr2.obj", originalObjects[20]->verts, originalObjects[20]->uvs, originalObjects[20]->normals);
-	fileReader->loadObj("features/obj__shr3.obj", originalObjects[21]->verts, originalObjects[21]->uvs, originalObjects[21]->normals);
-	fileReader->loadObj("features/obj__shr4.obj", originalObjects[22]->verts, originalObjects[22]->uvs, originalObjects[22]->normals);
-	fileReader->loadObj("features/obj__shr9.obj", originalObjects[23]->verts, originalObjects[23]->uvs, originalObjects[23]->normals);
-	fileReader->loadObj("features/obj__shr15.obj", originalObjects[24]->verts, originalObjects[24]->uvs, originalObjects[24]->normals);
-	fileReader->loadObj("features/obj__shr16.obj", originalObjects[25]->verts, originalObjects[25]->uvs, originalObjects[25]->normals);
-	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, originalObjects[26]->normals);
-	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals);
+	fileReader->loadObj("features/obj__pinet1.obj", originalObjects[0]->verts, originalObjects[0]->uvs, originalObjects[0]->normals, originalObjects[0]->tangents, originalObjects[0]->bitangents);
+	fileReader->loadObj("features/obj__pinet2.obj", originalObjects[1]->verts, originalObjects[1]->uvs, originalObjects[1]->normals, originalObjects[1]->tangents, originalObjects[1]->bitangents);
+	fileReader->loadObj("features/obj__tree1.obj", originalObjects[2]->verts, originalObjects[2]->uvs, originalObjects[2]->normals, originalObjects[2]->tangents, originalObjects[2]->bitangents);
+	fileReader->loadObj("features/obj__tree2.obj", originalObjects[3]->verts, originalObjects[3]->uvs, originalObjects[3]->normals, originalObjects[3]->tangents, originalObjects[3]->bitangents);
+	fileReader->loadObj("features/obj__tree3.obj", originalObjects[4]->verts, originalObjects[4]->uvs, originalObjects[4]->normals, originalObjects[4]->tangents, originalObjects[4]->bitangents);
+	fileReader->loadObj("features/obj__tree4.obj", originalObjects[5]->verts, originalObjects[5]->uvs, originalObjects[5]->normals, originalObjects[5]->tangents, originalObjects[5]->bitangents);
+	fileReader->loadObj("features/obj__tree5.obj", originalObjects[6]->verts, originalObjects[6]->uvs, originalObjects[6]->normals, originalObjects[6]->tangents, originalObjects[6]->bitangents);
+	fileReader->loadObj("features/obj__tree6.obj", originalObjects[7]->verts, originalObjects[7]->uvs, originalObjects[7]->normals, originalObjects[7]->tangents, originalObjects[7]->bitangents);
+	fileReader->loadObj("features/obj__fern1.obj", originalObjects[8]->verts, originalObjects[8]->uvs, originalObjects[8]->normals, originalObjects[8]->tangents, originalObjects[8]->bitangents);
+	fileReader->loadObj("features/obj__fern2.obj", originalObjects[9]->verts, originalObjects[9]->uvs, originalObjects[9]->normals, originalObjects[9]->tangents, originalObjects[9]->bitangents);
+	fileReader->loadObj("features/obj__fern3.obj", originalObjects[10]->verts, originalObjects[10]->uvs, originalObjects[10]->normals, originalObjects[10]->tangents, originalObjects[10]->bitangents);
+	fileReader->loadObj("features/obj__flow2.obj", originalObjects[11]->verts, originalObjects[11]->uvs, originalObjects[11]->normals, originalObjects[11]->tangents, originalObjects[11]->bitangents);
+	fileReader->loadObj("features/obj__flow3.obj", originalObjects[12]->verts, originalObjects[12]->uvs, originalObjects[12]->normals, originalObjects[12]->tangents, originalObjects[12]->bitangents);
+	fileReader->loadObj("features/obj__weed1.obj", originalObjects[13]->verts, originalObjects[13]->uvs, originalObjects[13]->normals, originalObjects[13]->tangents, originalObjects[13]->bitangents);
+	fileReader->loadObj("features/obj__weed3.obj", originalObjects[14]->verts, originalObjects[14]->uvs, originalObjects[14]->normals, originalObjects[14]->tangents, originalObjects[14]->bitangents);
+	fileReader->loadObj("features/obj__weed4.obj", originalObjects[15]->verts, originalObjects[15]->uvs, originalObjects[15]->normals, originalObjects[15]->tangents, originalObjects[15]->bitangents);
+	fileReader->loadObj("features/obj__weed4a.obj", originalObjects[16]->verts, originalObjects[16]->uvs, originalObjects[16]->normals, originalObjects[16]->tangents, originalObjects[16]->bitangents);
+	fileReader->loadObj("features/obj__weed5.obj", originalObjects[17]->verts, originalObjects[17]->uvs, originalObjects[17]->normals, originalObjects[17]->tangents, originalObjects[17]->bitangents);
+	fileReader->loadObj("features/obj__weed6.obj", originalObjects[18]->verts, originalObjects[18]->uvs, originalObjects[18]->normals, originalObjects[18]->tangents, originalObjects[18]->bitangents);
+	fileReader->loadObj("features/obj__shr1h.obj", originalObjects[19]->verts, originalObjects[19]->uvs, originalObjects[19]->normals, originalObjects[19]->tangents, originalObjects[19]->bitangents);
+	fileReader->loadObj("features/obj__shr2.obj", originalObjects[20]->verts, originalObjects[20]->uvs, originalObjects[20]->normals, originalObjects[20]->tangents, originalObjects[20]->bitangents);
+	fileReader->loadObj("features/obj__shr3.obj", originalObjects[21]->verts, originalObjects[21]->uvs, originalObjects[21]->normals, originalObjects[21]->tangents, originalObjects[21]->bitangents);
+	fileReader->loadObj("features/obj__shr4.obj", originalObjects[22]->verts, originalObjects[22]->uvs, originalObjects[22]->normals, originalObjects[22]->tangents, originalObjects[22]->bitangents);
+	fileReader->loadObj("features/obj__shr9.obj", originalObjects[23]->verts, originalObjects[23]->uvs, originalObjects[23]->normals, originalObjects[23]->tangents, originalObjects[23]->bitangents);
+	fileReader->loadObj("features/obj__shr15.obj", originalObjects[24]->verts, originalObjects[24]->uvs, originalObjects[24]->normals, originalObjects[24]->tangents, originalObjects[24]->bitangents);
+	fileReader->loadObj("features/obj__shr16.obj", originalObjects[25]->verts, originalObjects[25]->uvs, originalObjects[25]->normals, originalObjects[25]->tangents, originalObjects[25]->bitangents);
+	fileReader->loadObj("features/obj__shr17h.obj", originalObjects[26]->verts, originalObjects[26]->uvs, originalObjects[26]->normals, originalObjects[26]->tangents, originalObjects[26]->bitangents);
+	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals, originalObjects[27]->tangents, originalObjects[27]->bitangents);
 
 	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
@@ -280,6 +344,37 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/shr17h.tga", &shr17hTGA);
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
+	fileReader->loadTGAFile("features/texture_soil_edited_normal.tga", &terrain_normalTGA);//texture made in GIMP
+	fileReader->loadTGAFile("features/pinet1_normal.tga", &pinet1_normalTGA);
+	fileReader->loadTGAFile("features/pinet2_normal.tga", &pinet2_normalTGA);
+	fileReader->loadTGAFile("features/tree1_normal2.tga", &tree1_normalTGA);
+	fileReader->loadTGAFile("features/tree2_normal.tga", &tree2_normalTGA);
+	fileReader->loadTGAFile("features/tree3_normal.tga", &tree3_normalTGA);
+	fileReader->loadTGAFile("features/tree4_normal.tga", &tree4_normalTGA);
+	fileReader->loadTGAFile("features/tree5_normal.tga", &tree5_normalTGA);
+	fileReader->loadTGAFile("features/tree6_normal.tga", &tree6_normalTGA);
+	fileReader->loadTGAFile("features/fern1_normal.tga", &fern1_normalTGA);
+	fileReader->loadTGAFile("features/fern2_normal.tga", &fern2_normalTGA);
+	fileReader->loadTGAFile("features/fern3_normal.tga", &fern3_normalTGA);
+	fileReader->loadTGAFile("features/flow2_normal.tga", &flow2_normalTGA);
+	fileReader->loadTGAFile("features/flow3_normal.tga", &flow3_normalTGA);
+	fileReader->loadTGAFile("features/weed1_normal.tga", &weed1_normalTGA);
+	fileReader->loadTGAFile("features/weed3_normal.tga", &weed3_normalTGA);
+    fileReader->loadTGAFile("features/weed4_normal.tga", &weed4_normalTGA);
+	fileReader->loadTGAFile("features/weed4a_normal.tga", &weed4a_normalTGA);
+	fileReader->loadTGAFile("features/weed5_normal.tga", &weed5_normalTGA);
+	fileReader->loadTGAFile("features/weed6_normal.tga", &weed6_normalTGA);
+	fileReader->loadTGAFile("features/shr1h_normal.tga", &shr1h_normalTGA);
+	fileReader->loadTGAFile("features/shr2_normal.tga", &shr2_normalTGA);
+	fileReader->loadTGAFile("features/shr3_normal.tga", &shr3_normalTGA);
+	fileReader->loadTGAFile("features/shr4_normal.tga", &shr4_normalTGA);
+	fileReader->loadTGAFile("features/shr9_normal.tga", &shr9_normalTGA);
+	fileReader->loadTGAFile("features/shr15_normal.tga", &shr15_normalTGA);
+	fileReader->loadTGAFile("features/shr16_normal.tga", &shr16_normalTGA);
+	fileReader->loadTGAFile("features/shr17h_normal.tga", &shr17h_normalTGA);
+	fileReader->loadTGAFile("features/grass_normal.tga", &grass_normalTGA);
+
+	
 	originalObjects[0]->type = "pinet1";
 	originalObjects[1]->type = "pinet2";
 	originalObjects[2]->type = "tree1";
@@ -444,18 +539,26 @@ void Scene::drawTexturizedObjects() {
 	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
 	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
 	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
-
+	
 	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
 		if (objectsToDraw[i] != NULL) {
 			
 		
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			//cout << "about to draw..." << endl;
-			glBufferData(GL_ARRAY_BUFFER, (objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferData(GL_ARRAY_BUFFER, (
+				objectsToDraw[i]->verts.size()*sizeof(vec3) +
+				objectsToDraw[i]->uvs.size()*sizeof(vec2) + 
+				objectsToDraw[i]->normals.size()*sizeof(vec3) +
+				objectsToDraw[i]->tangents.size()*sizeof(vec3) +
+				objectsToDraw[i]->bitangents.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
 			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
-			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of UV coordinates
-
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of normals
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2)+ objectsToDraw[i]->normals.size()*sizeof(vec3), objectsToDraw[i]->tangents.size()*sizeof(vec3), &objectsToDraw[i]->tangents[0]);//chunk tangents
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3) + objectsToDraw[i]->tangents.size()*sizeof(vec3),
+				objectsToDraw[i]->bitangents.size()*sizeof(vec3), &objectsToDraw[i]->bitangents[0]);//chunk of bitangents
+			/* vertices*/
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
 				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -465,7 +568,7 @@ void Scene::drawTexturizedObjects() {
 				0,                  // stride
 				(const GLvoid *)0            // array buffer offset
 				);
-
+			/*  uvs */
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(
 				1,								//to match layout in the shader
@@ -475,6 +578,7 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
+			/* normals */
 			glEnableVertexAttribArray(2);
 			glVertexAttribPointer(
 				2,								//to match layout in the shader
@@ -484,125 +588,177 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2))//offset
 				);
-
+			/* tangents*/
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(
+				3,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3))//offset
+				);
+			/* bitangents*/
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(
+				4,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)+ objectsToDraw[i]->tangents.size()*sizeof(vec3))//offset
+				);
 			glActiveTexture(GL_TEXTURE0);
+			GLuint normalTexture = 0;
 			if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, pinet1_textureID);
+				normalTexture = pinet1_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("pinet2") == 0)//bind pine tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
+				normalTexture = pinet2_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree1") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree1_textureID);
+				normalTexture = tree1_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree2") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree2_textureID);
+				normalTexture = tree2_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree3") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree3_textureID);
+				normalTexture = tree3_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree4") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree4_textureID);
+				normalTexture = tree4_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree5") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree5_textureID);
+				normalTexture = tree5_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("tree6") == 0)//bind regular tree texture
 			{
 				glBindTexture(GL_TEXTURE_2D, tree6_textureID);
+				normalTexture = tree6_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
+				normalTexture = fern1_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("fern2") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, fern2_textureID);
+				normalTexture = fern2_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("fern3") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, fern3_textureID);
+				normalTexture = fern3_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("flow2") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, flow2_textureID);
+				normalTexture = flow2_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("flow3") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, flow3_textureID);
+				normalTexture = flow3_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed1") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed1_textureID);
+				normalTexture = weed1_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed3") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed3_textureID);
+				normalTexture = weed3_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed4") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed4_textureID);
+				normalTexture = weed4_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed4a") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed4a_textureID);
+				normalTexture = weed4a_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed5") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed5_textureID);
+				normalTexture = weed5_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("weed6") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, weed6_textureID);
+				normalTexture = weed6_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr1h") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr1h_textureID);
+				normalTexture = shr1h_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr2") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr2_textureID);
+				normalTexture = shr2_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr3") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr3_textureID);
+				normalTexture = shr3_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr4") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr4_textureID);
+				normalTexture = shr4_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr9") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr9_textureID);
+				normalTexture = shr9_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr15") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr15_textureID);
+				normalTexture = shr15_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr16") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr16_textureID);
+				normalTexture = shr16_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("shr17h") == 0)//bind fern texture
 			{
 				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
+				normalTexture = shr17h_texture_normalID;
 			}
 			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
 			{
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
+				normalTexture = grass_texture_normalID;
 			}
 
 			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 			
+			glActiveTexture(GL_TEXTURE1);
+			glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glBindTexture(GL_TEXTURE_2D, normalTexture);
+
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
@@ -925,6 +1081,12 @@ int Scene::runEngine() {
 		//view_matrix = gCamera.matrix();//is projection()*view()
 		view_matrix = gCamera.view();
 		proj_matrix = gCamera.projection();
+
+		/* Used for normal mapping */
+		model_View_matrix = view_matrix * model_matrix;
+		model_View_3x3_matrix = glm::mat3(model_View_matrix);
+		MVP = proj_matrix * view_matrix * model_matrix;
+
 		double timer = (clock() - time) / 1000.0f;
 		if (timer > 0.1f) {
 			//	cout << "constructing..." << endl;
@@ -966,7 +1128,10 @@ int Scene::runEngine() {
 		//glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
 		glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));
 		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
-
+		glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, &proj_matrix[0][0]);
+		glUniformMatrix4fv(MVP_id, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(model_View_matrix_id, 1, GL_FALSE, &model_View_matrix[0][0]);
+		glUniformMatrix3fv(model_View_3x3_matrix_id, 1, GL_FALSE, &model_View_3x3_matrix[0][0]);
 		glBindVertexArray(VAO);
 		drawEverything();
 
@@ -1154,6 +1319,10 @@ bool Scene::initializeOpenGL() {
 
 bool Scene::cleanUp() {
 	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glDisableVertexAttribArray(3);
+	glDisableVertexAttribArray(4);
 	//Properly de-allocate all resources once they've outlived their purpose
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);

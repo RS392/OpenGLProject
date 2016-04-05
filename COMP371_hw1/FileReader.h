@@ -26,7 +26,7 @@ class FileReader
 public:
 	void loadTGAFile(char *filename, TGAFILE *tgaFile);
 	//GLuint loadTGA(const char * imagepath);
-	bool loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals);
+	bool loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals, vector <vec3> out_tangents, vector <vec3> out_bitangents);
 	FileReader();
 	~FileReader();
 };

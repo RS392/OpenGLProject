@@ -6,6 +6,8 @@ uniform mat4 view_matrix, model_matrix, proj_matrix;
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec2 vertTexCoord;
 layout (location = 2) in vec3 vertNormal;
+layout (location = 3) in vec3 vertTangent;
+layout (location = 4) in vec3 vertBitangent;
 
 out vec3 fragVert;
 out vec2 fragTexCoord;

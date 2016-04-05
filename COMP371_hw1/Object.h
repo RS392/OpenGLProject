@@ -38,6 +38,8 @@ public:
 	vec3 boundingBox;
 	string type;
 	vertices verts;
+	vector<vec3> tangents;
+	vector<vec3> bitangents;
 	vector<vec3> normals;
 	Object();
 	~Object();

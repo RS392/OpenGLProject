@@ -1,8 +1,10 @@
 
 #version 150
 
-uniform mat4 model_matrix, view_matrix, proj_matrix;
+uniform mat4 model_matrix, view_matrix, proj_matrix,model_View_matrix,model_View_3x3_matrix,MVP;
+
 uniform sampler2D tex; //this is the texture
+uniform sampler2D normal_texture;
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
