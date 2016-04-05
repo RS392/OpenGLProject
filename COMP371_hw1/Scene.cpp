@@ -207,19 +207,6 @@ void Update(float secondsElapsed) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
 
-	if (glfwGetKey(window, 'F')) {
-		
-		if (lightOn == true) {
-			lightOn = false;
-			cout << "Light is off" << endl;
-		}
-		else if (!lightOn) {
-			lightOn = true;
-			cout << "Light is on" << endl;
-		}
-	}
-
-
 	/*
 	if (moving) {
 		PlaySound(TEXT("footsteps2.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
@@ -254,6 +241,25 @@ void Update(float secondsElapsed) {
 void OnScroll(GLFWwindow* window, double deltaX, double deltaY) {
 	gScrollY += deltaY;
 }
+
+void flashlightPressed(GLFWwindow *_window, int key, int scancode, int action, int mods) {
+
+	if (key == GLFW_KEY_F) {
+		if (action == GLFW_PRESS) {
+
+			if (lightOn == true) {
+				lightOn = false;
+				//cout << "Light is off" << endl;
+			}
+			else if (!lightOn) {
+				lightOn = true;
+				//cout << "Light is on" << endl;
+			}
+		}
+	}
+}
+
+
 Scene::Scene()
 {
 	UserInput* title = new UserInput();
@@ -1325,6 +1331,7 @@ bool Scene::initializeOpenGL() {
 	
 	glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
+	glfwSetKeyCallback(window, flashlightPressed);
 
 	/// Initialize GLEW extension handler
 	glewExperimental = GL_TRUE;	///Needed to get the latest version of OpenGL
