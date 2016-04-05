@@ -6,7 +6,7 @@ using namespace glm;
 using namespace cimg_library;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-#define SEEDISTANCE 1000
+#define SEEDISTANCE 500
 
 GLFWwindow* window = 0x00;
 Object* pinet2;
@@ -115,7 +115,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 1000.0f; //units per second
+	const float moveSpeed = 150.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -183,8 +183,6 @@ Scene::Scene()
 		originalObjects.push_back(obj);
 	}
 	
-	pinet2 = new Object();
-	//pinet2->combineVXUvs();
 	time = clock();
 	glm::vec3 cameraPosition(0.0, 20, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
@@ -197,7 +195,7 @@ Scene::Scene()
 	//gCamera.setViewportAspectRatio(width / height);
 	
 
-	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);// terrain
+//	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);// terrain
 
 }
 
@@ -602,7 +600,7 @@ void Scene::drawTexturizedObjects() {
 			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
-			glDepthMask(GL_FALSE);
+		//	glDepthMask(GL_FALSE);
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
@@ -819,16 +817,13 @@ int Scene::runEngine() {
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
 	objectsInTransit = objectsInMemory;
-	//makeMultipleObjects();
-	//constructEnvironment();
-	//objectsToDraw = objectsInMemory;
 
 	initializeOpenGL();
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
-	//PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
@@ -903,7 +898,7 @@ int Scene::runEngine() {
 				t.detach();
 			}
 		}
-		
+		/*
 		if (threadDone == true) {
 			double timer = (clock() - time) / 1000.0f;
 			if (timer > 1.0f) {
@@ -914,7 +909,7 @@ int Scene::runEngine() {
 			
 
 		}
-		
+		*/
 		objectsToDraw = objectsInTransit;
 		
 		
@@ -925,37 +920,22 @@ int Scene::runEngine() {
 		//view_matrix = gCamera.matrix();//is projection()*view()
 		view_matrix = gCamera.view();
 		proj_matrix = gCamera.projection();
-		double timer = (clock() - time) / 1000.0f;
-		if (timer > 0.1f) {
+		//double timer = (clock() - time) / 1000.0f;
+		//if (timer > 0.1f) {
 			//	cout << "constructing..." << endl;
 		//	thread t(&Scene::handleCollisionWithCamera, this);
 		//	t.detach();
 		//	thread tt(&Scene::drawObjects, this);
 		//	tt.detach();
-		}
+		//}
 		handleCollisionWithCamera();
 		boundariesCollision();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;
-	//	view_matrix[0][0] = -1;
-		//view_matrix[1][1] = 0.97;
-		//view_matrix[2][1] = 0.24;
-		//view_matrix[3][1] = -0.24;
-		//view_matrix[1][2] = 0.24;
-		//view_matrix[2][2] = -0.97;
-		//view_matrix[3][1] = -200;
-		
-	//	view_matrix[1][3] =0;
-	//	view_matrix[2][3] = 1.1;
-		//setUniform3v(uniformName, glm::value_ptr(v));
-		//gProgram->setUniform("camera", gCamera.matrix());
-		//time = clock() - 2000;
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		
 		glEnable(GL_DEPTH_TEST);
-	    glClearColor(0.02f, 0.1f, 0.3f, 0.0);
+	    glClearColor(0.01f, 0.01f, 0.01f, 1.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
@@ -1131,8 +1111,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
-	
-	glfwSetScrollCallback(window, OnScroll);
+//	glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
 
 	/// Initialize GLEW extension handler

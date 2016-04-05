@@ -48,27 +48,13 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 600 * title->getMultiplier();
 	}
 	else if (original.type.find("pinet") != string::npos) {
-		min = 400 * title->getMultiplier();
-		max = 600 * title->getMultiplier();
+		min = 1200 * title->getMultiplier();
+		max = 1600 * title->getMultiplier();
 	}
 	else if (original.type.find("fern") != string::npos) {
 		min = 400 * title->getMultiplier();
 		max = 500 * title->getMultiplier();
 	}
-	
-	else if (original.type.find("flow") != string::npos) {
-		min = 500 * title->getMultiplier();
-		max = 600 * title->getMultiplier();
-	}
-	else if (original.type.find("pinet") != string::npos) {
-		min = 300 * title->getMultiplier();
-		max = 400 * title->getMultiplier();
-	}
-	else if (original.type.find("fern") != string::npos) {
-		min = 300 * title->getMultiplier();
-		max = 400 * title->getMultiplier();
-	}
-	
 	else if (original.type.find("flow") != string::npos) {
 		min = 300 * title->getMultiplier();
 		max = 400 * title->getMultiplier();
@@ -83,8 +69,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	}
 	else if (original.type.find("grass") != string::npos){
 
-		min = 8000 * title->getMultiplier();
-		max = 10500 * title->getMultiplier();
+		min = 11000 * title->getMultiplier();
+		max = 14500 * title->getMultiplier();
 	}
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
@@ -119,7 +105,9 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 	//cout << obj.verts[2][2] << endl;
 	changeObjectLocation(obj);
 	//cout << obj.verts[2][2] << endl;
-//	changeObjectSize(obj);
+//	if (obj.type == "grass")
+//		changeObjectSize(obj);
+
 	changeObjectAttributes(obj);
 	Object* pObj = new Object(obj);
 	copies.push_back(pObj);
@@ -178,16 +166,16 @@ void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
 	}
 }
 void RandomAttributeGenerator::changeObjectSize(Object &obj) {
-	int xScale = (rand() % 5 + 1) / 10 + 1;
-	int yScale = (rand() % 10 + 1) / 10 + 1;
-	int zScale = (rand() % 5 + 1) / 10 + 1;
+	int xScale = (rand() % 5 + 1) / 10 + 3;
+	int yScale = (rand() % 10 + 1) / 10 + 3;
+	int zScale = (rand() % 5 + 1) / 10 + 3;
 	obj.xScale = xScale;
 	obj.yScale = yScale;
 	obj.zScale = zScale;
 	for (int i = 0; i < obj.verts.size(); i++) {
-		obj.verts[i][0] *= (float)xScale;
-		obj.verts[i][1] *= (float)yScale;
-		obj.verts[i][2] *= (float)zScale;
+		obj.verts[i][0] /= (float)xScale;
+		obj.verts[i][1] /= (float)yScale;
+		obj.verts[i][2] /= (float)zScale;
 	}
 }
 
