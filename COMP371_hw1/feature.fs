@@ -53,6 +53,7 @@ void main() {
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
     vec4 surfaceColor = texture(tex, fragTexCoord);
+	
 	if(surfaceColor.a < 0.5)
 	{ 
 		discard;
@@ -63,7 +64,7 @@ void main() {
 	//vec3 rayDir
 	float fogB = 0.01f;
 	float fogAmount = 1.0 - exp(-distance*fogB);
-	vec3 fogColor = vec3(0.0,0.0,0.0);
+	vec3 fogColor = vec3(0.01,0.01,0.01);
 
 	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 	vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
