@@ -1041,6 +1041,35 @@ int Scene::runEngine() {
 	shr16_textureID = testObjectTextures(shr16TGA);
 	shr17h_textureID = testObjectTextures(shr17hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
+
+	pinet1_texture_normalID = testObjectTextures(pinet1_normalTGA);
+	pinet2_texture_normalID = testObjectTextures(pinet2_normalTGA);
+	tree1_texture_normalID = testObjectTextures(tree1_normalTGA);
+	tree2_texture_normalID = testObjectTextures(tree2_normalTGA);
+	tree3_texture_normalID = testObjectTextures(tree3_normalTGA);
+	tree4_texture_normalID = testObjectTextures(tree4_normalTGA);
+	tree5_texture_normalID = testObjectTextures(tree5_normalTGA);
+	tree6_texture_normalID = testObjectTextures(tree6_normalTGA);
+	fern1_texture_normalID = testObjectTextures(fern1_normalTGA);
+	fern2_texture_normalID = testObjectTextures(fern2_normalTGA);
+	fern3_texture_normalID = testObjectTextures(fern3_normalTGA);
+	flow2_texture_normalID = testObjectTextures(flow2_normalTGA);
+	flow3_texture_normalID = testObjectTextures(flow3_normalTGA);
+	weed1_texture_normalID = testObjectTextures(weed1_normalTGA);
+	weed3_texture_normalID = testObjectTextures(weed3_normalTGA);
+	weed4_texture_normalID = testObjectTextures(weed4_normalTGA);
+	weed4a_texture_normalID = testObjectTextures(weed4a_normalTGA);
+	weed5_texture_normalID = testObjectTextures(weed5_normalTGA);
+	weed6_texture_normalID = testObjectTextures(weed6_normalTGA);
+	shr1h_texture_normalID = testObjectTextures(shr1h_normalTGA);
+	shr2_texture_normalID = testObjectTextures(shr2_normalTGA);
+	shr3_texture_normalID = testObjectTextures(shr3_normalTGA);
+	shr4_texture_normalID = testObjectTextures(shr4_normalTGA);
+	shr9_texture_normalID = testObjectTextures(shr9_normalTGA);
+	shr15_texture_normalID = testObjectTextures(shr15_normalTGA);
+	shr16_texture_normalID = testObjectTextures(shr16_normalTGA);
+	shr17h_texture_normalID = testObjectTextures(shr17h_normalTGA);
+	grass_texture_normalID = testObjectTextures(grass_normalTGA);
 	setBoundaries();
 	//applyTexture();//test
 	glGenBuffers(1, &VBO);

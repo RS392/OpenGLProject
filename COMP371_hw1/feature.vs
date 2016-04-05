@@ -12,6 +12,7 @@ layout (location = 4) in vec3 vertBitangent;
 out vec3 fragVert;
 out vec2 fragTexCoord;
 out vec3 fragNormal;
+out mat3 TBN;
 
 void main() {
 
@@ -22,4 +23,12 @@ void main() {
 	fragVert = in_Position;
 
     gl_Position = CTM * vec4(in_Position, 1);
+
+	mat3 mv3x3 = transpose(inverse(mat3(view_matrix*model_matrix)));//source of error
+
+	vec3 vertexNormal_cameraspace = mv3x3 * normalize(vertNormal);//normal in model space
+	vec3 vertexTangent_cameraspace = mv3x3 * normalize(vertTangent);//tangent in model space
+	vec3 vertexBittangent_cameraspace = mv3x3 * normalize(vertBitangent);//bitangent in model space
+
+	TBN = transpose(mat3(vertexTangent_cameraspace, vertexBittangent_cameraspace, vertexNormal_cameraspace));
 }
