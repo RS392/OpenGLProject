@@ -8,6 +8,7 @@ in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
 
+
 out vec4 finalColor; //this is the output color of the pixel
 
 
@@ -53,7 +54,20 @@ void main() {
 		discard;
 	}
 	
+
+	//vec3 fogDistance = fragVert - light.position;
+	//float distance = sqrt((cameraToPoint.x * cameraToPoint.x) + (cameraToPoint.y * cameraToPoint.y) + (cameraToPoint.z * cameraToPoint.z));;
+	float distance = 50.0f;
+	//vec3 rayDir
+	float fogB = 0.005f;
+	float fogAmount = 1.0 - exp(-distance*fogB);
+	vec3 fogColor = vec3(0.05,0.05,0.05);
+
 	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+	vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
+	finalColor = vec4 (fogFinalColor, surfaceColor.a);
+
+
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else

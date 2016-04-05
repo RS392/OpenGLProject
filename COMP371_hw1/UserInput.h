@@ -16,6 +16,6 @@ public:
 	void titleScreen();
 	//void terrainType();
 	void header();
-	void executeOrder();
+	//void executeOrder();
 };
 

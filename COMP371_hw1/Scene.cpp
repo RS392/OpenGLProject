@@ -775,7 +775,7 @@ void Scene::drawEverything() {
 	//drawObjects();
 	drawTerrain();
 	//drawBoundaries();
-	drawTexturizedObjects();
+	//drawTexturizedObjects();
 	
 }
 /*
@@ -1117,7 +1117,7 @@ int Scene::runEngine() {
 		
 		
 		glEnable(GL_DEPTH_TEST);
-	    glClearColor(0.02f, 0.1f, 0.3f, 0.0);
+	    glClearColor(0.0f, 0.0f, 0.0f, 0.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
