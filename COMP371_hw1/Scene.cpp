@@ -1201,7 +1201,7 @@ void Scene::moveTiles() {
 	vec3 translateVector1;
 	//translate before applying rotations
 	transformMatrix1 = glm::rotate(transformMatrix1, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
-
+	transformMatrix1 = glm::translate(transformMatrix1, glm::vec3(0, 0, 150));
 	boundaryTransformationMatrices.push_back(transformMatrix1);
 	//LEFT
 
@@ -1210,6 +1210,7 @@ void Scene::moveTiles() {
 	//translate before applying rotations
 	transformMatrix2 = glm::rotate(transformMatrix2, glm::radians(-90.0f), glm::vec3(0, 1, 0));//rotate -90 about y
 	transformMatrix2 = glm::rotate(transformMatrix2, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	transformMatrix1 = glm::translate(transformMatrix1, glm::vec3(0, -RADIUS - boundOffset, 150));
 	boundaryTransformationMatrices.push_back(transformMatrix2);
 
 	//NEAR
@@ -1218,6 +1219,7 @@ void Scene::moveTiles() {
 	//translate before applying rotations
 	transformMatrix3 = glm::rotate(transformMatrix3, glm::radians(-180.0f), glm::vec3(0, 1, 0));//rotate -180 about y
 	transformMatrix3 = glm::rotate(transformMatrix3, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	transformMatrix3 = glm::translate(transformMatrix1, glm::vec3(0, -2 * RADIUS, 150));
 	boundaryTransformationMatrices.push_back(transformMatrix3);
 
 	//RIGHT
@@ -1227,6 +1229,7 @@ void Scene::moveTiles() {
 	//translate before applying rotations
 	transformMatrix4 = glm::rotate(transformMatrix4, glm::radians(90.0f), glm::vec3(0, 1, 0));//rotate 90 about y
 	transformMatrix4 = glm::rotate(transformMatrix4, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	transformMatrix3 = glm::translate(transformMatrix1, glm::vec3(0, -RADIUS - boundOffset, 150));
 	boundaryTransformationMatrices.push_back(transformMatrix4);
 	//boundaryTransformationMatrices.push_back((glm::rotate(glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1, 0, 0)), glm::radians(90.0f), glm::vec3(0, 1, 0))));
 	}
