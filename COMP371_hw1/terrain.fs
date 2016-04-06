@@ -41,7 +41,12 @@ void main() {
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
-    float brightness = dot(normal, surfaceToLight) * attenuation;//  / (length(surfaceToLight) * length(normal));//;
+	float dotProduct = dot(normal, surfaceToLight);
+	if(dotProduct < 0)
+	{
+		dotProduct*=-1.0;
+	}
+    float brightness = dotProduct * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
     //calculate final color of the pixel, based on:
