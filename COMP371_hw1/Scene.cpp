@@ -904,6 +904,53 @@ void Scene::setBoundaries() {
 	boundaries[59] = 2 * RADIUS + boundOffset;
 }
 
+void Scene::moveTiles() {
+
+	//FAR
+	boundaryTransformationMatrices[0] = glm::mat4()
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					-RADIUS - boundOffset, 0.0f, -boundOffset, 1.0f);
+
+	//LEFT
+	boundaryTransformationMatrices[1] = glm::mat4()
+		* glm::mat4(cos(90.0f * DEG_TO_RAD), sin(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			-sin(90.0f * DEG_TO_RAD), cos(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			-RADIUS - boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f);
+
+	//NEAR
+	boundaryTransformationMatrices[2] = glm::mat4()
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			RADIUS + boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f);
+
+	//RIGHT
+	boundaryTransformationMatrices[3] = glm::mat4()
+		* glm::mat4(cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			-sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f);
+}
+
 void Scene::drawBoundaries() {
 	
 	/*glGenBuffers(1, &VBO4);
