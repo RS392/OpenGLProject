@@ -1291,7 +1291,7 @@ void Scene::drawBoundaries() {
 
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-	glBindTexture(GL_TEXTURE_2D, terr_textureID);
+	glBindTexture(GL_TEXTURE_2D, boundary_textureID);
 
 	glActiveTexture(GL_TEXTURE1);
 	glUniform1i(glGetUniformLocation(terrain_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
@@ -1423,6 +1423,7 @@ int Scene::runEngine() {
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
 	//terr_textureID = testTexture("dirt1.bmp");
+	boundary_textureID = testObjectTextures(boundaryTGA);
 	terr_textureID = testObjectTextures(terrainTGA);
 	pinet1_textureID = testObjectTextures(pinet1TGA);
 	pinet2_textureID = testObjectTextures(pinet2TGA);
@@ -1453,6 +1454,7 @@ int Scene::runEngine() {
 	shr17h_textureID = testObjectTextures(shr17hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
 
+	boundary_texture_normalID = testObjectTextures(boundary_normalTGA);
 	terr_texture_normalID = testObjectTextures(terrain_normalTGA);
 	pinet1_texture_normalID = testObjectTextures(pinet1_normalTGA);
 	pinet2_texture_normalID = testObjectTextures(pinet2_normalTGA);

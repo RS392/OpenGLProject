@@ -59,8 +59,8 @@ void main() {
     vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
-		discard;
-	 }
+	//	discard;
+	}
 	 /*
 	 float x = fragPosition.x;
 	 float y = fragPosition.y;

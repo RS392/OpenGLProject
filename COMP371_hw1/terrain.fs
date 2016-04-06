@@ -31,7 +31,7 @@ void main() {
 	
 	vec3 camToPoint = vec3(model*vec4(cameraToPoint, 1.0));
 	//vec3 normal = normalize(normalMatrix*camToPoint);
-	vec3 normal = normalize(texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0);
+	vec3 normal = texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0;
 	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
 	
@@ -42,8 +42,7 @@ void main() {
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
-	float dotProduct = dot(vec3(0.0,1.0,0.0), surfaceToLight);//prevents black strip where dot products are flipped
-	
+	float dotProduct = dot(normal, surfaceToLight);
     float brightness = dotProduct * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
@@ -55,7 +54,7 @@ void main() {
 	vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
-		discard;
+		//discard;
 	}
 	
 	//vec3 fogDistance = fragVert - light.position;

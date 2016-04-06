@@ -210,20 +210,21 @@ void Terrain::setEverything(int initialSize)
 				/* Calculate tangents and bitangents for for fourth vertex*/
 				deltaUV1 = uv2 - uv1;
 				deltaUV2 = uv3 - uv1;
+				r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 				glm::vec3 tangent2 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
 				glm::vec3 bitangent2 = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
 
 				tangents.push_back(tangent1);
 				tangents.push_back(tangent1);
-				tangents.push_back(tangent2);
+				
 				tangents.push_back(tangent1);
-				
+				tangents.push_back(tangent1);
 				bitangents.push_back(bitangent1);
 				bitangents.push_back(bitangent1);
-				bitangents.push_back(bitangent2);
+				
 				bitangents.push_back(bitangent1);
 				
-				
+				bitangents.push_back(bitangent1);
 				
 			}
 
