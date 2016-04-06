@@ -41,11 +41,8 @@ void main() {
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
-	float dotProduct = dot(normal, surfaceToLight);
-	if(dotProduct < 0)
-	{
-		dotProduct*=-1.0;
-	}
+	float dotProduct = dot(vec3(0.0,1.0,0.0), surfaceToLight);//prevents black strip where dot products are flipped
+	
     float brightness = dotProduct * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
