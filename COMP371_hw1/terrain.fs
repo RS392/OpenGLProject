@@ -61,7 +61,7 @@ void main() {
     //vec3 rayDir
     float fogB = 0.01f;
     float fogAmount = 1.0 - exp(-distance*fogB);
-    vec3 fogColor = vec3(0.2,0.2,0.2);
+    vec3 fogColor = vec3(0.01,0.01,0.01);
 
     finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
     vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
