@@ -206,6 +206,13 @@ void Update(float secondsElapsed) {
 	else if (glfwGetKey(window, 'X')) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
+	else if (glfwGetKey(window, 'U')) {
+		gCamera.setFieldOfView(gCamera.fieldOfView() + 1);
+		cout << gCamera.fieldOfView() << endl;
+	}
+	else if (glfwGetKey(window, 'I')) {
+		gCamera.setFieldOfView(gCamera.fieldOfView() - 1);
+	}
 
 	//rotate camera based on mouse movement
 	const float mouseSensitivity = 0.1f;
@@ -578,7 +585,7 @@ void Scene::drawTexturizedObjects() {
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3), objectsToDraw[i]->tangents.size()*sizeof(vec3), &objectsToDraw[i]->tangents[0]);//chunk tangents
 			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3) + objectsToDraw[i]->tangents.size()*sizeof(vec3),
 				objectsToDraw[i]->bitangents.size()*sizeof(vec3), &objectsToDraw[i]->bitangents[0]);//chunk of bitangents
-			// vertices*
+																									/* vertices*/
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(
 				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
@@ -588,7 +595,7 @@ void Scene::drawTexturizedObjects() {
 				0,                  // stride
 				(const GLvoid *)0            // array buffer offset
 				);
-			// uvs
+			/*  uvs */
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(
 				1,								//to match layout in the shader
@@ -598,7 +605,7 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
 				);
-			//normals
+			/* normals */
 			glEnableVertexAttribArray(2);
 			glVertexAttribPointer(
 				2,								//to match layout in the shader
@@ -608,7 +615,7 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2))//offset
 				);
-			// tangents
+			/* tangents*/
 			glEnableVertexAttribArray(3);
 			glVertexAttribPointer(
 				3,								//to match layout in the shader
@@ -618,7 +625,7 @@ void Scene::drawTexturizedObjects() {
 				0,								// stride
 				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3))//offset
 				);
-			//bitangents
+			/* bitangents*/
 			glEnableVertexAttribArray(4);
 			glVertexAttribPointer(
 				4,								//to match layout in the shader
@@ -770,37 +777,26 @@ void Scene::drawTexturizedObjects() {
 				glBindTexture(GL_TEXTURE_2D, grass_textureID);
 				normalTexture = grass_texture_normalID;
 			}
-			
+
 			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+			glUniform1f(glGetUniformLocation(feature_shader_program, "fov"), gCamera.fieldOfView());
 
 			glActiveTexture(GL_TEXTURE1);
 			glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glBindTexture(GL_TEXTURE_2D, normalTexture);
-			
+
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
 			glDisable(GL_BLEND);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
-			
-			/*
-			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
-			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
-			//	glDepthMask(GL_FALSE);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//	cout << objectsToDraw[i] << endl;
-			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
-			glDisable(GL_BLEND);
-			glDepthMask(GL_TRUE);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			*/
 		}
+
 	}
+
 }
 void Scene::drawEverything() {
 	
@@ -1070,7 +1066,7 @@ void Scene::optimizeFromVBO() {
 		if (obj != NULL) {
 			int differenceX = (int)abs(objectsInMemory[i]->verts[0][0] - playerPos[0]);
 			int differenceZ = (int)abs(objectsInMemory[i]->verts[0][2] - playerPos[2]);
-			int dist = SEEDISTANCE * 1.7;
+			int dist = SEEDISTANCE * 1.3;
 			if ((differenceZ < dist && differenceX < dist) && objectsInTransit[i] == NULL) {
 				objectsInTransit[i] = objectsInMemory[i];
 			}
@@ -1098,7 +1094,7 @@ void Scene::handleCollisionWithCamera() {
 						if (abs(cPos.z - obj->position.z) < 0 + obj->boundingBox.z) {
 							gCamera.setPosition(lastFrameCamPos);
 							//COLLISION, stop camera from moving in the current direction
-						//	cout << obj->type << endl;
+				//			cout << obj->type << endl;
 						}
 					}
 				}
@@ -1256,7 +1252,7 @@ int Scene::runEngine() {
 		view_matrix = gCamera.view();
 		proj_matrix = gCamera.projection();
 
-
+		
 		/* Used for normal mapping */
 		model_View_matrix = view_matrix * model_matrix;
 		model_View_3x3_matrix = glm::mat3(model_View_matrix);
@@ -1269,12 +1265,12 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-	    glClearColor(0.01f, 0.01f, 0.01f, 0.0);
+	    glClearColor(0.0f, 0.0f, 0.0f, 0.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
 		glUseProgram(shader_program);
-
+		//cout << gCamera.fieldOfView() << endl;
 
 		//Pass the values of the three matrices to the shaders
 		//glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));

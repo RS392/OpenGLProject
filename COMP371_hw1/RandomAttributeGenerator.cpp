@@ -56,12 +56,12 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 500 * title->getMultiplier();
 	}
 	else if (original.type.find("flow") != string::npos) {
-		min = 300 * title->getMultiplier();
-		max = 400 * title->getMultiplier();
+		min = 500 * title->getMultiplier();
+		max = 1000 * title->getMultiplier();
 	}
 	else if (original.type.find("shr") != string::npos) {
-		min = 150 * title->getMultiplier();
-		max = 300 * title->getMultiplier();
+		min = 300 * title->getMultiplier();
+		max = 400 * title->getMultiplier();
 	}
 	else if (original.type.find("weed") != string::npos) {
 		min = 250 * title->getMultiplier();
@@ -103,11 +103,10 @@ void RandomAttributeGenerator::alterObj(Object &obj, objects &copies) {
 //	cout << "doing one object" << endl;
 	
 	//cout << obj.verts[2][2] << endl;
-	changeObjectLocation(obj);
+	
 	//cout << obj.verts[2][2] << endl;
-//	if (obj.type == "grass")
-//		changeObjectSize(obj);
-
+	changeObjectSize(obj);
+	changeObjectLocation(obj);
 	changeObjectAttributes(obj);
 	Object* pObj = new Object(obj);
 	copies.push_back(pObj);
@@ -121,9 +120,9 @@ void RandomAttributeGenerator::changeObjectAttributes(Object& obj) {
 
 		obj.position = vec3(x, y, z);
 		
-		double xx = (20);
+		double xx = (10);
 		double yy = 185;
-		double zz = (20);
+		double zz = (10);
 		obj.boundingBox = vec3(xx, yy, zz);
 	//}
 }
@@ -166,17 +165,50 @@ void RandomAttributeGenerator::changeObjectLocation(Object &obj) {
 	}
 }
 void RandomAttributeGenerator::changeObjectSize(Object &obj) {
-	int xScale = (rand() % 5 + 1) / 10 + 3;
-	int yScale = (rand() % 10 + 1) / 10 + 3;
-	int zScale = (rand() % 5 + 1) / 10 + 3;
-	obj.xScale = xScale;
-	obj.yScale = yScale;
-	obj.zScale = zScale;
-	for (int i = 0; i < obj.verts.size(); i++) {
-		obj.verts[i][0] /= (float)xScale;
-		obj.verts[i][1] /= (float)yScale;
-		obj.verts[i][2] /= (float)zScale;
-	}
+	
+	//	int xScale = (rand() % 5 + 1) / 10 + 1;
+//		int yScale = (rand() % 10 + 1) / 10 + 1;
+	//	int zScale = (rand() % 5 + 1) / 10 + 1;
+
+	float yScale = 1;
+	float xScale = 1;
+	float zScale = 1;
+		 if (obj.type.find("grass") != string::npos)
+			yScale = 1.8;
+		 else if (obj.type.find("tree") != string::npos) {
+			 yScale = 0.3;
+			 xScale = 0.5;
+			 zScale = 0.5;
+		 }
+		 else if (obj.type.find("flow") != string::npos) {
+			 yScale = 8;
+			 xScale = 8;
+			 zScale = 8;
+		 }
+		 else if (obj.type.find("weed4") != string::npos || obj.type.find("weed1") != string::npos || obj.type.find("shr9") != string::npos) {
+			 yScale = 8;
+			 xScale = 8;
+			 zScale = 8;
+		 }
+		 else if (obj.type.find("shr") != string::npos || obj.type.find("weed") != string::npos) {
+			 yScale = 3;
+			 xScale = 3;
+			 zScale = 3;
+		 }
+		
+		else {
+			yScale = 1;
+			xScale = 1;
+			zScale = 1;
+		}
+		obj.xScale = xScale;
+		obj.yScale = yScale;
+		obj.zScale = zScale;
+		for (int i = 0; i < obj.verts.size(); i++) {
+			obj.verts[i][0] /= (float)xScale;
+			obj.verts[i][1] /= (float)yScale;
+			obj.verts[i][2] /= (float)zScale;
+		}
 }
 
 void RandomAttributeGenerator::setTitle(UserInput* t) {
