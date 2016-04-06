@@ -6,7 +6,7 @@ using namespace glm;
 using namespace cimg_library;
 #define M_PI        3.14159265358979323846264338327950288   /* pi */
 #define DEG_TO_RAD	M_PI/180.0f
-#define SEEDISTANCE 1000
+#define SEEDISTANCE 500
 
 GLFWwindow* window = 0x00;
 Object* pinet2;
@@ -181,7 +181,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 1000.0f; //units per second
+	const float moveSpeed = 150.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -267,8 +267,6 @@ Scene::Scene()
 		originalObjects.push_back(obj);
 	}
 	
-	pinet2 = new Object();
-	//pinet2->combineVXUvs();
 	time = clock();
 	glm::vec3 cameraPosition(0.0, 20, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
@@ -279,7 +277,6 @@ Scene::Scene()
 	setTerrainTranslationMatrices();
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
-
 }
 
 Scene::~Scene()
@@ -552,245 +549,256 @@ bool sortByFirstVertex(const Object* lhs, const Object* rhs) // objects = vector
 	return lhs->verts[0].z < rhs->verts[0].z;
 }
 
-	void Scene::drawTexturizedObjects() {
+void Scene::drawTexturizedObjects() {
 
-		//switch shader programs
-		glUseProgram(feature_shader_program);
-		glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
-		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
-		glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
+	//switch shader programs
+	glUseProgram(feature_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//
+	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));//
 
-		for (size_t i = 0; i < objectsToDraw.size(); ++i) {
-			if (objectsToDraw[i] != NULL) {
+	for (size_t i = 0; i < objectsToDraw.size(); ++i) {
+		if (objectsToDraw[i] != NULL) {
 
 
-				glBindBuffer(GL_ARRAY_BUFFER, VBO);
-				//cout << "about to draw..." << endl;
-				glBufferData(GL_ARRAY_BUFFER, (
-					objectsToDraw[i]->verts.size()*sizeof(vec3) +
-					objectsToDraw[i]->uvs.size()*sizeof(vec2) +
-					objectsToDraw[i]->normals.size()*sizeof(vec3) +
-					objectsToDraw[i]->tangents.size()*sizeof(vec3) +
-					objectsToDraw[i]->bitangents.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
-				glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
-				glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
-				glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of normals
-				glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2)+ objectsToDraw[i]->normals.size()*sizeof(vec3), objectsToDraw[i]->tangents.size()*sizeof(vec3), &objectsToDraw[i]->tangents[0]);//chunk tangents
-				glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3) + objectsToDraw[i]->tangents.size()*sizeof(vec3),
-					objectsToDraw[i]->bitangents.size()*sizeof(vec3), &objectsToDraw[i]->bitangents[0]);//chunk of bitangents
-				// vertices*
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(
-					0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-					3,                  // size
-					GL_FLOAT,           // type
-					GL_FALSE,           // normalized?
-					0,                  // stride
-					(const GLvoid *)0            // array buffer offset
-					);
-				// uvs
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(
-					1,								//to match layout in the shader
-					2,								//size
-					GL_FLOAT,						// type
-					GL_FALSE,						// normalized?
-					0,								// stride
-					(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
-					);
-				//normals
-				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(
-					2,								//to match layout in the shader
-					3,								//size
-					GL_FLOAT,						// type
-					GL_FALSE,						// normalized?
-					0,								// stride
-					(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2))//offset
-					);
-				// tangents
-				glEnableVertexAttribArray(3);
-				glVertexAttribPointer(
-					3,								//to match layout in the shader
-					3,								//size
-					GL_FLOAT,						// type
-					GL_FALSE,						// normalized?
-					0,								// stride
-					(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3))//offset
-					);
-				//bitangents
-				glEnableVertexAttribArray(4);
-				glVertexAttribPointer(
-					4,								//to match layout in the shader
-					3,								//size
-					GL_FLOAT,						// type
-					GL_FALSE,						// normalized?
-					0,								// stride
-					(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3)+ objectsToDraw[i]->tangents.size()*sizeof(vec3))//offset
-					);
-				glActiveTexture(GL_TEXTURE0);
-				GLuint normalTexture = 0;
-				if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, pinet1_textureID);
-					normalTexture = pinet1_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("pinet2") == 0)//bind pine tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
-					normalTexture = pinet2_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree1") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree1_textureID);
-					normalTexture = tree1_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree2") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree2_textureID);
-					normalTexture = tree2_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree3") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree3_textureID);
-					normalTexture = tree3_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree4") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree4_textureID);
-					normalTexture = tree4_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree5") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree5_textureID);
-					normalTexture = tree5_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("tree6") == 0)//bind regular tree texture
-				{
-					glBindTexture(GL_TEXTURE_2D, tree6_textureID);
-					normalTexture = tree6_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, fern1_textureID);
-					normalTexture = fern1_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("fern2") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, fern2_textureID);
-					normalTexture = fern2_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("fern3") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, fern3_textureID);
-					normalTexture = fern3_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("flow2") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, flow2_textureID);
-					normalTexture = flow2_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("flow3") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, flow3_textureID);
-					normalTexture = flow3_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed1") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed1_textureID);
-					normalTexture = weed1_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed3") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed3_textureID);
-					normalTexture = weed3_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed4") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed4_textureID);
-					normalTexture = weed4_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed4a") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed4a_textureID);
-					normalTexture = weed4a_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed5") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed5_textureID);
-					normalTexture = weed5_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("weed6") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, weed6_textureID);
-					normalTexture = weed6_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr1h") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr1h_textureID);
-					normalTexture = shr1h_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr2") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr2_textureID);
-					normalTexture = shr2_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr3") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr3_textureID);
-					normalTexture = shr3_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr4") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr4_textureID);
-					normalTexture = shr4_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr9") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr9_textureID);
-					normalTexture = shr9_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr15") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr15_textureID);
-					normalTexture = shr15_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr16") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr16_textureID);
-					normalTexture = shr16_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("shr17h") == 0)//bind fern texture
-				{
-					glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
-					normalTexture = shr17h_texture_normalID;
-				}
-				if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
-				{
-					glBindTexture(GL_TEXTURE_2D, grass_textureID);
-					normalTexture = grass_texture_normalID;
-				}
-
-				glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-				glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
-				glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
-
-				glActiveTexture(GL_TEXTURE1);
-				glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
-				glBindTexture(GL_TEXTURE_2D, normalTexture);
-
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
-				glDisable(GL_BLEND);
-
-				glBindTexture(GL_TEXTURE_2D, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			//cout << "about to draw..." << endl;
+			glBufferData(GL_ARRAY_BUFFER, (
+				objectsToDraw[i]->verts.size()*sizeof(vec3) +
+				objectsToDraw[i]->uvs.size()*sizeof(vec2) +
+				objectsToDraw[i]->normals.size()*sizeof(vec3) +
+				objectsToDraw[i]->tangents.size()*sizeof(vec3) +
+				objectsToDraw[i]->bitangents.size()*sizeof(vec3)), NULL, GL_STATIC_DRAW);//allocate space for both chunks
+			glBufferSubData(GL_ARRAY_BUFFER, 0, objectsToDraw[i]->verts.size()*sizeof(vec3), &objectsToDraw[i]->verts[0]);//chunk of vertices
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3), objectsToDraw[i]->uvs.size()*sizeof(vec2), &objectsToDraw[i]->uvs[0]);//chunk of UV coordinates
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2), objectsToDraw[i]->normals.size()*sizeof(vec3), &objectsToDraw[i]->normals[0]);//chunk of normals
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3), objectsToDraw[i]->tangents.size()*sizeof(vec3), &objectsToDraw[i]->tangents[0]);//chunk tangents
+			glBufferSubData(GL_ARRAY_BUFFER, objectsToDraw[i]->verts.size()*sizeof(vec3) + objectsToDraw[i]->uvs.size()*sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3) + objectsToDraw[i]->tangents.size()*sizeof(vec3),
+				objectsToDraw[i]->bitangents.size()*sizeof(vec3), &objectsToDraw[i]->bitangents[0]);//chunk of bitangents
+			// vertices*
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(
+				0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+				3,                  // size
+				GL_FLOAT,           // type
+				GL_FALSE,           // normalized?
+				0,                  // stride
+				(const GLvoid *)0            // array buffer offset
+				);
+			// uvs
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(
+				1,								//to match layout in the shader
+				2,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3))//offset
+				);
+			//normals
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(
+				2,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2))//offset
+				);
+			// tangents
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(
+				3,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3))//offset
+				);
+			//bitangents
+			glEnableVertexAttribArray(4);
+			glVertexAttribPointer(
+				4,								//to match layout in the shader
+				3,								//size
+				GL_FLOAT,						// type
+				GL_FALSE,						// normalized?
+				0,								// stride
+				(const GLvoid *)(objectsToDraw[i]->verts.size() * sizeof(vec3) + objectsToDraw[i]->uvs.size() * sizeof(vec2) + objectsToDraw[i]->normals.size()*sizeof(vec3) + objectsToDraw[i]->tangents.size()*sizeof(vec3))//offset
+				);
+			glActiveTexture(GL_TEXTURE0);
+			GLuint normalTexture = 0;
+			if (objectsToDraw[i]->type.compare("pinet1") == 0)//bind pine tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, pinet1_textureID);
+				normalTexture = pinet1_texture_normalID;
 			}
+			if (objectsToDraw[i]->type.compare("pinet2") == 0)//bind pine tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, pinet2_textureID);
+				normalTexture = pinet2_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree1") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree1_textureID);
+				normalTexture = tree1_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree2") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree2_textureID);
+				normalTexture = tree2_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree3") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree3_textureID);
+				normalTexture = tree3_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree4") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree4_textureID);
+				normalTexture = tree4_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree5") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree5_textureID);
+				normalTexture = tree5_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("tree6") == 0)//bind regular tree texture
+			{
+				glBindTexture(GL_TEXTURE_2D, tree6_textureID);
+				normalTexture = tree6_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("fern1") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, fern1_textureID);
+				normalTexture = fern1_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("fern2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, fern2_textureID);
+				normalTexture = fern2_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("fern3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, fern3_textureID);
+				normalTexture = fern3_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("flow2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, flow2_textureID);
+				normalTexture = flow2_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("flow3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, flow3_textureID);
+				normalTexture = flow3_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed1") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed1_textureID);
+				normalTexture = weed1_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed3_textureID);
+				normalTexture = weed3_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed4") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed4_textureID);
+				normalTexture = weed4_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed4a") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed4a_textureID);
+				normalTexture = weed4a_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed5") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed5_textureID);
+				normalTexture = weed5_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("weed6") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, weed6_textureID);
+				normalTexture = weed6_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr1h") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr1h_textureID);
+				normalTexture = shr1h_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr2") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr2_textureID);
+				normalTexture = shr2_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr3") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr3_textureID);
+				normalTexture = shr3_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr4") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr4_textureID);
+				normalTexture = shr4_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr9") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr9_textureID);
+				normalTexture = shr9_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr15") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr15_textureID);
+				normalTexture = shr15_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr16") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr16_textureID);
+				normalTexture = shr16_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("shr17h") == 0)//bind fern texture
+			{
+				glBindTexture(GL_TEXTURE_2D, shr17h_textureID);
+				normalTexture = shr17h_texture_normalID;
+			}
+			if (objectsToDraw[i]->type.compare("grass") == 0)//bind grass texture
+			{
+				glBindTexture(GL_TEXTURE_2D, grass_textureID);
+				normalTexture = grass_texture_normalID;
+			}
+			
+			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 
+			glActiveTexture(GL_TEXTURE1);
+			glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glBindTexture(GL_TEXTURE_2D, normalTexture);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
+			glDisable(GL_BLEND);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+			
+			/*
+			glUniform1i(glGetUniformLocation(feature_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+			glUniform3f(glGetUniformLocation(feature_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+			//	glDepthMask(GL_FALSE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//	cout << objectsToDraw[i] << endl;
+			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
+			glDisable(GL_BLEND);
+			glDepthMask(GL_TRUE);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			*/
+		}
 	}
-
-	}
-
+}
 void Scene::drawEverything() {
 	
 	//drawObjects();
@@ -998,16 +1006,15 @@ int Scene::runEngine() {
 	constructEnvironment();
 	objectsToDraw = objectsInMemory;
 	objectsInTransit = objectsInMemory;
-	//makeMultipleObjects();
-	//constructEnvironment();
-	//objectsToDraw = objectsInMemory;
 
 	initializeOpenGL();
 	
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
-	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+
+//	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
@@ -1111,7 +1118,7 @@ int Scene::runEngine() {
 				t.detach();
 			}
 		}
-		
+		/*
 		if (threadDone == true) {
 			double timer = (clock() - time) / 1000.0f;
 			if (timer > 1.0f) {
@@ -1122,7 +1129,7 @@ int Scene::runEngine() {
 			
 
 		}
-		
+		*/
 		objectsToDraw = objectsInTransit;
 		
 		
@@ -1134,42 +1141,20 @@ int Scene::runEngine() {
 		view_matrix = gCamera.view();
 		proj_matrix = gCamera.projection();
 
+
 		/* Used for normal mapping */
 		model_View_matrix = view_matrix * model_matrix;
 		model_View_3x3_matrix = glm::mat3(model_View_matrix);
 		MVP = proj_matrix * view_matrix * model_matrix;
-
-		double timer = (clock() - time) / 1000.0f;
-		if (timer > 0.1f) {
-			//	cout << "constructing..." << endl;
-		//	thread t(&Scene::handleCollisionWithCamera, this);
-		//	t.detach();
-		//	thread tt(&Scene::drawObjects, this);
-		//	tt.detach();
-		}
 		handleCollisionWithCamera();
 		boundariesCollision();
 	//	proj_matrix = gCamera.projection();
 	//	cout << gCamera.forward().z << endl;
-	//	view_matrix[0][0] = -1;
-		//view_matrix[1][1] = 0.97;
-		//view_matrix[2][1] = 0.24;
-		//view_matrix[3][1] = -0.24;
-		//view_matrix[1][2] = 0.24;
-		//view_matrix[2][2] = -0.97;
-		//view_matrix[3][1] = -200;
-		
-	//	view_matrix[1][3] =0;
-	//	view_matrix[2][3] = 1.1;
-		//setUniform3v(uniformName, glm::value_ptr(v));
-		//gProgram->setUniform("camera", gCamera.matrix());
-		//time = clock() - 2000;
 		// wipe the drawing surface clear
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		
 		glEnable(GL_DEPTH_TEST);
-	    glClearColor(0.0f, 0.0f, 0.0f, 0.0);
+
+	    glClearColor(0.01f, 0.01f, 0.01f, 1.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
@@ -1348,8 +1333,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
-	
-	glfwSetScrollCallback(window, OnScroll);
+//	glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
 	glfwSetKeyCallback(window, flashlightPressed);
 
