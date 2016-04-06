@@ -80,6 +80,7 @@ private:
 	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();
 	void setTerrainTranslationMatrices();
+	void moveTiles();
 public:
 	Scene();
 	~Scene();
