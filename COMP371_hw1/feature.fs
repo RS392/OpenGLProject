@@ -8,6 +8,7 @@ uniform float fov;
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
+in mat3 TBN;
 
 out vec4 finalColor; //this is the output color of the pixel
 
@@ -25,13 +26,15 @@ void main() {
     //mat3 normalMatrix = transpose(inverse(mat3(model)));
     mat4 inverseView = inverse(view_matrix);
 	vec4 camera = inverseView[3];
-	
-    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
-	vec3 normal = normalize(normalMatrix * fragNormal);
+	vec3 cameraTBN = TBN*vec3(camera.x, camera.y, camera.z);
+	vec3 point = TBN*fragVert;
 
+    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
+	//vec3 normal = normalize(normalMatrix * fragNormal);
+	vec3 normal = normalize(texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0);
 	if(dot(normalize(cameraToPoint), fragNormal) > 0)
 	{
-		normal *= -1.0;
+		//normal *= -1.0;
 	}
 	float q = length(cameraToPoint);
 	float a = 1.0;//0.6
@@ -42,7 +45,8 @@ void main() {
     vec3 fragPosition = vec3(model * vec4(fragVert, 1));
     
     //calculate the vector from this pixels surface to the light source
-    vec3 surfaceToLight = light.position - fragPosition;
+    //vec3 surfaceToLight = light.position - fragPosition;
+	vec3 surfaceToLight = light.position - point;
 	
     //calculate the cosine of the angle of incidence
     float brightness = dot(normal, surfaceToLight) * attenuation;// / (length(surfaceToLight) * length(normal));

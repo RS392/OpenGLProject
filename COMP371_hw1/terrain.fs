@@ -50,7 +50,8 @@ void main() {
     // 1. The angle of incidence: brightness
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
-    vec4 surfaceColor = texture(tex, fragTexCoord);
+    //vec4 surfaceColor = texture(tex, fragTexCoord);
+	vec4 surfaceColor = texture(normal_texture, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
 		discard;
