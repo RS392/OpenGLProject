@@ -44,8 +44,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 
 	if (original.type.find("tree") != string::npos) {
 
-		min = 400 * title->getMultiplier();
-		max = 600 * title->getMultiplier();
+		min = 600 * title->getMultiplier();
+		max = 800 * title->getMultiplier();
 	}
 	else if (original.type.find("pinet") != string::npos) {
 		min = 1200 * title->getMultiplier();
