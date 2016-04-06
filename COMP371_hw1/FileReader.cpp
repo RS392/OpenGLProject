@@ -184,7 +184,7 @@ bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vect
 		tan1 = glm::normalize(tan1 - out_normals[i]*glm::dot(out_normals[i], tan1));
 		tan2 = glm::normalize(tan2 - out_normals[i+1] * glm::dot(out_normals[i + 1], tan2));
 		tan3 = glm::normalize(tan3 - out_normals[i+2] * glm::dot(out_normals[i + 2], tan3));
-
+		
 		if (glm::dot(glm::cross(out_normals[i], tan1), bitan) < 0.0f)
 		{
 			tan1 *= -1;

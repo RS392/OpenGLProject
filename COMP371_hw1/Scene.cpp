@@ -672,13 +672,20 @@ void Scene::drawTerrain()
 	glEnableVertexAttribArray(4);
 	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size() + sizeof(vec3)*terrain->tangents.size()));//bitangents
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, terr_textureID);
-	
-	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+
+
 	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);
+	
+	glActiveTexture(GL_TEXTURE1);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glBindTexture(GL_TEXTURE_2D, terr_texture_normalID);//todo load and bind appropriate texture
+	
+	
 	for (int i = 0; i < terrainTranslationMatrices.size(); i++)
 	{
 
@@ -1375,6 +1382,7 @@ int Scene::runEngine() {
 	shr17h_textureID = testObjectTextures(shr17hTGA);
 	grass_textureID = testObjectTextures(grassTGA);
 
+	terr_texture_normalID = testObjectTextures(terrain_normalTGA);
 	pinet1_texture_normalID = testObjectTextures(pinet1_normalTGA);
 	pinet2_texture_normalID = testObjectTextures(pinet2_normalTGA);
 	tree1_texture_normalID = testObjectTextures(tree1_normalTGA);
