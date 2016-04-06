@@ -223,11 +223,13 @@ void Update(float secondsElapsed) {
 	gCamera.setFieldOfView(fieldOfView);
 	if (lightOn == true) {
 		light.position = gCamera.position();
-		light.position.y -= 1.5;
+		light.position.y -= 0;
+		light.intensities = vec3(0.9, 0.9, 0.9);
 	}
-	else
-		light.position = vec3(-10, -1000, -10);
-
+	else {
+		light.intensities = vec3(0,0,0);
+		//light.position = vec3(-10000, -10000, -10000);
+	}
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -775,7 +777,7 @@ void Scene::drawTexturizedObjects() {
 			glActiveTexture(GL_TEXTURE1);
 			glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glBindTexture(GL_TEXTURE_2D, normalTexture);
-
+			
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
@@ -1154,7 +1156,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-	    glClearColor(0.01f, 0.01f, 0.01f, 1.0);
+	    glClearColor(0.01f, 0.01f, 0.01f, 0.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);
