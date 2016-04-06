@@ -542,7 +542,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals, originalObjects[27]->tangents, originalObjects[27]->bitangents);
 
 	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
-	fileReader->loadTGAFile("features/brick3.tga", &boundaryTGA);
+	fileReader->loadTGAFile("features/texture_soil_edited2.tga", &boundaryTGA);
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
 	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
 	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
@@ -573,7 +573,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
 	fileReader->loadTGAFile("features/texture_soil_edited_normal2.tga", &terrain_normalTGA);//texture made in GIMP
-	fileReader->loadTGAFile("features/brick3.tga", &boundary_normalTGA);
+	fileReader->loadTGAFile("features/texture_soil_edited2.tga", &boundary_normalTGA);
 	fileReader->loadTGAFile("features/pinet1_normal.tga", &pinet1_normalTGA);
 	fileReader->loadTGAFile("features/pinet2_normal.tga", &pinet2_normalTGA);
 	fileReader->loadTGAFile("features/tree1_normal2.tga", &tree1_normalTGA);
