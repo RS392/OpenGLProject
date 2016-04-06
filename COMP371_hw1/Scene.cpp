@@ -223,11 +223,13 @@ void Update(float secondsElapsed) {
 	gCamera.setFieldOfView(fieldOfView);
 	if (lightOn == true) {
 		light.position = gCamera.position();
-		light.position.y -= 1.5;
+		light.position.y -= 0;
+		light.intensities = vec3(0.9, 0.9, 0.9);
 	}
-	else
-		light.position = vec3(-10, -1000, -10);
-
+	else {
+		light.intensities = vec3(0,0,0);
+		//light.position = vec3(-10000, -10000, -10000);
+	}
 	gScrollY = 0;
 }
 // records how far the y axis has been scrolled
@@ -775,7 +777,7 @@ void Scene::drawTexturizedObjects() {
 			glActiveTexture(GL_TEXTURE1);
 			glUniform1i(glGetUniformLocation(feature_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
 			glBindTexture(GL_TEXTURE_2D, normalTexture);
-
+			
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glDrawArrays(GL_TRIANGLES, 0, objectsToDraw[i]->verts.size());
@@ -803,7 +805,7 @@ void Scene::drawEverything() {
 	
 	//drawObjects();
 	drawTerrain();
-	//drawBoundaries();
+	drawBoundaries();
 	drawTexturizedObjects();
 	
 }
@@ -904,12 +906,64 @@ void Scene::setBoundaries() {
 
 void Scene::drawBoundaries() {
 	
-	glGenBuffers(1, &VBO4);
+	/*glGenBuffers(1, &VBO4);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boundaries), &boundaries[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);
+	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);*/
+
+
+
+	/*
+	Texture vertices are of the form x, y, z, u, v
+	*/
+	//switch shader programs
+	glUseProgram(terrain_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), sizeof(vec3)*terrain->getNormals().size(), (&terrain->getNormals()[0]));
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
+
+	// connect the xyz vertex attribute of the vertex shader
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+
+	// connect the uv coords to the texture coordinate attribute of the vertex shader
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);//todo load and bind appropriate texture
+
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+
+	for (int i = 0; i < boundaryTransformationMatrices.size(); i++)
+	{
+
+		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(boundaryTransformationMatrices[i]));//use translated model matrix
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
+		glDisable(GL_BLEND);
+
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//glUseProgram(shader_program);
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
+	/**/
+
+
 }
 
 void Scene::boundariesCollision() {
@@ -1014,7 +1068,7 @@ int Scene::runEngine() {
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 
 //	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
-	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
@@ -1154,7 +1208,7 @@ int Scene::runEngine() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-	    glClearColor(0.01f, 0.01f, 0.01f, 1.0);
+	    glClearColor(0.01f, 0.01f, 0.01f, 0.0);
 		//glClearColor(0.01f, 0.0f, 0.1f, 0.0);
 		//glColor4f(0.0f, 0.0f, 1.0f,1.0f);
 		glPointSize(point_size);

@@ -55,6 +55,8 @@ private:
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
 	vector<mat4> terrainTranslationMatrices;
+	vector<mat4> boundaryTransformationMatrices;
+
 	GLfloat boundaries[60];
 
 	void renewObjectsToDraw();
