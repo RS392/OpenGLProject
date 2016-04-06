@@ -66,8 +66,29 @@ void main() {
     finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
     vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
     finalColor = vec4 (fogFinalColor, surfaceColor.a);
+	float radius = 5000;
+	float offset = 50;
+	
+	if(fragVert.y != 0.0)//if boundary
+	{
+		if(fragVert.z == -2.0*(radius + offset))//front
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.z == 0.0)//back
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.x == (offset+radius))//right
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.x == -1.0*(radius + offset))//left
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
 
-
+	}
 
 
 //	if (normal.x == 0)

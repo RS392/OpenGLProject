@@ -121,10 +121,10 @@ vector<glm::vec3> Terrain::getInitialPoints()
 */
 void Terrain::setInitialPoints()
 {
-	for (double i = -1.0*getCameraPosition().z; i < getCameraPosition().z; i+=100)//centered around camera
+	for (double i = -1.0*getCameraPosition().z; i <= getCameraPosition().z; i+=100)//centered around camera
 	{
 		//initialPoints.push_back(glm::vec3((float)i, 0.0f, -1.0*getCameraPosition().z));//getCameraPosition().z is RADIUS
-		initialPoints.push_back(glm::vec3((float)i, 0.0f, 0.0f));//getCameraPosition().z is RADIUS
+		initialPoints.push_back(glm::vec3((float)i, 0.0f, -200.0f));//getCameraPosition().z is RADIUS
 	}
 	/*waterVertices.push_back(initialPoints[0].x);
 	waterVertices.push_back(-.01);

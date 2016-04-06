@@ -181,7 +181,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 150.0f; //units per second
+	const float moveSpeed = 1500.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -275,8 +275,9 @@ Scene::Scene()
 	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
 	gCamera.setPosition(cameraPosition);
-	terrain = new Terrain(cameraPosition);//for testing
+	terrain = new Terrain(vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z+boundOffset));//for testing
 	setTerrainTranslationMatrices();
+	moveTiles();
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 }
@@ -292,7 +293,7 @@ void Scene::setTerrainTranslationMatrices()
 {
 	mat4 transform_matrix = mat4(1.0f);
 	vec3 translateVector = vec3(terrain->getTranslateVector().getX(), terrain->getTranslateVector().getY(), terrain->getTranslateVector().getZ());
-	for (double i = -1.0*getCameraPos().z; i < 2.0*getCameraPos().z; i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
+	for (double i = -1.0*(getCameraPos().z+boundOffset + terrain->getTranslateVector().getZ()); i <= 2.0*(getCameraPos().z+ boundOffset + terrain->getTranslateVector().getZ()); i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
 	{
 		transform_matrix = glm::translate(transform_matrix, translateVector);
 		terrainTranslationMatrices.push_back(transform_matrix);
@@ -907,7 +908,7 @@ void Scene::setBoundaries() {
 void Scene::moveTiles() {
 
 	//FAR
-	boundaryTransformationMatrices[0] = glm::mat4()
+	boundaryTransformationMatrices.push_back(glm::mat4()
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
 			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
@@ -915,10 +916,10 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 					0.0f, 1.0f, 0.0f, 0.0f,
 					0.0f, 0.0f, 1.0f, 0.0f,
-					-RADIUS - boundOffset, 0.0f, -boundOffset, 1.0f);
+					-RADIUS - boundOffset, 0.0f, -boundOffset, 1.0f));
 
 	//LEFT
-	boundaryTransformationMatrices[1] = glm::mat4()
+	boundaryTransformationMatrices.push_back(glm::mat4()
 		* glm::mat4(cos(90.0f * DEG_TO_RAD), sin(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
 			-sin(90.0f * DEG_TO_RAD), cos(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
@@ -926,10 +927,10 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			-RADIUS - boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f);
+			-RADIUS - boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
 
 	//NEAR
-	boundaryTransformationMatrices[2] = glm::mat4()
+	boundaryTransformationMatrices.push_back(glm::mat4()
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
 			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
@@ -937,10 +938,10 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f);
+			RADIUS + boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
 
 	//RIGHT
-	boundaryTransformationMatrices[3] = glm::mat4()
+	boundaryTransformationMatrices.push_back(glm::mat4()
 		* glm::mat4(cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
 			-sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
@@ -948,7 +949,7 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f);
+			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));
 }
 
 void Scene::drawBoundaries() {
