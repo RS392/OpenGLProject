@@ -82,7 +82,7 @@ void FileReader::loadTGAFile(char *filename, TGAFILE *tgaFile)
 	return;
 }
 
-bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals) {
+bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals, vector <vec3> & out_tangents, vector <vec3> & out_bitangents) {
 	vector< unsigned int > vertexIndices, uvIndices, normalIndices;
 	vector< vec3 > temp_vertices;
 	vector< vec2 > temp_uvs;
@@ -154,6 +154,58 @@ bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vect
 		unsigned int uvIndex = uvIndices[i];
 		vec2 uv = temp_uvs[uvIndex - 1];
 		out_uvs.push_back(uv);
+	}
+	//compute tangents and bitangents. 
+	//http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-13-normal-mapping/
+	for (unsigned int i = 0; i < out_vertices.size(); i+=3) {
+		glm::vec3 & v0 = out_vertices[i];
+		glm::vec3 & v1 = out_vertices[i+1];
+		glm::vec3 & v2 = out_vertices[i+2];
+
+		glm::vec2 & uv0 = out_uvs[i];
+		glm::vec2 & uv1 = out_uvs[i+1];
+		glm::vec2 & uv2 = out_uvs[i+2];
+
+		//Vertices delta
+		glm::vec3 deltaPos1 = v1 - v0;
+		glm::vec3 deltaPos2 = v2 - v0;
+
+		glm::vec2 deltauv1 = uv1 - uv0;
+		glm::vec2 deltauv2 = uv2 - uv0;
+		
+		//compute tangent and bitangent
+
+		float r = 1.0f / (deltauv1.x * deltauv2.y - deltauv1.y* deltauv2.x);
+		glm::vec3 tan1 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 tan2 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 tan3 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 bitan = (deltaPos2*deltauv1.x - deltaPos1 * deltauv2.x) * r;
+
+		tan1 = glm::normalize(tan1 - out_normals[i]*glm::dot(out_normals[i], tan1));
+		tan2 = glm::normalize(tan2 - out_normals[i+1] * glm::dot(out_normals[i + 1], tan2));
+		tan3 = glm::normalize(tan3 - out_normals[i+2] * glm::dot(out_normals[i + 2], tan3));
+
+		if (glm::dot(glm::cross(out_normals[i], tan1), bitan) < 0.0f)
+		{
+			tan1 *= -1;
+		}
+		if (glm::dot(glm::cross(out_normals[i+1], tan2), bitan) < 0.0f)
+		{
+			tan2 *= -1;
+		}
+		if (glm::dot(glm::cross(out_normals[i+2], tan3), bitan) < 0.0f)
+		{
+			tan3 *= -1;
+		}
+		//push one for each vertex
+		out_tangents.push_back(tan1);
+		out_tangents.push_back(tan2);
+		out_tangents.push_back(tan3);
+
+		out_bitangents.push_back(bitan);
+		out_bitangents.push_back(bitan);
+		out_bitangents.push_back(bitan);
+
 	}
 }
 FileReader::~FileReader()

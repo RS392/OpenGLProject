@@ -1,11 +1,13 @@
 
 #version 150
 
-uniform mat4 model_matrix, view_matrix, proj_matrix;
+uniform mat4 model_matrix, view_matrix, proj_matrix, model_View_matrix,model_View_3x3_matrix,MVP;
 uniform sampler2D tex; //this is the texture
+uniform sampler2D normal_texture;
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
+
 
 out vec4 finalColor; //this is the output color of the pixel
 
@@ -65,6 +67,8 @@ void main() {
 
 
 //	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+
+
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else
