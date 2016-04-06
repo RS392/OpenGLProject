@@ -41,7 +41,9 @@ void main() {
 	float attenuation = 1.0/(a + b*q+c*q*q);
 		
     //calculate the cosine of the angle of incidence
-    float brightness = dot(normal, surfaceToLight) * attenuation;//  / (length(surfaceToLight) * length(normal));//;
+	float dotProduct = dot(vec3(0.0,1.0,0.0), surfaceToLight);//prevents black strip where dot products are flipped
+	
+    float brightness = dotProduct * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
     //calculate final color of the pixel, based on:
@@ -64,8 +66,29 @@ void main() {
     finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
     vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
     finalColor = vec4 (fogFinalColor, surfaceColor.a);
+	float radius = 5000;
+	float offset = 50;
+	
+	if(fragVert.y != 0.0)//if boundary
+	{
+		if(fragVert.z == -2.0*(radius + offset))//front
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.z == 0.0)//back
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.x == (offset+radius))//right
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
+		if(fragVert.x == -1.0*(radius + offset))//left
+		{
+			//finalColor = vec4 (1.0,0.0,0.0,1.0);
+		}
 
-
+	}
 
 
 //	if (normal.x == 0)

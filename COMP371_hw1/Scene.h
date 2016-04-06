@@ -55,6 +55,8 @@ private:
 	vec3 lastFrameCamPos;
 	vector<vec3> treeNormals;
 	vector<mat4> terrainTranslationMatrices;
+	vector<mat4> boundaryTransformationMatrices;
+
 	GLfloat boundaries[60];
 
 	void renewObjectsToDraw();
@@ -78,6 +80,7 @@ private:
 	GLuint testObjectsTextures(TGAFILE);
 	void applyTexture();
 	void setTerrainTranslationMatrices();
+	void moveTiles();
 public:
 	Scene();
 	~Scene();

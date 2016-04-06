@@ -181,7 +181,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 150.0f; //units per second
+	const float moveSpeed = 1500.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -282,8 +282,9 @@ Scene::Scene()
 	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
 	gCamera.setPosition(cameraPosition);
-	terrain = new Terrain(cameraPosition);//for testing
+	terrain = new Terrain(vec3(cameraPosition.x, cameraPosition.y, cameraPosition.z+boundOffset));//for testing
 	setTerrainTranslationMatrices();
+	moveTiles();
 	//gCamera.setPosition(glm::vec3(0,0,0));//near terrain
 	//gCamera.setViewportAspectRatio(width / height);
 }
@@ -299,7 +300,7 @@ void Scene::setTerrainTranslationMatrices()
 {
 	mat4 transform_matrix = mat4(1.0f);
 	vec3 translateVector = vec3(terrain->getTranslateVector().getX(), terrain->getTranslateVector().getY(), terrain->getTranslateVector().getZ());
-	for (double i = -1.0*getCameraPos().z; i < 2.0*getCameraPos().z; i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
+	for (double i = -1.0*(getCameraPos().z+boundOffset + terrain->getTranslateVector().getZ()); i <= 2.0*(getCameraPos().z+ boundOffset + terrain->getTranslateVector().getZ()); i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
 	{
 		transform_matrix = glm::translate(transform_matrix, translateVector);
 		terrainTranslationMatrices.push_back(transform_matrix);
@@ -801,7 +802,7 @@ void Scene::drawEverything() {
 	
 	//drawObjects();
 	drawTerrain();
-	//drawBoundaries();
+	drawBoundaries();
 	drawTexturizedObjects();
 	
 }
@@ -900,14 +901,113 @@ void Scene::setBoundaries() {
 	boundaries[59] = 2 * RADIUS + boundOffset;
 }
 
+void Scene::moveTiles() {
+
+	//FAR
+	boundaryTransformationMatrices.push_back(glm::mat4()
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+					0.0f, 1.0f, 0.0f, 0.0f,
+					0.0f, 0.0f, 1.0f, 0.0f,
+					-RADIUS - boundOffset, 0.0f, -boundOffset, 1.0f));
+
+	//LEFT
+	boundaryTransformationMatrices.push_back(glm::mat4()
+		* glm::mat4(cos(90.0f * DEG_TO_RAD), sin(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			-sin(90.0f * DEG_TO_RAD), cos(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			-RADIUS - boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
+
+	//NEAR
+	boundaryTransformationMatrices.push_back(glm::mat4()
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			RADIUS + boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
+
+	//RIGHT
+	boundaryTransformationMatrices.push_back(glm::mat4()
+		* glm::mat4(cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			-sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f)
+		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));
+}
+
 void Scene::drawBoundaries() {
 	
-	glGenBuffers(1, &VBO4);
+	/*glGenBuffers(1, &VBO4);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(boundaries), &boundaries[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);
+	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);*/
+
+
+
+	/*
+	Texture vertices are of the form x, y, z, u, v
+	*/
+	//switch shader programs
+	glUseProgram(terrain_shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(proj_matrix_id, 1, GL_FALSE, glm::value_ptr(proj_matrix));
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), sizeof(vec3)*terrain->getNormals().size(), (&terrain->getNormals()[0]));
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
+
+	// connect the xyz vertex attribute of the vertex shader
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+
+	// connect the uv coords to the texture coordinate attribute of the vertex shader
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);//todo load and bind appropriate texture
+
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
+	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
+
+	for (int i = 0; i < boundaryTransformationMatrices.size(); i++)
+	{
+
+		glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(boundaryTransformationMatrices[i]));//use translated model matrix
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDrawArrays(GL_QUADS, 0, terrain->getTextureVertices().size() / 5);
+		glDisable(GL_BLEND);
+
+	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//glUseProgram(shader_program);
+	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
+	/**/
+
+
 }
 
 void Scene::boundariesCollision() {
@@ -1012,7 +1112,7 @@ int Scene::runEngine() {
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 
 //	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
-	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
@@ -1331,7 +1431,7 @@ bool Scene::initializeOpenGL() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPos(window, 0, 0);
 	glfwMakeContextCurrent(window);
-//	glfwSetScrollCallback(window, OnScroll);
+    glfwSetScrollCallback(window, OnScroll);
 	glfwSetWindowSizeCallback(window, windowResized);
 	glfwSetKeyCallback(window, flashlightPressed);
 
