@@ -374,7 +374,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/fern2_normal.tga", &fern2_normalTGA);
 	fileReader->loadTGAFile("features/fern3_normal.tga", &fern3_normalTGA);
 	fileReader->loadTGAFile("features/flow2_normal.tga", &flow2_normalTGA);
-	fileReader->loadTGAFile("features/flow3_normal.tga", &flow3_normalTGA);
+	fileReader->loadTGAFile("features/flow3_normal2.tga", &flow3_normalTGA);
 	fileReader->loadTGAFile("features/weed1_normal.tga", &weed1_normalTGA);
 	fileReader->loadTGAFile("features/weed3_normal.tga", &weed3_normalTGA);
     fileReader->loadTGAFile("features/weed4_normal.tga", &weed4_normalTGA);
@@ -1006,7 +1006,7 @@ int Scene::runEngine() {
 	shader_program = loadShaders("COMP371_hw1.vs", "COMP371_hw1.fs");
 	terrain_shader_program = loadShaders("terrain.vs", "terrain.fs");
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
-	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;

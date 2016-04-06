@@ -24,8 +24,8 @@ void main() {
 
     gl_Position = CTM * vec4(in_Position, 1);
 
-	mat3 mv3x3 = transpose(inverse(mat3(view_matrix*model_matrix)));//source of error
-
+	mat3 mv3x3 = mat3(transpose(inverse(view_matrix))*model_matrix);//
+	
 	vec3 vertexNormal_cameraspace = mv3x3 * normalize(vertNormal);//normal in model space
 	vec3 vertexTangent_cameraspace = mv3x3 * normalize(vertTangent);//tangent in model space
 	vec3 vertexBittangent_cameraspace = mv3x3 * normalize(vertBitangent);//bitangent in model space

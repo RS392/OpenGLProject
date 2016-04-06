@@ -176,13 +176,31 @@ bool FileReader::loadObj(const char * path, vector < vec3 > & out_vertices, vect
 		//compute tangent and bitangent
 
 		float r = 1.0f / (deltauv1.x * deltauv2.y - deltauv1.y* deltauv2.x);
-		glm::vec3 tan = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 tan1 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 tan2 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
+		glm::vec3 tan3 = (deltaPos1 * deltauv2.y - deltaPos2 * deltauv1.y)*r;
 		glm::vec3 bitan = (deltaPos2*deltauv1.x - deltaPos1 * deltauv2.x) * r;
 
+		tan1 = glm::normalize(tan1 - out_normals[i]*glm::dot(out_normals[i], tan1));
+		tan2 = glm::normalize(tan2 - out_normals[i+1] * glm::dot(out_normals[i + 1], tan2));
+		tan3 = glm::normalize(tan3 - out_normals[i+2] * glm::dot(out_normals[i + 2], tan3));
+
+		if (glm::dot(glm::cross(out_normals[i], tan1), bitan) < 0.0f)
+		{
+			tan1 *= -1;
+		}
+		if (glm::dot(glm::cross(out_normals[i+1], tan2), bitan) < 0.0f)
+		{
+			tan2 *= -1;
+		}
+		if (glm::dot(glm::cross(out_normals[i+2], tan3), bitan) < 0.0f)
+		{
+			tan3 *= -1;
+		}
 		//push one for each vertex
-		out_tangents.push_back(tan);
-		out_tangents.push_back(tan);
-		out_tangents.push_back(tan);
+		out_tangents.push_back(tan1);
+		out_tangents.push_back(tan2);
+		out_tangents.push_back(tan3);
 
 		out_bitangents.push_back(bitan);
 		out_bitangents.push_back(bitan);
