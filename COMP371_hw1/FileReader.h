@@ -12,6 +12,9 @@
 
 using namespace std;
 using namespace glm;
+
+
+
 typedef struct
 {
 	unsigned char imageTypeCode;
@@ -20,12 +23,17 @@ typedef struct
 	unsigned char bitCount;
 	unsigned char *imageData;
 } TGAFILE;
+
 class FileReader
 {
 
 public:
+
+	// this method just loads a tga file's data inside a TGAFILE struct to be used later with opengl textures
 	void loadTGAFile(char *filename, TGAFILE *tgaFile);
 	//GLuint loadTGA(const char * imagepath);
+
+	// this method reads an object, such as a tree or flower, from a .obj file.
 	bool loadObj(const char * path, vector < vec3 > & out_vertices, vector < vec2 > & out_uvs, vector < vec3 > & out_normals, vector <vec3> &  out_tangents, vector <vec3> & out_bitangents);
 	FileReader();
 	~FileReader();

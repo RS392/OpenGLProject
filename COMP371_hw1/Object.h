@@ -12,8 +12,6 @@ using namespace std;
 typedef vector<vec3> vertices;
 typedef vector<vec2> UVs;
 
-//typedef vector<vector<float>> vertsAndUvs; // first vxuvs option
-typedef vector<float> vertsAndUvs; // second vxuvs option
 
 class Object
 {
@@ -23,9 +21,6 @@ private:
 	
 public:
 	UVs uvs;
-	void combineVXUvs();
-	void combineVXUvs2();
-	vertsAndUvs vxuvs;
 	int vertSize;
 	int uvsSize;
 	int xScale;

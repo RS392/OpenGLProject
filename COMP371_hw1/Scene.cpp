@@ -415,13 +415,7 @@ void Update(float secondsElapsed) {
 	else if (glfwGetKey(window, 'X')) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
-	else if (glfwGetKey(window, 'U')) {
-		gCamera.setFieldOfView(gCamera.fieldOfView() + 1);
-		cout << gCamera.fieldOfView() << endl;
-	}
-	else if (glfwGetKey(window, 'I')) {
-		gCamera.setFieldOfView(gCamera.fieldOfView() - 1);
-	}
+	
 
 	//rotate camera based on mouse movement
 	const float mouseSensitivity = 0.1f;
@@ -1352,7 +1346,7 @@ void Scene::constructEnvironment() {
 void Scene::test() {
 
 }
-void Scene::optimizeFromVBO() {
+void Scene::optimizeVBO() {
 	threadDone = false;
 	time = clock();
 	vec3 playerPos = getCameraPos();
@@ -1494,7 +1488,7 @@ int Scene::runEngine() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	
 	double lastTime = glfwGetTime();
-	optimizeFromVBO();
+	optimizeVBO();
 
 
 	while (!glfwWindowShouldClose(window)) {
@@ -1521,7 +1515,7 @@ int Scene::runEngine() {
 			double timer = (clock() - time) / 1000.0f;
 			if (timer > 1.5 ) {
 			//	cout << "constructing..." << endl;
-				thread t(&Scene::optimizeFromVBO, this);
+				thread t(&Scene::optimizeVBO, this);
 				t.detach();
 			}
 		}

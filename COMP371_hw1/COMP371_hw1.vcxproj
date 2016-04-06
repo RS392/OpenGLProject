@@ -155,10 +155,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CImg.h" />
-    <ClInclude Include="CustomThread.h" />
-    <ClInclude Include="Feature.h" />
     <ClInclude Include="FileReader.h" />
-    <ClInclude Include="JunkCode.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="RandomAttributeGenerator.h" />
     <ClInclude Include="Scene.h" />
@@ -171,10 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CustomThread.cpp" />
-    <ClCompile Include="Feature.cpp" />
     <ClCompile Include="FileReader.cpp" />
-    <ClCompile Include="JunkCode.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="RandomAttributeGenerator.cpp" />
