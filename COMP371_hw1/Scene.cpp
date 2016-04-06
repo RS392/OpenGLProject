@@ -371,7 +371,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/fern2_normal.tga", &fern2_normalTGA);
 	fileReader->loadTGAFile("features/fern3_normal.tga", &fern3_normalTGA);
 	fileReader->loadTGAFile("features/flow2_normal.tga", &flow2_normalTGA);
-	fileReader->loadTGAFile("features/flow3_normal2.tga", &flow3_normalTGA);
+	fileReader->loadTGAFile("features/flow3_normal.tga", &flow3_normalTGA);
 	fileReader->loadTGAFile("features/weed1_normal.tga", &weed1_normalTGA);
 	fileReader->loadTGAFile("features/weed3_normal.tga", &weed3_normalTGA);
     fileReader->loadTGAFile("features/weed4_normal.tga", &weed4_normalTGA);
@@ -386,7 +386,8 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/shr15_normal.tga", &shr15_normalTGA);
 	fileReader->loadTGAFile("features/shr16_normal.tga", &shr16_normalTGA);
 	fileReader->loadTGAFile("features/shr17h_normal.tga", &shr17h_normalTGA);
-	fileReader->loadTGAFile("features/grass_normal.tga", &grass_normalTGA);
+	fileReader->loadTGAFile("features/grass_normal2.tga", &grass_normalTGA);
+	
 
 	
 	originalObjects[0]->type = "pinet1";
