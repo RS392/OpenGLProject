@@ -23,14 +23,15 @@ void main() {
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
     mat4 inverseView = inverse(view_matrix);
 	vec4 camera = inverseView[3];//checked xyz
-
+	vec3 cameraTBN = TBN*vec3(camera.x, camera.y, camera.z);
+	vec3 point = TBN*fragVert;
 	//calculate the location of this fragment (pixel) in world coordinates
 	vec3 fragPosition = vec3(model_matrix * vec4(fragVert, 1));
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
 	
 	vec3 camToPoint = vec3(model*vec4(cameraToPoint, 1.0));
-	vec3 normal = normalize(normalMatrix*camToPoint);
-	
+	//vec3 normal = normalize(normalMatrix*camToPoint);
+	vec3 normal = normalize(texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0);
 	 //calculate the vector from this pixels surface to the light source
     vec3 surfaceToLight = light.position - fragPosition;
 	
@@ -51,7 +52,7 @@ void main() {
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
     //vec4 surfaceColor = texture(tex, fragTexCoord);
-	vec4 surfaceColor = texture(normal_texture, fragTexCoord);
+	vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
 		discard;

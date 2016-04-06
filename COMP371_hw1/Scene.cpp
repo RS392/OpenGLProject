@@ -387,7 +387,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 150.0f; //units per second
+	const float moveSpeed = 1500.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -574,7 +574,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/shr17h.tga", &shr17hTGA);
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
-	fileReader->loadTGAFile("features/texture_soil_edited_normal.tga", &terrain_normalTGA);//texture made in GIMP
+	fileReader->loadTGAFile("features/texture_soil_edited_normal2.tga", &terrain_normalTGA);//texture made in GIMP
 	fileReader->loadTGAFile("features/pinet1_normal.tga", &pinet1_normalTGA);
 	fileReader->loadTGAFile("features/pinet2_normal.tga", &pinet2_normalTGA);
 	fileReader->loadTGAFile("features/tree1_normal2.tga", &tree1_normalTGA);
@@ -635,7 +635,10 @@ void Scene::makeOriginalObjects() {
 	originalObjects[26]->type = "shr17h";
 	originalObjects[27]->type = "grass";
 }
-bool once = true;
+
+/*
+	Uses instancing to tile the terrain
+*/
 void Scene::drawTerrain()
 {
 	
@@ -704,11 +707,12 @@ void Scene::drawTerrain()
 	}
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//glUseProgram(shader_program);
-	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));//reset to normal model matrix
-	/**/
+	
 }
 
+/*
+	Loads a texture from a BMP
+*/
 GLuint Scene::testTexture(char* path) {
 	
 	CImg<unsigned char> image(path);
@@ -730,7 +734,9 @@ GLuint Scene::testTexture(char* path) {
 	return textureID;
 
 }
-/*  Loading of texture works */
+/*
+	Loads a texture from a TGA file
+*/
 GLuint testObjectTextures(TGAFILE image)
 {
 	GLuint textureID;
@@ -780,7 +786,9 @@ void Scene::drawObjects() {
 		}
 	}
 }
-//bool once = true;
+/*
+	
+*/
 bool sortByFirstVertex(const Object* lhs, const Object* rhs) // objects = vector<Object*>
 {
 	return lhs->verts[0].z < rhs->verts[0].z;
@@ -1352,7 +1360,7 @@ int Scene::runEngine() {
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 
 //	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
-	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
