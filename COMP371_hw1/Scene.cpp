@@ -908,7 +908,7 @@ void Scene::setBoundaries() {
 void Scene::moveTiles() {
 
 	//FAR
-	boundaryTransformationMatrices.push_back(glm::mat4()
+	/*boundaryTransformationMatrices.push_back(glm::mat4()
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
 			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
@@ -949,7 +949,20 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));
+			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));*/
+	//FAR
+	mat4 rotateMatrix = mat4(1.0f);
+
+	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), glm::vec3(-RADIUS - boundOffset, 100, -boundOffset)));
+
+	//LEFT
+	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), -90.0f, glm::vec3(0, 1, 0)), glm::vec3(-RADIUS - boundOffset, 100, 2 * RADIUS + boundOffset)));
+
+	//NEAR
+	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), -180.0f, glm::vec3(0, 1, 0)), glm::vec3(RADIUS + boundOffset, 100, 2 * RADIUS + boundOffset)));
+
+	//RIGHT
+	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), 90.0f, glm::vec3(0, 1, 0)), glm::vec3(RADIUS + boundOffset, 100, -boundOffset)));
 }
 
 void Scene::drawBoundaries() {

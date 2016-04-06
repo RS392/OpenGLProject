@@ -28,6 +28,8 @@ private:
 	vector<vec2> quadUvs;
 	vector<GLuint> quadIndices;
 	vector<vec3> normals;
+	vector<vec3> tangents;
+	vector<vec3> bitangents;
 
 
 public:

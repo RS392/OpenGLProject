@@ -117,7 +117,7 @@ vector<glm::vec3> Terrain::getInitialPoints()
 	return initialPoints;
 }
 /*
-	Sets initial points extending from  x= -RADIUS to x = RADIUS, which is centered around the initial x value of the camera position
+	Sets initial points extending from  x= -RADIUS-offset to x = RADIUS+offset, which is centered around the initial x value of the camera position
 */
 void Terrain::setInitialPoints()
 {
