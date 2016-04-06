@@ -18,6 +18,9 @@ Terrain::Terrain(glm::vec3 cameraPosition)
 Terrain::~Terrain()
 {
 }
+/*
+	Sets normals perpendicular to surface of terrain
+*/
 void Terrain::setNormals()
 {
 	int numberVertices = vertices.size() / 3;
@@ -40,7 +43,7 @@ void Terrain::setVertices()
 {
 
 	int rowLength = initialPoints.size();
-	for (int i = 0; i <initialPoints.size(); i++)
+	for (int i = 0; i <initialPoints.size(); i++)//use initial points that span the scene
 	{
 		vertices.push_back(initialPoints[i].x);
 		vertices.push_back(initialPoints[i].y);
@@ -63,7 +66,7 @@ void Terrain::setVertices()
 	
 	//setLastPoints(); //todo
 	//setQuadIndices(rowLength);
-	setWireFrameIndices(rowLength);//sets
+	setEverything(rowLength);//sets
 }
 
 /*
@@ -129,10 +132,10 @@ void Terrain::setInitialPoints()
 }
 
 /*
-	Doesn't actually set wireframeindices...  todo: rename
-	Instead assigns UV coordinates for each vertex to be rendered in a quad
+	Assigns UV coordinates for each vertex to be rendered in a quad.
+	Also calculates the tangents and bitangents for each vertex.
 */
-void Terrain::setWireFrameIndices(int initialSize)
+void Terrain::setEverything(int initialSize)
 {
 	
 	offset = initialSize;
@@ -195,16 +198,10 @@ void Terrain::setWireFrameIndices(int initialSize)
 
 				/*  Calculate tangents for first three */
 				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
-				glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
-				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+				glm::vec3 tangent1 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+				glm::vec3 bitangent1 = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
 
-				tangents.push_back(tangent);
-				tangents.push_back(tangent);
-				tangents.push_back(tangent);
-
-				bitangents.push_back(bitangent);
-				bitangents.push_back(bitangent);
-				bitangents.push_back(bitangent);
+				
 
 				/* Reset deltas */
 				deltaPos1 = v2 - v1;
@@ -213,11 +210,20 @@ void Terrain::setWireFrameIndices(int initialSize)
 				/* Calculate tangents and bitangents for for fourth vertex*/
 				deltaUV1 = uv2 - uv1;
 				deltaUV2 = uv3 - uv1;
-				tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
-				bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+				glm::vec3 tangent2 = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+				glm::vec3 bitangent2 = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
 
-				tangents.push_back(tangent);
-				bitangents.push_back(bitangent);
+				tangents.push_back(tangent1);
+				tangents.push_back(tangent1);
+				tangents.push_back(tangent2);
+				tangents.push_back(tangent1);
+				
+				bitangents.push_back(bitangent1);
+				bitangents.push_back(bitangent1);
+				bitangents.push_back(bitangent2);
+				bitangents.push_back(bitangent1);
+				
+				
 				
 			}
 

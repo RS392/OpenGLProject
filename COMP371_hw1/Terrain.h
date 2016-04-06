@@ -86,7 +86,7 @@ public:
 
 	vector<GLuint> getQuadIndices() { return quadIndices; }
 	void setQuadIndices(int);
-	void setWireFrameIndices(int);
+	void setEverything(int);
 	vector<GLuint> getWireFrameIndices();
 	vector<vec2> getQuadUVs() { return quadUvs; }
 
