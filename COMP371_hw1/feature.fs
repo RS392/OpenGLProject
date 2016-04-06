@@ -1,14 +1,13 @@
-
 #version 150
 
 uniform mat4 model_matrix, view_matrix, proj_matrix,model_View_matrix,model_View_3x3_matrix,MVP;
 
 uniform sampler2D tex; //this is the texture
 uniform sampler2D normal_texture;
+uniform float fov;
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
-in mat3 TBN;
 
 out vec4 finalColor; //this is the output color of the pixel
 
@@ -26,15 +25,13 @@ void main() {
     //mat3 normalMatrix = transpose(inverse(mat3(model)));
     mat4 inverseView = inverse(view_matrix);
 	vec4 camera = inverseView[3];
-	vec3 cameraTBN = TBN*vec3(camera.x, camera.y, camera.z);
-	vec3 point =  TBN*fragVert;
+	
     vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
-	//vec3 cameraToPoint = (-1.0*vec3(point.x - cameraTBN.x, point.y - cameraTBN.y, point.z - cameraTBN.z));//in tangent space
-	//vec3 normal = normalize(normalMatrix * fragNormal);
-	vec3 normal = normalize(texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0);
+	vec3 normal = normalize(normalMatrix * fragNormal);
+
 	if(dot(normalize(cameraToPoint), fragNormal) > 0)
 	{
-		//normal *= -1.0;
+		normal *= -1.0;
 	}
 	float q = length(cameraToPoint);
 	float a = 1.0;//0.6
@@ -45,8 +42,7 @@ void main() {
     vec3 fragPosition = vec3(model * vec4(fragVert, 1));
     
     //calculate the vector from this pixels surface to the light source
-   vec3 surfaceToLight = (light.position - point);
-    //vec3 surfaceToLight = light.position - fragPosition;
+    vec3 surfaceToLight = light.position - fragPosition;
 	
     //calculate the cosine of the angle of incidence
     float brightness = dot(normal, surfaceToLight) * attenuation;// / (length(surfaceToLight) * length(normal));
@@ -61,8 +57,18 @@ void main() {
 	{ 
 		discard;
 	 }
+	 /*
+	 float x = fragPosition.x;
+	 float y = fragPosition.y;
+	 if (x > 50 || x < -50) {
+		float diff = abs(x) - 50.0f;
+		float result = brightness/diff;
+		if (result >= 1)
+			result = brightness;
 
-
+		brightness = result;	
+	}
+	*/
 	//vec3 fogDistance = fragVert - light.position;
 	float distance = sqrt((cameraToPoint.x * cameraToPoint.x) + (cameraToPoint.y * cameraToPoint.y) + (cameraToPoint.z * cameraToPoint.z));
 //    float distance = normal(cameraToPoint);
@@ -70,11 +76,14 @@ void main() {
     float fogB = 0.001f;
     float fogAmount = 1.0 - exp(-distance*fogB);
     vec3 fogColor = vec3(0.01,0.01,0.01);
+	
+
+
     finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+
     vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
     finalColor = vec4 (fogFinalColor, surfaceColor.a);
 
-//	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 	//finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 
 	

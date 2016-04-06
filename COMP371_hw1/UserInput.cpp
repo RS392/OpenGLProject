@@ -57,11 +57,11 @@ void UserInput::titleScreen() {
 					cout << "You selected small\n" << endl;
 				}
 				else if (numChoice == "2") {
-					multiplier = 1.25;
+					multiplier = 1.1;
 					cout << "You selected medium\n" << endl;
 				}
 				else if (numChoice == "3") {
-					multiplier = 1.5;
+					multiplier = 1.2;
 					cout << "You selected large\n" << endl;
 				}
 			}
