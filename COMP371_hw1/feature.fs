@@ -62,6 +62,7 @@ void main() {
 		discard;
 	 }
 
+
 	//vec3 fogDistance = fragVert - light.position;
 	float distance = sqrt((cameraToPoint.x * cameraToPoint.x) + (cameraToPoint.y * cameraToPoint.y) + (cameraToPoint.z * cameraToPoint.z));
 //    float distance = normal(cameraToPoint);
@@ -75,6 +76,7 @@ void main() {
 
 //	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 	//finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+
 	
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);

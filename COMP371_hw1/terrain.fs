@@ -66,7 +66,6 @@ void main() {
     finalColor = vec4 (fogFinalColor, surfaceColor.a);
 
 
-//	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 
 
 //	if (normal.x == 0)
