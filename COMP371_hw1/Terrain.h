@@ -28,14 +28,14 @@ private:
 	vector<vec2> quadUvs;
 	vector<GLuint> quadIndices;
 	vector<vec3> normals;
-	vector<vec3> tangents;
-	vector<vec3> bitangents;
+	
 
 
 public:
 	Terrain(glm::vec3);
 	~Terrain();
-
+	vector<vec3> tangents;
+	vector<vec3> bitangents;
 	void setTranslateVector(double, double, double);
 	void setNormals();
 	void setCameraPosition(glm::vec3 pos) { cameraPosition = pos; }

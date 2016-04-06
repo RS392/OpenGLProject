@@ -7,7 +7,7 @@ uniform sampler2D normal_texture;
 in vec2 fragTexCoord; //this is the texture coord
 in vec3 fragNormal;
 in vec3 fragVert;
-
+in mat3 TBN;
 
 out vec4 finalColor; //this is the output color of the pixel
 

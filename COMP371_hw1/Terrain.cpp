@@ -123,16 +123,9 @@ void Terrain::setInitialPoints()
 {
 	for (double i = -1.0*getCameraPosition().z; i <= getCameraPosition().z; i+=100)//centered around camera
 	{
-		//initialPoints.push_back(glm::vec3((float)i, 0.0f, -1.0*getCameraPosition().z));//getCameraPosition().z is RADIUS
 		initialPoints.push_back(glm::vec3((float)i, 0.0f, -200.0f));//getCameraPosition().z is RADIUS
 	}
-	/*waterVertices.push_back(initialPoints[0].x);
-	waterVertices.push_back(-.01);
-	waterVertices.push_back(initialPoints[0].z);
 
-	waterVertices.push_back(initialPoints[initialPoints.size()-1].x);
-	waterVertices.push_back(-.01);
-	waterVertices.push_back(initialPoints[initialPoints.size() - 1].z);*/
 }
 
 /*
@@ -183,6 +176,48 @@ void Terrain::setWireFrameIndices(int initialSize)
 				textureVertices.push_back(textureCoordinates[2].x);//top left
 				textureVertices.push_back(textureCoordinates[2].y);
 
+				/* For calculating tangents and bitangents */
+				vec3 v0 = vec3(vertices[k + 0], vertices[k + 1], vertices[k + 2]);
+				vec3 v1 = vec3(vertices[k + 3], vertices[k + 4], vertices[k + 5]);
+				vec3 v2 = vec3(vertices[k + (offset * 3) + 3], vertices[k + (offset * 3) + 4], vertices[k + (offset * 3) + 5]);
+				vec3 v3 = vec3(vertices[k + (offset * 3) + 0], vertices[k + (offset * 3) + 1], vertices[k + (offset * 3) + 2]);
+
+				vec2 uv0 = textureCoordinates[0];
+				vec2 uv1 = textureCoordinates[1];
+				vec2 uv2 = textureCoordinates[3];
+				vec2 uv3 = textureCoordinates[2];
+				
+				glm::vec3 deltaPos1 = v1 - v0;
+				glm::vec3 deltaPos2 = v2 - v0;
+
+				glm::vec2 deltaUV1 = uv1 - uv0;
+				glm::vec2 deltaUV2 = uv2 - uv0;
+
+				/*  Calculate tangents for first three */
+				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+
+				tangents.push_back(tangent);
+				tangents.push_back(tangent);
+				tangents.push_back(tangent);
+
+				bitangents.push_back(bitangent);
+				bitangents.push_back(bitangent);
+				bitangents.push_back(bitangent);
+
+				/* Reset deltas */
+				deltaPos1 = v2 - v1;
+				deltaPos2 = v3 - v1;
+
+				/* Calculate tangents and bitangents for for fourth vertex*/
+				deltaUV1 = uv2 - uv1;
+				deltaUV2 = uv3 - uv1;
+				tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y)*r;
+				bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x)*r;
+
+				tangents.push_back(tangent);
+				bitangents.push_back(bitangent);
 				
 			}
 

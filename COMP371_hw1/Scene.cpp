@@ -649,21 +649,35 @@ void Scene::drawTerrain()
 	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 		
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));
+	glBufferData(GL_ARRAY_BUFFER, 
+		sizeof(GLfloat)*terrain->getTextureVertices().size() + 
+		sizeof(vec3)*terrain->getNormals().size() + 
+		sizeof(vec3)*terrain->tangents.size() +
+		sizeof(vec3)*terrain->bitangents.size()
+		, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));//xyzuv
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), sizeof(vec3)*terrain->getNormals().size(), (&terrain->getNormals()[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), sizeof(vec3)*terrain->tangents.size(), (&terrain->tangents[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size() + sizeof(vec3)*terrain->tangents.size(), sizeof(vec3)*terrain->bitangents.size(), (&terrain->bitangents[0]));
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
 	
 	// connect the xyz vertex attribute of the vertex shader
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);//vertices
 
 	// connect the uv coords to the texture coordinate attribute of the vertex shader
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));//uvs
 	
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());//normals
+
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size()));//tangents
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size() + sizeof(vec3)*terrain->tangents.size()));//bitangents
+
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, terr_textureID);
 	
