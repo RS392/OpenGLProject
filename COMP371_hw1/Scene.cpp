@@ -229,7 +229,7 @@ GLuint model_View_3x3_matrix_id = 0;
 GLuint texture_location = 0;
 
 GLuint textureID;
-
+GLuint boundary_textureID;
 GLuint terr_textureID;
 GLuint pinet1_textureID;
 GLuint pinet2_textureID;
@@ -260,6 +260,7 @@ GLuint weed5_textureID;
 GLuint weed6_textureID;
 GLuint grass_textureID;
 
+GLuint boundary_texture_normalID;
 GLuint terr_texture_normalID;
 GLuint pinet1_texture_normalID;
 GLuint pinet2_texture_normalID;
@@ -290,6 +291,7 @@ GLuint weed5_texture_normalID;
 GLuint weed6_texture_normalID;
 GLuint grass_texture_normalID;
 
+TGAFILE boundaryTGA;
 TGAFILE tree1TGA;
 TGAFILE tree2TGA;
 TGAFILE tree3TGA;
@@ -320,6 +322,7 @@ TGAFILE weed6TGA;
 TGAFILE grassTGA;
 TGAFILE terrainTGA;
 
+TGAFILE boundary_normalTGA;
 TGAFILE tree1_normalTGA;
 TGAFILE tree2_normalTGA;
 TGAFILE tree3_normalTGA;
@@ -545,6 +548,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadObj("features/obj__grass.obj", originalObjects[27]->verts, originalObjects[27]->uvs, originalObjects[27]->normals, originalObjects[27]->tangents, originalObjects[27]->bitangents);
 
 	fileReader->loadTGAFile("features/texture_soil_edited.tga", &terrainTGA);//texture made in GIMP
+	fileReader->loadTGAFile("features/brick3.tga", &boundaryTGA);
 	fileReader->loadTGAFile("features/pinet1.tga", &pinet1TGA);
 	fileReader->loadTGAFile("features/pinet2.tga",&pinet2TGA);
 	fileReader->loadTGAFile("features/tree1.tga", &tree1TGA);
@@ -575,6 +579,7 @@ void Scene::makeOriginalObjects() {
 	fileReader->loadTGAFile("features/grass.tga", &grassTGA);
 
 	fileReader->loadTGAFile("features/texture_soil_edited_normal2.tga", &terrain_normalTGA);//texture made in GIMP
+	fileReader->loadTGAFile("features/brick3.tga", &boundary_normalTGA);
 	fileReader->loadTGAFile("features/pinet1_normal.tga", &pinet1_normalTGA);
 	fileReader->loadTGAFile("features/pinet2_normal.tga", &pinet2_normalTGA);
 	fileReader->loadTGAFile("features/tree1_normal2.tga", &tree1_normalTGA);
@@ -1180,7 +1185,7 @@ void Scene::moveTiles() {
 		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));*/
+			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));
 	//FAR
 	mat4 rotateMatrix = mat4(1.0f);
 
@@ -1194,7 +1199,43 @@ void Scene::moveTiles() {
 
 	//RIGHT
 	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), 90.0f, glm::vec3(0, 1, 0)), glm::vec3(RADIUS + boundOffset, 100, -boundOffset)));
-}
+	*/
+	//FAR
+	// FAR
+	
+	mat4 transformMatrix1 = mat4(1.0f);
+	vec3 translateVector1;
+	//translate before applying rotations
+	transformMatrix1 = glm::rotate(transformMatrix1, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+
+	boundaryTransformationMatrices.push_back(transformMatrix1);
+	//LEFT
+
+	mat4 transformMatrix2 = mat4(1.0f);
+	vec3 translateVector2;
+	//translate before applying rotations
+	transformMatrix2 = glm::rotate(transformMatrix2, glm::radians(-90.0f), glm::vec3(0, 1, 0));//rotate -90 about y
+	transformMatrix2 = glm::rotate(transformMatrix2, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	boundaryTransformationMatrices.push_back(transformMatrix2);
+
+	//NEAR
+	mat4 transformMatrix3 = mat4(1.0f);
+	vec3 translateVector3;
+	//translate before applying rotations
+	transformMatrix3 = glm::rotate(transformMatrix3, glm::radians(-180.0f), glm::vec3(0, 1, 0));//rotate -180 about y
+	transformMatrix3 = glm::rotate(transformMatrix3, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	boundaryTransformationMatrices.push_back(transformMatrix3);
+
+	//RIGHT
+
+	mat4 transformMatrix4 = mat4(1.0f);
+	vec3 translateVector4;
+	//translate before applying rotations
+	transformMatrix4 = glm::rotate(transformMatrix4, glm::radians(90.0f), glm::vec3(0, 1, 0));//rotate 90 about y
+	transformMatrix4 = glm::rotate(transformMatrix4, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
+	boundaryTransformationMatrices.push_back(transformMatrix4);
+	//boundaryTransformationMatrices.push_back((glm::rotate(glm::rotate(glm::mat4(), glm::radians(-90.0f), glm::vec3(1, 0, 0)), glm::radians(90.0f), glm::vec3(0, 1, 0))));
+	}
 
 void Scene::drawBoundaries() {
 	
@@ -1217,28 +1258,47 @@ void Scene::drawBoundaries() {
 	//glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));
+	glBufferData(GL_ARRAY_BUFFER,
+		sizeof(GLfloat)*terrain->getTextureVertices().size() +
+		sizeof(vec3)*terrain->getNormals().size() +
+		sizeof(vec3)*terrain->tangents.size() +
+		sizeof(vec3)*terrain->bitangents.size()
+		, NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]));//xyzuv
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), sizeof(vec3)*terrain->getNormals().size(), (&terrain->getNormals()[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size(), sizeof(vec3)*terrain->tangents.size(), (&terrain->tangents[0]));
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size() + sizeof(vec3)*terrain->tangents.size(), sizeof(vec3)*terrain->bitangents.size(), (&terrain->bitangents[0]));
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*terrain->getTextureVertices().size(), (&terrain->getTextureVertices()[0]), GL_STATIC_DRAW);
 
 	// connect the xyz vertex attribute of the vertex shader
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), NULL);//vertices
 
-	// connect the uv coords to the texture coordinate attribute of the vertex shader
+																			   // connect the uv coords to the texture coordinate attribute of the vertex shader
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));//uvs
 
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, terr_textureID);//todo load and bind appropriate texture
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)terrain->getTextureVertices().size());//normals
 
-	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size()));//tangents
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, (const GLvoid*)(terrain->getTextureVertices().size() + sizeof(vec3)*terrain->getNormals().size() + sizeof(vec3)*terrain->tangents.size()));//bitangents
+
+
+
 	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.position"), light.position.x, light.position.y, light.position.z);
 	glUniform3f(glGetUniformLocation(terrain_shader_program, "light.intensities"), light.intensities.x, light.intensities.y, light.intensities.z);
 
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "tex"), 0);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glBindTexture(GL_TEXTURE_2D, terr_textureID);
+
+	glActiveTexture(GL_TEXTURE1);
+	glUniform1i(glGetUniformLocation(terrain_shader_program, "normal_texture"), 1);// the second argument i must match the glActiveTexture(GL_TEXTUREi)
+	glBindTexture(GL_TEXTURE_2D, terr_texture_normalID);//todo load and bind appropriate texture
 	for (int i = 0; i < boundaryTransformationMatrices.size(); i++)
 	{
 

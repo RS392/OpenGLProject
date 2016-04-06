@@ -92,7 +92,7 @@ void main() {
 
 	}
 
-
+	 finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else
