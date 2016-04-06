@@ -8,6 +8,212 @@ using namespace cimg_library;
 #define DEG_TO_RAD	M_PI/180.0f
 #define SEEDISTANCE 500
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 GLFWwindow* window = 0x00;
 Object* pinet2;
 GLuint shader_program = 0;
@@ -234,7 +440,7 @@ void Update(float secondsElapsed) {
 		light.intensities = vec3(0.9, 0.9, 0.9);
 	}
 	else {
-		light.intensities = vec3(0,0,0);
+		light.intensities = vec3(0.1,0.1,0.1);
 		//light.position = vec3(-10000, -10000, -10000);
 	}
 	gScrollY = 0;
@@ -1125,7 +1331,7 @@ int Scene::runEngine() {
 	feature_shader_program = loadShaders("feature.vs", "feature.fs");
 
 //	PlaySound(TEXT("forestSound.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
-	//PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
+	PlaySound(TEXT("night.wav"), NULL, SND_ASYNC | SND_FILENAME | SND_LOOP);
 	generator->generatedOnce = true;
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;

@@ -56,8 +56,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 500 * title->getMultiplier();
 	}
 	else if (original.type.find("flow") != string::npos) {
-		min = 500 * title->getMultiplier();
-		max = 1000 * title->getMultiplier();
+		min = 1000 * title->getMultiplier();
+		max = 2000 * title->getMultiplier();
 	}
 	else if (original.type.find("shr") != string::npos) {
 		min = 300 * title->getMultiplier();
@@ -72,6 +72,8 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		min = 11000 * title->getMultiplier();
 		max = 14500 * title->getMultiplier();
 	}
+	//min *= 2;
+	//max *= 2;
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
 	cout << "Creating " << nbOfCopies << " " << original.type << endl;
@@ -120,9 +122,9 @@ void RandomAttributeGenerator::changeObjectAttributes(Object& obj) {
 
 		obj.position = vec3(x, y, z);
 		
-		double xx = (10);
+		double xx = (20);
 		double yy = 185;
-		double zz = (10);
+		double zz = (20);
 		obj.boundingBox = vec3(xx, yy, zz);
 	//}
 }
