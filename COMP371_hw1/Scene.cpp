@@ -503,7 +503,7 @@ void Scene::setTerrainTranslationMatrices()
 {
 	mat4 transform_matrix = mat4(1.0f);
 	vec3 translateVector = vec3(terrain->getTranslateVector().getX(), terrain->getTranslateVector().getY(), terrain->getTranslateVector().getZ());
-	for (double i = -1.0*(getCameraPos().z+boundOffset + terrain->getTranslateVector().getZ()); i <= 2.0*(getCameraPos().z+ boundOffset + terrain->getTranslateVector().getZ()); i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
+	for (double i = -1.0*(getCameraPos().z+boundOffset + terrain->getTranslateVector().getZ()); i <= 2.0*(getCameraPos().z+ boundOffset + terrain->getTranslateVector().getZ()) + boundOffset; i += terrain->getTranslateVector().getZ())//from 0 to  2 *RADIUS in z direction, since camera starts at z = RADIUS
 	{
 		transform_matrix = glm::translate(transform_matrix, translateVector);
 		terrainTranslationMatrices.push_back(transform_matrix);

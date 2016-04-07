@@ -40,7 +40,7 @@ void main() {
 	float q = length(cameraToPoint);
 	float a = 1.0;//0.6
 	float b = 0.5;
-	float c = 0.1;
+	float c = 0.6;
 	float attenuation = 1.0/(a + b*q+c*q*q);
     //calculate the location of this fragment (pixel) in world coordinates
     vec3 fragPosition = vec3(model * vec4(fragVert, 1));
