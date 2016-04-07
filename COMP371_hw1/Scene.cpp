@@ -390,7 +390,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 1500.0f; //units per second
+	const float moveSpeed = 1000.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -437,7 +437,7 @@ void Update(float secondsElapsed) {
 		light.intensities = vec3(0.9, 0.9, 0.9);
 	}
 	else {
-		light.intensities = vec3(0.1,0.1,0.1);
+		light.intensities = vec3(0.13,0.13,0.13);
 		//light.position = vec3(-10000, -10000, -10000);
 	}
 	gScrollY = 0;
@@ -480,7 +480,7 @@ Scene::Scene()
 	}
 	
 	time = clock();
-	glm::vec3 cameraPosition(0.0, 20, RADIUS);
+	glm::vec3 cameraPosition(0.0, 30, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
@@ -1038,7 +1038,7 @@ void Scene::drawEverything() {
 	drawTerrain();
 	drawBoundaries();
 	drawTexturizedObjects();
-	
+	drawStars();
 }
 
 /*
@@ -1061,6 +1061,29 @@ void Scene::applyTexture() {
 		pinetTGA.imageData);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }*/
+
+void Scene::createStars() {
+
+	GLfloat randX = rand() % (2 * RADIUS) - RADIUS;
+	GLfloat randZ = rand() % (2 * RADIUS);
+
+	for (size_t i = 0; i < 1000; i++) {
+
+		stars.push_back(randX);
+		stars.push_back(300.0f);
+		stars.push_back(randZ);
+	}
+}
+
+void Scene::drawStars() {
+
+	glUseProgram(shader_program);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(stars), &stars[0], GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glDrawArrays(GL_POINTS, 0, stars.size() / 3);
+}
 
 void Scene::setBoundaries() {
 	
@@ -1137,74 +1160,15 @@ void Scene::setBoundaries() {
 
 void Scene::moveTiles() {
 
-	//FAR
-	/*boundaryTransformationMatrices.push_back(glm::mat4()
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
-			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f)
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-					0.0f, 1.0f, 0.0f, 0.0f,
-					0.0f, 0.0f, 1.0f, 0.0f,
-					-RADIUS - boundOffset, 0.0f, -boundOffset, 1.0f));
-
-	//LEFT
-	boundaryTransformationMatrices.push_back(glm::mat4()
-		* glm::mat4(cos(90.0f * DEG_TO_RAD), sin(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
-			-sin(90.0f * DEG_TO_RAD), cos(90.0f * DEG_TO_RAD), 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f)
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			-RADIUS - boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
-
-	//NEAR
-	boundaryTransformationMatrices.push_back(glm::mat4()
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f,
-			0.0f, -sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f)
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, 2 * RADIUS + boundOffset, 1.0f));
-
-	//RIGHT
-	boundaryTransformationMatrices.push_back(glm::mat4()
-		* glm::mat4(cos(-90.0f * DEG_TO_RAD), sin(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
-			-sin(-90.0f * DEG_TO_RAD), cos(-90.0f * DEG_TO_RAD), 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f)
-		* glm::mat4(1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			RADIUS + boundOffset, 0.0f, -boundOffset, 1.0f));
-	//FAR
-	mat4 rotateMatrix = mat4(1.0f);
-
-	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), glm::vec3(-RADIUS - boundOffset, 100, -boundOffset)));
-
-	//LEFT
-	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), -90.0f, glm::vec3(0, 1, 0)), glm::vec3(-RADIUS - boundOffset, 100, 2 * RADIUS + boundOffset)));
-
-	//NEAR
-	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), -180.0f, glm::vec3(0, 1, 0)), glm::vec3(RADIUS + boundOffset, 100, 2 * RADIUS + boundOffset)));
-
-	//RIGHT
-	boundaryTransformationMatrices.push_back(glm::translate(glm::rotate(glm::rotate(glm::mat4(), -90.0f, glm::vec3(1, 0, 0)), 90.0f, glm::vec3(0, 1, 0)), glm::vec3(RADIUS + boundOffset, 100, -boundOffset)));
-	*/
-	//FAR
 	// FAR
-	
 	mat4 transformMatrix1 = mat4(1.0f);
 	vec3 translateVector1;
 	//translate before applying rotations
 	transformMatrix1 = glm::rotate(transformMatrix1, glm::radians(-90.0f), glm::vec3(1, 0, 0));//rotate -90 about x
-	transformMatrix1 = glm::translate(transformMatrix1, glm::vec3(0, boundOffset, 150));
+	transformMatrix1 = glm::translate(transformMatrix1, glm::vec3(0, 0, 150));
 	boundaryTransformationMatrices.push_back(transformMatrix1);
-	//LEFT
 
+	//LEFT
 	mat4 transformMatrix2 = mat4(1.0f);
 	vec3 translateVector2;
 	//translate before applying rotations
@@ -1221,7 +1185,6 @@ void Scene::moveTiles() {
 	boundaryTransformationMatrices.push_back(transformMatrix3);
 
 	//RIGHT
-
 	mat4 transformMatrix4 = mat4(1.0f);
 	vec3 translateVector4;
 	//translate before applying rotations
@@ -1233,15 +1196,6 @@ void Scene::moveTiles() {
 	}
 
 void Scene::drawBoundaries() {
-	
-	/*glGenBuffers(1, &VBO4);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(boundaries), &boundaries[0], GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glDrawArrays(GL_LINE_STRIP, 0, sizeof(boundaries) / 12);*/
-
-
 
 	/*
 	Texture vertices are of the form x, y, z, u, v
@@ -1325,9 +1279,9 @@ void Scene::boundariesCollision() {
 
 		gCamera.setPosition(glm::vec3(-RADIUS - boundOffset + 10, lastFrameCamPos.y, lastFrameCamPos.z));
 	}
-	else if (pos.z <= -boundOffset + 10) {
+	else if (pos.z <= 10) {
 
-		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, -boundOffset + 10));
+		gCamera.setPosition(glm::vec3(lastFrameCamPos.x, lastFrameCamPos.y, 10));
 	}
 	else if (pos.z >= 2 * RADIUS + boundOffset - 10) {
 
@@ -1420,6 +1374,7 @@ int Scene::runEngine() {
 	oldPlayerPos = getCameraPos();
 	vec3 pos = oldPlayerPos;
 	generator->setPlayerPos(pos);
+	createStars();
 	//terr_textureID = testTexture("dirt1.bmp");
 	boundary_textureID = testObjectTextures(boundaryTGA);
 	terr_textureID = testObjectTextures(terrainTGA);
@@ -1487,6 +1442,7 @@ int Scene::runEngine() {
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &VBO2);
 	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &VBO4);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	
