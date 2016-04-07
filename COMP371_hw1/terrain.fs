@@ -27,8 +27,8 @@ void main() {
 	vec3 point = TBN*fragVert;
 	//calculate the location of this fragment (pixel) in world coordinates
 	vec3 fragPosition = vec3(model_matrix * vec4(fragVert, 1));
-    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
-	
+   // vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
+	vec3 cameraToPoint = (-1.0*vec3(point.x - cameraTBN.x, point.y - cameraTBN.y, point.z - cameraTBN.z));//in tangent space
 	vec3 camToPoint = vec3(model*vec4(cameraToPoint, 1.0));
 	//vec3 normal = normalize(normalMatrix*camToPoint);
 	vec3 normal = texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0;
@@ -43,6 +43,10 @@ void main() {
 		
     //calculate the cosine of the angle of incidence
 	float dotProduct = dot(normal, surfaceToLight);
+	if(dotProduct < 0)
+	{
+		dotProduct *= -1.0;
+	}
     float brightness = dotProduct * attenuation;//  / (length(surfaceToLight) * length(normal));//;
     brightness = clamp(brightness, 0, 1) ;
 
@@ -54,7 +58,7 @@ void main() {
 	vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
-		//discard;
+		discard;
 	}
 	
 	//vec3 fogDistance = fragVert - light.position;
@@ -91,7 +95,7 @@ void main() {
 
 	}
 
-	 finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+	 //finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 //	if (normal.x == 0)
 //		finalColor = texture(tex, fragTexCoord);
 //	else

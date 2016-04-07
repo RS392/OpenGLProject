@@ -29,7 +29,8 @@ void main() {
 	vec3 cameraTBN = TBN*vec3(camera.x, camera.y, camera.z);
 	vec3 point = TBN*fragVert;
 
-    vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
+   // vec3 cameraToPoint = -1.0*vec3(fragVert.x - camera.x, fragVert.y - camera.y, fragVert.z - camera.z);
+   vec3 cameraToPoint = (-1.0*vec3(point.x - cameraTBN.x, point.y - cameraTBN.y, point.z - cameraTBN.z));//in tangent space
 	//vec3 normal = normalize(normalMatrix * fragNormal);
 	vec3 normal = normalize(texture(normal_texture, fragTexCoord).rgb*2.0 - 1.0);
 	if(dot(normalize(cameraToPoint), fragNormal) > 0)
@@ -59,7 +60,7 @@ void main() {
     vec4 surfaceColor = texture(tex, fragTexCoord);
 	if(surfaceColor.a < 0.5)
 	{ 
-	//	discard;
+	 discard;
 	}
 	 /*
 	 float x = fragPosition.x;
@@ -88,7 +89,7 @@ void main() {
     vec3 fogFinalColor = mix(finalColor.rgb, fogColor, fogAmount);
     finalColor = vec4 (fogFinalColor, surfaceColor.a);
 
-	finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
+	//finalColor = vec4(brightness * light.intensities * surfaceColor.rgb, surfaceColor.a);
 
 	
 //	if (normal.x == 0)
