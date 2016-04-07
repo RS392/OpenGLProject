@@ -390,7 +390,11 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
+<<<<<<< HEAD
 	const float moveSpeed = 1000.0f; //units per second
+=======
+	const float moveSpeed = 100.0f; //units per second
+>>>>>>> 311e91fe6c1e7ebc1e9dcd3e30096677dfaa05e6
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
