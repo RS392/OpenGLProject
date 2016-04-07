@@ -43,13 +43,20 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	// double multiplier = 5;
 
 	if (original.type.find("tree") != string::npos) {
-
-		min = 600 * title->getMultiplier();
-		max = 800 * title->getMultiplier();
+		float mult = title->getMultiplier();
+		if ( mult == 1.2) {
+			mult = 1.1;
+		}
+		min = 600 * mult;
+		max = 800 * mult;
 	}
 	else if (original.type.find("pinet") != string::npos) {
-		min = 1200 * title->getMultiplier();
-		max = 1600 * title->getMultiplier();
+		float mult = title->getMultiplier();
+		if (mult == 1.2) {
+			mult = 1.1;
+		}
+		min = 1200 * mult;
+		max = 1600 * mult;
 	}
 	else if (original.type.find("fern") != string::npos) {
 		min = 400 * title->getMultiplier();
@@ -69,11 +76,12 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 	}
 	else if (original.type.find("grass") != string::npos){
 
-		min = 11000 * title->getMultiplier();
-		max = 14500 * title->getMultiplier();
+		min = 13000 * title->getMultiplier();
+		max = 17500 * title->getMultiplier();
 	}
-	//min *= 2;
-	//max *= 2;
+	
+//	min /= 3;
+//    max /= 3;
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
 	cout << "Creating " << nbOfCopies << " " << original.type << endl;

@@ -56,6 +56,7 @@ private:
 	vector<vec3> treeNormals;
 	vector<mat4> terrainTranslationMatrices;
 	vector<mat4> boundaryTransformationMatrices;
+	vector<GLfloat> stars;
 
 	GLfloat boundaries[60];
 	// puts the new objects that should be considered into the objects that need to be drawn by opengl
@@ -85,6 +86,8 @@ private:
 	void applyTexture();
 	void setTerrainTranslationMatrices();
 	void moveTiles();
+	void createStars();
+	void drawStars();
 public:
 	Scene();
 	~Scene();
