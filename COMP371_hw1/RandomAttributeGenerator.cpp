@@ -80,8 +80,6 @@ void RandomAttributeGenerator::randomizeObject(Object original, objects &copies)
 		max = 17500 * title->getMultiplier();
 	}
 	
-//	min /= 3;
-//    max /= 3;
 	maxDist = playerPos.z + radius;
 	nbOfCopies = rand() % (max-min) + min;
 	cout << "Creating " << nbOfCopies << " " << original.type << endl;

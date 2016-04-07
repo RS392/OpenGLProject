@@ -259,7 +259,7 @@ GLuint weed4a_textureID;
 GLuint weed5_textureID;
 GLuint weed6_textureID;
 GLuint grass_textureID;
-
+vector<GLfloat> stars;
 GLuint boundary_texture_normalID;
 GLuint terr_texture_normalID;
 GLuint pinet1_texture_normalID;
@@ -390,11 +390,8 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-<<<<<<< HEAD
-	const float moveSpeed = 1000.0f; //units per second
-=======
+
 	const float moveSpeed = 100.0f; //units per second
->>>>>>> 311e91fe6c1e7ebc1e9dcd3e30096677dfaa05e6
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -413,13 +410,14 @@ void Update(float secondsElapsed) {
 		moving = true;
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * gCamera.right());
 	}
+	/*
 	if (glfwGetKey(window, 'Z')) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * -glm::vec3(0, 1, 0));
 	}
 	else if (glfwGetKey(window, 'X')) {
 		gCamera.offsetPosition(secondsElapsed * moveSpeed * glm::vec3(0, 1, 0));
 	}
-	
+	*/
 
 	//rotate camera based on mouse movement
 	const float mouseSensitivity = 0.1f;
@@ -1042,7 +1040,7 @@ void Scene::drawEverything() {
 	drawTerrain();
 	drawBoundaries();
 	drawTexturizedObjects();
-	drawStars();
+	//drawStars();
 }
 
 /*
@@ -1082,11 +1080,13 @@ void Scene::createStars() {
 void Scene::drawStars() {
 
 	glUseProgram(shader_program);
+	glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, glm::value_ptr(view_matrix));//
+	glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, glm::value_ptr(model_matrix));
 	glBindBuffer(GL_ARRAY_BUFFER, VBO4);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(stars), &stars[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * stars.size(), &stars[0], GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glDrawArrays(GL_POINTS, 0, stars.size() / 3);
+	glDrawArrays(GL_LINES, 0, stars.size() / 3);
 }
 
 void Scene::setBoundaries() {
@@ -1541,7 +1541,8 @@ int Scene::runEngine() {
 
 
 
-
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE))
+			glfwSetWindowShouldClose(window, GL_TRUE);
 
 		glfwPollEvents();
 		// put the stuff we've been drawing onto the display
