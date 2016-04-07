@@ -390,7 +390,7 @@ GLfloat boundOffset = 50;
 void Update(float secondsElapsed) {
 
 	//move position of camera based on WASD keys, and XZ keys for up and down
-	const float moveSpeed = 1500.0f; //units per second
+	const float moveSpeed = 100.0f; //units per second
 	bool moving = false;
 	if (glfwGetKey(window, 'S')) {
 		moving = true;
@@ -437,7 +437,7 @@ void Update(float secondsElapsed) {
 		light.intensities = vec3(0.9, 0.9, 0.9);
 	}
 	else {
-		light.intensities = vec3(0.1,0.1,0.1);
+		light.intensities = vec3(0.13,0.13,0.13);
 		//light.position = vec3(-10000, -10000, -10000);
 	}
 	gScrollY = 0;
@@ -480,7 +480,7 @@ Scene::Scene()
 	}
 	
 	time = clock();
-	glm::vec3 cameraPosition(0.0, 20, RADIUS);
+	glm::vec3 cameraPosition(0.0, 30, RADIUS);
 //	gCamera.setNearAndFarPlanes(0.1f,5000.0f);
 	gCamera.setNearAndFarPlanes(5.0f, SEEDISTANCE);
 
