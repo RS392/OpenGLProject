@@ -130,7 +130,6 @@ void Terrain::setInitialPoints()
 	}
 
 }
-
 /*
 	Assigns UV coordinates for each vertex to be rendered in a quad.
 	Also calculates the tangents and bitangents for each vertex.
